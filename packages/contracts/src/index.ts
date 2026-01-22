@@ -29,6 +29,7 @@ export {
 	getStatusCode,
 	// Concrete errors
 	ValidationError,
+	AssertionError,
 	NotFoundError,
 	ConflictError,
 	PermissionError,

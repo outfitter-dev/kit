@@ -1,22 +1,55 @@
 {
 	"name": "@outfitter/cli",
-	"version": "0.0.1",
 	"description": "Typed CLI runtime with output contracts, input parsing, and pagination",
+	"version": "0.0.1",
 	"type": "module",
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
-		}
-	},
 	"files": [
 		"dist"
 	],
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		"./output": {
+			"import": {
+				"types": "./dist/output.d.ts",
+				"default": "./dist/output.js"
+			}
+		},
+		"./types": {
+			"import": {
+				"types": "./dist/types.d.ts",
+				"default": "./dist/types.js"
+			}
+		},
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			}
+		},
+		"./pagination": {
+			"import": {
+				"types": "./dist/pagination.d.ts",
+				"default": "./dist/pagination.js"
+			}
+		},
+		"./input": {
+			"import": {
+				"types": "./dist/input.d.ts",
+				"default": "./dist/input.js"
+			}
+		},
+		"./command": {
+			"import": {
+				"types": "./dist/command.d.ts",
+				"default": "./dist/command.js"
+			}
+		},
+		"./package.json": "./package.json"
+	},
+	"sideEffects": false,
 	"scripts": {
-		"build": "bun build ./src/index.ts --outdir ./dist --target bun && bun run build:types",
-		"build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist",
+		"build": "bunup --filter @outfitter/cli",
 		"test": "bun test",
 		"test:watch": "bun test --watch",
 		"lint": "biome lint ./src",

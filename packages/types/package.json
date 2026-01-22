@@ -1,22 +1,55 @@
 {
 	"name": "@outfitter/types",
-	"version": "0.0.1",
 	"description": "Branded types, type guards, and type utilities for Outfitter",
+	"version": "0.0.1",
 	"type": "module",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
-		}
-	},
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
 	"files": [
 		"dist"
 	],
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		"./utilities": {
+			"import": {
+				"types": "./dist/utilities.d.ts",
+				"default": "./dist/utilities.js"
+			}
+		},
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			}
+		},
+		"./collections": {
+			"import": {
+				"types": "./dist/collections.d.ts",
+				"default": "./dist/collections.js"
+			}
+		},
+		"./short-id": {
+			"import": {
+				"types": "./dist/short-id.d.ts",
+				"default": "./dist/short-id.js"
+			}
+		},
+		"./branded": {
+			"import": {
+				"types": "./dist/branded.d.ts",
+				"default": "./dist/branded.js"
+			}
+		},
+		"./guards": {
+			"import": {
+				"types": "./dist/guards.d.ts",
+				"default": "./dist/guards.js"
+			}
+		},
+		"./package.json": "./package.json"
+	},
+	"sideEffects": false,
 	"scripts": {
-		"build": "bun build ./src/index.ts --outdir ./dist --target bun && bun run build:types",
-		"build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist",
+		"build": "bunup --filter @outfitter/types",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit",
 		"clean": "rm -rf dist"

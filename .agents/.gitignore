@@ -1,0 +1,3 @@
+# Keep .agents directory local - not committed to repo
+*
+!.gitignore

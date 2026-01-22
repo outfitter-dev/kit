@@ -21,7 +21,7 @@ pre-push:
   parallel: false
   commands:
     test:
-      run: bun run test
+      run: ./scripts/pre-push-test.sh
 
     # ast-grep patterns (to be configured when patterns are defined)
     # ast-grep:

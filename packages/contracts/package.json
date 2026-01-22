@@ -1,25 +1,84 @@
 {
 	"name": "@outfitter/contracts",
-	"version": "0.0.1",
 	"description": "Result/Error patterns, error taxonomy, and handler contracts for Outfitter",
+	"version": "0.0.1",
 	"type": "module",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
-		}
-	},
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
 	"files": [
 		"dist"
 	],
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		"./validation": {
+			"import": {
+				"types": "./dist/validation.d.ts",
+				"default": "./dist/validation.js"
+			}
+		},
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			}
+		},
+		"./handler": {
+			"import": {
+				"types": "./dist/handler.d.ts",
+				"default": "./dist/handler.js"
+			}
+		},
+		"./adapters": {
+			"import": {
+				"types": "./dist/adapters.d.ts",
+				"default": "./dist/adapters.js"
+			}
+		},
+		"./envelope": {
+			"import": {
+				"types": "./dist/envelope.d.ts",
+				"default": "./dist/envelope.js"
+			}
+		},
+		"./resilience": {
+			"import": {
+				"types": "./dist/resilience.d.ts",
+				"default": "./dist/resilience.js"
+			}
+		},
+		"./serialization": {
+			"import": {
+				"types": "./dist/serialization.d.ts",
+				"default": "./dist/serialization.js"
+			}
+		},
+		"./errors": {
+			"import": {
+				"types": "./dist/errors.d.ts",
+				"default": "./dist/errors.js"
+			}
+		},
+		"./context": {
+			"import": {
+				"types": "./dist/context.d.ts",
+				"default": "./dist/context.js"
+			}
+		},
+		"./redactor": {
+			"import": {
+				"types": "./dist/redactor.d.ts",
+				"default": "./dist/redactor.js"
+			}
+		},
+		"./package.json": "./package.json"
+	},
+	"sideEffects": false,
 	"scripts": {
-		"build": "bun build ./src/index.ts --outdir ./dist --target bun && tsc --emitDeclarationOnly --outDir ./dist",
+		"build": "bunup --filter @outfitter/contracts",
 		"lint": "biome lint ./src",
 		"lint:fix": "biome lint --write ./src",
 		"test": "bun test",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf dist"
 	},
 	"dependencies": {
 		"better-result": "^2.5.0",

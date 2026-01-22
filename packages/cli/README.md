@@ -34,7 +34,7 @@ if (cursor) {
 
 Output data to the console with automatic mode selection.
 
-Respects `--json`, `--jsonl`, `--tree`, `--table` flags automatically. Defaults to human-friendly output when no flags are present (TTY detection).
+Defaults to human-friendly output for TTY, JSON for non-TTY. Override via `mode` option or `OUTFITTER_JSON`/`OUTFITTER_JSONL` environment variables.
 
 ```typescript
 import { output } from "@outfitter/cli";
@@ -59,7 +59,6 @@ output(errors, { stream: process.stderr });
 | `mode` | `OutputMode` | auto | Force a specific output mode |
 | `stream` | `WritableStream` | `stdout` | Stream to write to |
 | `pretty` | `boolean` | `false` | Pretty-print JSON output |
-| `exitCode` | `number` | - | Exit code after output |
 
 **Output Modes:**
 
@@ -111,8 +110,6 @@ const ids = await collectIds(args.ids, {
 |--------|------|---------|-------------|
 | `allowFile` | `boolean` | `true` | Allow `@file` expansion |
 | `allowStdin` | `boolean` | `true` | Allow `@-` for stdin |
-| `allowGlob` | `boolean` | `false` | Allow glob patterns |
-| `separator` | `string` | `,` | Separator for values |
 
 #### `expandFileArg(input, options?)`
 
@@ -291,9 +288,12 @@ const result = await confirmDestructive({
 });
 
 if (result.isErr()) {
-  // User cancelled
+  // User cancelled or non-TTY environment
+  console.error("Operation cancelled");
   process.exit(0);
 }
+
+// Proceed with destructive operation
 ```
 
 ### Pagination Utilities
@@ -364,14 +364,17 @@ if (flags.reset) {
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `OUTFITTER_OUTPUT_FORMAT` | Force output mode (`human`, `json`, `jsonl`) | TTY auto-detect |
-| `XDG_STATE_HOME` | State directory for pagination | `~/.local/state` |
+| `OUTFITTER_JSON` | Set to `1` to force JSON output | - |
+| `OUTFITTER_JSONL` | Set to `1` to force JSONL output (takes priority over JSON) | - |
+| `XDG_STATE_HOME` | State directory for pagination | Platform-specific |
 
 ### Output Mode Priority
 
 1. Explicit `mode` option in `output()` call
-2. `OUTFITTER_OUTPUT_FORMAT` environment variable
-3. TTY detection: `json` for non-TTY, `human` for TTY
+2. `OUTFITTER_JSONL=1` environment variable (highest env priority)
+3. `OUTFITTER_JSON=1` environment variable
+4. `OUTFITTER_JSON=0` or `OUTFITTER_JSONL=0` forces human mode
+5. TTY detection: `json` for non-TTY, `human` for TTY
 
 ## Error Handling
 

@@ -50,6 +50,15 @@ export {
 	CancelledError,
 } from "./errors.js";
 
+// Recovery heuristics
+export {
+	type BackoffOptions,
+	isRecoverable,
+	isRetryable,
+	getBackoffDelay,
+	shouldRetry,
+} from "./recovery.js";
+
 // Handler contract
 export type {
 	Logger,

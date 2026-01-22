@@ -66,13 +66,6 @@ function detectMode(options?: OutputOptions): OutputMode {
 }
 
 /**
- * Type guard for valid output modes.
- */
-function isValidMode(mode: string): mode is OutputMode {
-	return ["human", "json", "jsonl", "tree", "table"].includes(mode);
-}
-
-/**
  * Type guard for valid error categories.
  */
 function isValidCategory(category: string): category is ErrorCategory {

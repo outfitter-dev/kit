@@ -56,29 +56,39 @@ function cleanupTmpDir(dir: string): void {
 
 describe("Cursor Creation", () => {
 	it("createCursor creates a new cursor with ID and position", () => {
-		const cursor = createCursor({ id: "cursor-1", position: 0 });
+		const result = createCursor({ id: "cursor-1", position: 0 });
 
-		expect(cursor.id).toBe("cursor-1");
-		expect(cursor.position).toBe(0);
+		expect(Result.isOk(result)).toBe(true);
+		if (Result.isOk(result)) {
+			expect(result.value.id).toBe("cursor-1");
+			expect(result.value.position).toBe(0);
+		}
 	});
 
 	it("createCursor generates unique cursor ID if not provided", () => {
-		const cursor1 = createCursor({ position: 0 });
-		const cursor2 = createCursor({ position: 0 });
+		const result1 = createCursor({ position: 0 });
+		const result2 = createCursor({ position: 0 });
 
-		expect(cursor1.id).toBeDefined();
-		expect(cursor2.id).toBeDefined();
-		expect(cursor1.id).not.toBe(cursor2.id);
+		expect(Result.isOk(result1)).toBe(true);
+		expect(Result.isOk(result2)).toBe(true);
+		if (Result.isOk(result1) && Result.isOk(result2)) {
+			expect(result1.value.id).toBeDefined();
+			expect(result2.value.id).toBeDefined();
+			expect(result1.value.id).not.toBe(result2.value.id);
+		}
 	});
 
 	it("createCursor accepts optional metadata", () => {
-		const cursor = createCursor({
+		const result = createCursor({
 			id: "cursor-1",
 			position: 10,
 			metadata: { query: "test", pageSize: 50 },
 		});
 
-		expect(cursor.metadata).toEqual({ query: "test", pageSize: 50 });
+		expect(Result.isOk(result)).toBe(true);
+		if (Result.isOk(result)) {
+			expect(result.value.metadata).toEqual({ query: "test", pageSize: 50 });
+		}
 	});
 
 	it("createCursor validates position is non-negative", () => {

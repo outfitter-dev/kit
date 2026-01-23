@@ -8,7 +8,7 @@
  * @packageDocumentation
  */
 
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { Result, NotFoundError, ValidationError } from "@outfitter/contracts";
 
@@ -305,14 +305,7 @@ export async function createPersistentStore(
 		try {
 			writeFileSync(tempPath, content, { encoding: "utf-8" });
 			// Rename is atomic on most filesystems
-			await Bun.write(storagePath, await Bun.file(tempPath).text());
-			// Clean up temp file
-			try {
-				const { unlinkSync } = await import("node:fs");
-				unlinkSync(tempPath);
-			} catch {
-				// Ignore cleanup errors
-			}
+			renameSync(tempPath, storagePath);
 		} catch (error) {
 			// Try to clean up temp file on failure
 			try {
@@ -424,7 +417,19 @@ export function createScopedStore(store: CursorStore | ScopedStore, scope: strin
 		},
 
 		get(id: string): Result<Cursor, InstanceType<typeof NotFoundError>> {
-			return store.get(`${prefix}${id}`);
+			const result = store.get(`${prefix}${id}`);
+			if (result.isErr()) {
+				return result;
+			}
+			// Strip prefix from cursor ID to present clean ID to caller
+			// This prevents double-prefixing when cursor is updated and set again
+			const cursor = result.value;
+			return Result.ok(
+				Object.freeze({
+					...cursor,
+					id: cursor.id.slice(prefix.length),
+				}),
+			);
 		},
 
 		has(id: string): boolean {

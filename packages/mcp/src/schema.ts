@@ -299,10 +299,12 @@ function isFieldOptional(fieldDef: any): boolean {
 		return isFieldOptional(fieldDef.schema?._def);
 	}
 
-	// Unwrap ZodPipeline and check the input type
-	// (pipeline: input -> output, optionality comes from input)
+	// Unwrap ZodPipeline and check both input/output
+	// (pipeline: input -> output, optionality requires both to allow undefined)
 	if (typeName === "ZodPipeline") {
-		return isFieldOptional(fieldDef.in?._def);
+		const inputOptional = isFieldOptional(fieldDef.in?._def);
+		const outputOptional = isFieldOptional(fieldDef.out?._def);
+		return inputOptional && outputOptional;
 	}
 
 	// Unwrap ZodNullable and check inner type

@@ -337,6 +337,21 @@ describe("branded", () => {
 				const result = uuid("");
 				expect(result.isErr()).toBe(true);
 			});
+
+			it("returns Err for UUID v1 (wrong version nibble)", () => {
+				// v1 UUID has '1' at version position instead of '4'
+				const result = uuid("123e4567-e89b-12d3-a456-426614174000");
+				expect(result.isErr()).toBe(true);
+				if (result.isErr()) {
+					expect(result.error.message).toBe("Invalid UUID v4 format");
+				}
+			});
+
+			it("returns Err for UUID with invalid variant bits", () => {
+				// Valid v4 version but wrong variant (0 instead of [89ab])
+				const result = uuid("550e8400-e29b-41d4-0716-446655440000");
+				expect(result.isErr()).toBe(true);
+			});
 		});
 
 		describe("Type Safety (compile-time)", () => {

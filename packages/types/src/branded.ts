@@ -193,9 +193,11 @@ export function email(value: string): Result<Email, InstanceType<typeof Validati
 }
 
 /**
- * UUID v4 format regex: 8-4-4-4-12 hexadecimal characters
+ * UUID v4 format regex: 8-4-4-4-12 hexadecimal characters with v4 constraints.
+ * - Version nibble (position 15) must be '4'
+ * - Variant bits (position 20) must be one of [89ab]
  */
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 /**
  * Creates a UUID from a string, validating UUID v4 format.
@@ -215,7 +217,7 @@ export function uuid(value: string): Result<UUID, InstanceType<typeof Validation
 	if (!UUID_REGEX.test(value)) {
 		return Result.err(
 			new ValidationError({
-				message: "Invalid UUID format",
+				message: "Invalid UUID v4 format",
 				field: "value",
 			}),
 		);

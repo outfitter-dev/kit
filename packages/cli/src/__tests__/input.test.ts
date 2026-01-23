@@ -27,7 +27,12 @@ import {
 // =============================================================================
 
 const cancelSymbol = Symbol("clack-cancel");
-const confirmMock = mock.fn();
+const confirmQueue: unknown[] = [];
+const confirmMock = mock(async () => confirmQueue.shift());
+
+function queueConfirmResponse(value: unknown): void {
+	confirmQueue.push(value);
+}
 
 mock.module("@clack/prompts", () => ({
 	confirm: confirmMock,
@@ -91,6 +96,7 @@ beforeEach(() => {
 afterEach(() => {
 	process.env = originalEnv;
 	mock.clearAllMocks();
+	confirmQueue.length = 0;
 	Object.defineProperty(process.stdout, "isTTY", {
 		value: originalIsTTY,
 		writable: true,
@@ -800,7 +806,7 @@ describe("confirmDestructive()", () => {
 			configurable: true,
 		});
 
-		confirmMock.mockResolvedValueOnce(true);
+		queueConfirmResponse(true);
 
 		const result = await confirmDestructive({
 			message: "Delete items?",
@@ -820,7 +826,7 @@ describe("confirmDestructive()", () => {
 			configurable: true,
 		});
 
-		confirmMock.mockResolvedValueOnce(false);
+		queueConfirmResponse(false);
 
 		const result = await confirmDestructive({
 			message: "Delete items?",
@@ -840,7 +846,7 @@ describe("confirmDestructive()", () => {
 			configurable: true,
 		});
 
-		confirmMock.mockResolvedValueOnce(cancelSymbol);
+		queueConfirmResponse(cancelSymbol);
 
 		const result = await confirmDestructive({
 			message: "Delete items?",
@@ -861,7 +867,7 @@ describe("confirmDestructive()", () => {
 			configurable: true,
 		});
 
-		confirmMock.mockResolvedValueOnce(true);
+		queueConfirmResponse(true);
 
 		const result = await confirmDestructive({
 			message: "Delete items?",

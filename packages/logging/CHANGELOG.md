@@ -1,16 +1,5 @@
 # Changelog
 
-## 0.1.0
-
-### Minor Changes
-
-- chore: align package versions to 0.1.0
-
-### Patch Changes
-
-- Updated dependencies
-  - @outfitter/contracts@0.1.0
-
 All notable changes to this package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -34,3 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Error object serialization with name, message, and stack trace
 - Runtime level changes via `setLevel()`
 - Dynamic sink addition via `addSink()`
+
+### Changed
+
+- Align package versions to 0.1.0
+
+### Dependencies
+
+- Updated dependencies
+  - @outfitter/contracts@0.1.0

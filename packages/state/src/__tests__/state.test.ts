@@ -25,6 +25,8 @@ import {
 	createCursorStore,
 	createPersistentStore,
 	createScopedStore,
+	decodeCursor,
+	encodeCursor,
 	isExpired,
 	type Cursor,
 	type CursorStore,
@@ -596,6 +598,92 @@ describe("TTL and Expiration", () => {
 			expect(store.has("long-lived")).toBe(true);
 			expect(store.has("eternal")).toBe(true);
 			expect(store.has("short-lived")).toBe(false);
+		}
+	});
+});
+
+// ============================================================================
+// 6. Cursor Encoding (5 tests)
+// ============================================================================
+
+describe("Cursor Encoding", () => {
+	it("encodeCursor returns URL-safe base64 string (no +, /, =)", () => {
+		const cursorResult = createCursor({
+			id: "test-id",
+			position: 100,
+			metadata: { query: "status:open" },
+			ttl: 3600000,
+		});
+
+		expect(Result.isOk(cursorResult)).toBe(true);
+		if (Result.isOk(cursorResult)) {
+			const encoded = encodeCursor(cursorResult.value);
+
+			// Should be a string
+			expect(typeof encoded).toBe("string");
+			// Should not contain URL-unsafe characters
+			expect(encoded).not.toMatch(/[+/=]/);
+			// Should only contain URL-safe base64 characters
+			expect(encoded).toMatch(/^[A-Za-z0-9_-]+$/);
+		}
+	});
+
+	it("decodeCursor restores all cursor properties (round-trip)", () => {
+		const originalCursor = createCursor({
+			id: "round-trip-id",
+			position: 42,
+			metadata: { filter: "active", pageSize: 25 },
+			ttl: 7200000,
+		});
+
+		expect(Result.isOk(originalCursor)).toBe(true);
+		if (Result.isOk(originalCursor)) {
+			const encoded = encodeCursor(originalCursor.value);
+			const decoded = decodeCursor(encoded);
+
+			expect(Result.isOk(decoded)).toBe(true);
+			if (Result.isOk(decoded)) {
+				expect(decoded.value.id).toBe(originalCursor.value.id);
+				expect(decoded.value.position).toBe(originalCursor.value.position);
+				expect(decoded.value.metadata).toEqual(originalCursor.value.metadata);
+				expect(decoded.value.ttl).toBe(originalCursor.value.ttl);
+				expect(decoded.value.expiresAt).toBe(originalCursor.value.expiresAt);
+				expect(decoded.value.createdAt).toBe(originalCursor.value.createdAt);
+			}
+		}
+	});
+
+	it("decodeCursor returns ValidationError for invalid base64", () => {
+		// Invalid base64 string (contains invalid characters like !)
+		const result = decodeCursor("!!!not-valid-base64!!!");
+
+		expect(Result.isError(result)).toBe(true);
+		if (Result.isError(result)) {
+			expect(result.error._tag).toBe("ValidationError");
+		}
+	});
+
+	it("decodeCursor returns ValidationError for invalid JSON", () => {
+		// Valid base64 but not valid JSON
+		// "not json" in URL-safe base64
+		const invalidJson = Buffer.from("not json").toString("base64url");
+		const result = decodeCursor(invalidJson);
+
+		expect(Result.isError(result)).toBe(true);
+		if (Result.isError(result)) {
+			expect(result.error._tag).toBe("ValidationError");
+		}
+	});
+
+	it("decodeCursor returns ValidationError for missing required fields", () => {
+		// Valid JSON but missing required cursor fields
+		const incompleteData = { position: 10 }; // missing id, createdAt
+		const encoded = Buffer.from(JSON.stringify(incompleteData)).toString("base64url");
+		const result = decodeCursor(encoded);
+
+		expect(Result.isError(result)).toBe(true);
+		if (Result.isError(result)) {
+			expect(result.error._tag).toBe("ValidationError");
 		}
 	});
 });

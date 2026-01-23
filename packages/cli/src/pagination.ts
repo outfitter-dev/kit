@@ -117,7 +117,20 @@ export function loadCursor(options: CursorOptions): PaginationState | undefined 
 			return undefined;
 		}
 
-		return parsed as PaginationState;
+		const state = parsed as PaginationState;
+
+		if (options.maxAgeMs !== undefined) {
+			if (typeof state.timestamp !== "number") {
+				return undefined;
+			}
+
+			const ageMs = Date.now() - state.timestamp;
+			if (ageMs > options.maxAgeMs) {
+				return undefined;
+			}
+		}
+
+		return state;
 	} catch {
 		// Return undefined for corrupted/invalid JSON
 		return undefined;

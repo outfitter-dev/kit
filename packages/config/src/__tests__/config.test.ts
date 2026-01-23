@@ -13,7 +13,7 @@
  * NOTE: These tests are written in TDD RED phase.
  * They will FAIL until implementation is complete.
  */
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
@@ -27,6 +27,76 @@ import {
 	parseConfigFile,
 	deepMerge,
 } from "../index.js";
+
+// ============================================================================
+// Test Fixture Setup
+// ============================================================================
+
+const FIXTURE_DIRS = [
+	"/tmp/test-config/test-app",
+	"/tmp/xdg-config-test/myapp",
+	"/tmp/xdg-config-test/strict-app",
+	"/tmp/xdg-config-test/invalid-config-app",
+	"/tmp/xdg-config-test/bad-nested-app",
+];
+
+// Valid config that matches TestConfigSchema
+const VALID_CONFIG_TOML = `[server]
+port = 3000
+host = "localhost"
+
+[database]
+url = "postgres://localhost/testdb"
+poolSize = 10
+`;
+
+// Valid config that matches StrictSchema
+const STRICT_CONFIG_TOML = `name = "test-app"
+count = 42
+`;
+
+// Invalid config - missing required fields
+const INVALID_CONFIG_TOML = `[server]
+port = 3000
+# Missing host and database
+`;
+
+// Bad nested config - has invalid nested field
+const BAD_NESTED_CONFIG_TOML = `[server]
+port = 99999
+host = "localhost"
+
+[database]
+url = "not-a-valid-url"
+`;
+
+function setupFixtures() {
+	// Create directories
+	for (const dir of FIXTURE_DIRS) {
+		mkdirSync(dir, { recursive: true });
+	}
+
+	// Create valid config files
+	writeFileSync("/tmp/test-config/test-app/config.toml", VALID_CONFIG_TOML);
+	writeFileSync("/tmp/xdg-config-test/myapp/config.toml", VALID_CONFIG_TOML);
+	writeFileSync("/tmp/xdg-config-test/strict-app/config.toml", STRICT_CONFIG_TOML);
+	writeFileSync("/tmp/xdg-config-test/invalid-config-app/config.toml", INVALID_CONFIG_TOML);
+	writeFileSync("/tmp/xdg-config-test/bad-nested-app/config.toml", BAD_NESTED_CONFIG_TOML);
+}
+
+function cleanupFixtures() {
+	rmSync("/tmp/test-config", { recursive: true, force: true });
+	rmSync("/tmp/xdg-config-test", { recursive: true, force: true });
+}
+
+// Setup and teardown for all tests
+beforeAll(() => {
+	setupFixtures();
+});
+
+afterAll(() => {
+	cleanupFixtures();
+});
 
 // ============================================================================
 // Test Fixtures
@@ -139,6 +209,11 @@ describe("XDG Path Resolution", () => {
 describe("loadConfig()", () => {
 	const originalEnv = { ...process.env };
 
+	beforeEach(() => {
+		// Set XDG_CONFIG_HOME to test fixtures location
+		process.env.XDG_CONFIG_HOME = "/tmp/xdg-config-test";
+	});
+
 	afterEach(() => {
 		process.env = { ...originalEnv };
 	});
@@ -181,9 +256,9 @@ count = 42
 		});
 
 		afterEach(() => {
-			// Clean up fixture directories
-			rmSync("/tmp/test-config", { recursive: true, force: true });
-			rmSync("/tmp/xdg-config-test", { recursive: true, force: true });
+			// Only clean up fixtures created by this describe block's beforeEach
+			// Don't delete /tmp/xdg-config-test entirely as "error handling" tests need it
+			rmSync("/tmp/test-config/test-app", { recursive: true, force: true });
 		});
 
 		it("returns Result.ok with validated config on success", async () => {

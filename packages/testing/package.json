@@ -21,18 +21,6 @@
 				"default": "./dist/fixtures.js"
 			}
 		},
-		"./cli-harness": {
-			"import": {
-				"types": "./dist/cli-harness.d.ts",
-				"default": "./dist/cli-harness.js"
-			}
-		},
-		"./mcp-harness": {
-			"import": {
-				"types": "./dist/mcp-harness.d.ts",
-				"default": "./dist/mcp-harness.js"
-			}
-		},
 		"./package.json": "./package.json"
 	},
 	"sideEffects": false,

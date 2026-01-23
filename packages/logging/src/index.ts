@@ -7,6 +7,8 @@
  * @packageDocumentation
  */
 
+import { writeFileSync } from "node:fs";
+
 // ============================================================================
 // Type Definitions
 // ============================================================================
@@ -296,8 +298,8 @@ function processMetadata(
 		}
 	}
 
-	// Apply redaction if enabled
-	if (redactionConfig?.enabled) {
+	// Apply redaction if enabled (enabled defaults to true when redactionConfig is provided)
+	if (redactionConfig && redactionConfig.enabled !== false) {
 		const allPatterns = [
 			...(redactionConfig.patterns ?? []),
 			...(globalRedactionConfig.patterns ?? []),
@@ -643,9 +645,9 @@ export function createFileSink(options: FileSinkOptions): Sink {
 	// append defaults to true
 	const append = options.append ?? true;
 
-	// Clear file if not appending
+	// Clear file synchronously if not appending to prevent race with flush()
 	if (!append) {
-		Bun.write(path, "");
+		writeFileSync(path, "");
 	}
 
 	const sink: Sink = {

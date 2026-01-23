@@ -669,6 +669,12 @@ interface KitError {
   /** Structured context for debugging (logged, not shown to users) */
   readonly context?: Record<string, unknown>;
 
+  /** Optional granular numeric error code for programmatic handling */
+  readonly code?: number;
+
+  /** Correlation ID for distributed tracing across service boundaries */
+  readonly correlationId?: string;
+
   /** Serialize for JSON output / MCP responses */
   toJSON(): SerializedError;
 
@@ -684,6 +690,8 @@ interface SerializedError {
   category: ErrorCategory;
   message: string;
   context?: Record<string, unknown>;
+  code?: number;
+  correlationId?: string;
 }
 ```
 
@@ -765,6 +773,8 @@ abstract class BaseKitError extends TaggedError implements KitError {
       category: this.category,
       message: this.message,
       context: this.context,
+      code: this.code,
+      correlationId: this.correlationId,
     };
   }
 
@@ -876,6 +886,417 @@ class AuthError extends BaseKitError {
     context?: Record<string, unknown>
   ) {
     super(message, { ...context, provider });
+  }
+}
+```
+
+#### Hybrid Error Pattern: Tags + Numeric Codes
+
+The kit uses a hybrid approach combining `_tag` discriminants (for type-safe pattern matching) with optional numeric error codes (for programmatic handling and external system integration). The `_tag` is always present; the `code` is opt-in for cases requiring granular identification.
+
+**When to use numeric codes:**
+
+- External API integration (returning specific error codes to clients)
+- Log aggregation and metrics (grouping by code range)
+- Retry logic (some codes are retryable, others are not)
+- Legacy system interop (numeric codes are universally understood)
+
+**When `_tag` alone suffices:**
+
+- Internal handler logic (pattern match on `_tag`)
+- Test assertions (match on specific error types)
+- Simple CLIs without external consumers
+
+#### Curated Error Codes
+
+Error codes are organized by domain in 1000-code ranges. This provides ~30 commonly-used codes while leaving room for domain-specific extensions.
+
+```typescript
+/**
+ * Error code registry — curated codes for common scenarios.
+ *
+ * Ranges:
+ * - 1000-1999: Validation errors
+ * - 2000-2999: Runtime errors
+ * - 3000-3999: Network errors
+ * - 4000-4999: Filesystem errors
+ * - 5000-5999: Configuration errors
+ * - 7000-7999: Timeout errors
+ * - 8000-8999: Resource errors
+ */
+const ERROR_CODES = {
+  // ========================================
+  // Validation Errors (1000-1999)
+  // ========================================
+
+  /** Invalid input provided */
+  INVALID_INPUT: 1000,
+  /** Schema validation failed */
+  SCHEMA_VALIDATION_FAILED: 1001,
+  /** Type mismatch detected */
+  TYPE_MISMATCH: 1002,
+  /** Required field missing */
+  MISSING_REQUIRED_FIELD: 1005,
+  /** Parse error */
+  PARSE_ERROR: 1014,
+  /** Invalid JSON */
+  INVALID_JSON: 1017,
+  /** Invalid YAML */
+  INVALID_YAML: 1019,
+  /** Invalid TOML */
+  INVALID_TOML: 1020,
+
+  // ========================================
+  // Runtime Errors (2000-2999)
+  // ========================================
+
+  /** Generic runtime exception */
+  RUNTIME_EXCEPTION: 2000,
+  /** Hook execution failed */
+  HOOK_EXECUTION_FAILED: 2001,
+  /** Dependency missing */
+  DEPENDENCY_MISSING: 2003,
+  /** Assertion failed */
+  ASSERTION_FAILED: 2008,
+  /** Internal error */
+  INTERNAL_ERROR: 2019,
+  /** Unknown error */
+  UNKNOWN_ERROR: 2020,
+
+  // ========================================
+  // Network Errors (3000-3999)
+  // ========================================
+
+  /** Connection refused */
+  CONNECTION_REFUSED: 3000,
+  /** Connection timeout */
+  CONNECTION_TIMEOUT: 3001,
+  /** Socket error */
+  SOCKET_ERROR: 3020,
+  /** Protocol error */
+  PROTOCOL_ERROR: 3008,
+  /** Request aborted */
+  REQUEST_ABORTED: 3013,
+
+  // ========================================
+  // Filesystem Errors (4000-4999)
+  // ========================================
+
+  /** File not found */
+  FILE_NOT_FOUND: 4000,
+  /** Permission denied */
+  PERMISSION_DENIED: 4001,
+  /** File locked */
+  FILE_LOCKED: 4003,
+  /** Read error */
+  FILE_READ_ERROR: 4010,
+  /** Write error */
+  FILE_WRITE_ERROR: 4011,
+  /** IO error */
+  IO_ERROR: 4019,
+
+  // ========================================
+  // Configuration Errors (5000-5999)
+  // ========================================
+
+  /** Configuration not found */
+  CONFIG_NOT_FOUND: 5000,
+  /** Invalid configuration */
+  CONFIG_INVALID: 5001,
+  /** Configuration parse error */
+  CONFIG_PARSE_ERROR: 5002,
+  /** Configuration validation failed */
+  CONFIG_VALIDATION_FAILED: 5003,
+  /** Environment variable missing */
+  ENV_VAR_MISSING: 5010,
+
+  // ========================================
+  // Timeout Errors (7000-7999)
+  // ========================================
+
+  /** Operation timeout */
+  OPERATION_TIMEOUT: 7000,
+  /** Lock timeout */
+  LOCK_TIMEOUT: 7006,
+  /** Execution timeout */
+  EXECUTION_TIMEOUT: 7012,
+
+  // ========================================
+  // Resource Errors (8000-8999)
+  // ========================================
+
+  /** Resource locked */
+  RESOURCE_LOCKED: 8017,
+  /** Resource busy */
+  RESOURCE_BUSY: 8018,
+} as const;
+
+type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
+```
+
+**Code category utilities:**
+
+```typescript
+/**
+ * Get the category range for an error code.
+ *
+ * @example
+ * getCodeCategory(1017) // => 1000 (validation range)
+ */
+const getCodeCategory = (code: number): number => {
+  return Math.floor(code / 1000) * 1000;
+};
+
+/**
+ * Check if a code is in a specific category range.
+ *
+ * @example
+ * isInCategory(4003, 4000) // => true (filesystem range)
+ */
+const isInCategory = (code: number, categoryBase: number): boolean => {
+  return getCodeCategory(code) === categoryBase;
+};
+```
+
+#### Recovery Heuristics
+
+Recovery heuristics help determine whether an error is transient (might succeed on retry) or permanent (requires intervention).
+
+```typescript
+/**
+ * Check if an error is potentially recoverable.
+ *
+ * Recoverable errors are transient failures that might succeed if retried.
+ * Non-recoverable errors require user intervention or indicate permanent failure.
+ *
+ * Categories considered recoverable:
+ * - network: Connection issues may be temporary
+ * - timeout: May succeed with more time
+ * - rate_limit: May succeed after backoff
+ *
+ * Categories considered non-recoverable:
+ * - validation: Invalid input won't become valid
+ * - auth: Requires user credentials
+ * - permission: Requires authorization change
+ * - not_found: Resource doesn't exist
+ *
+ * @example
+ * const err = new NetworkError("Connection refused");
+ * if (isRecoverable(err)) {
+ *   // Consider retry logic
+ * }
+ */
+function isRecoverable(error: KitError): boolean;
+
+/**
+ * Check if an error should trigger an automatic retry.
+ *
+ * More restrictive than isRecoverable — only errors where retry
+ * is the appropriate default behavior. All retryable errors are
+ * recoverable, but not all recoverable errors should auto-retry.
+ *
+ * Retryable categories:
+ * - network: Transient network failures
+ * - timeout: Operation may succeed with more time
+ *
+ * NOT automatically retryable (but may be recoverable):
+ * - rate_limit: Requires specific backoff timing
+ * - conflict: May need user conflict resolution
+ *
+ * @example
+ * const err = new TimeoutError("Request timed out", "fetch", 5000);
+ * if (isRetryable(err) && attempts < maxAttempts) {
+ *   await retry();
+ * }
+ */
+function isRetryable(error: KitError): boolean;
+
+/**
+ * Calculate retry delay with exponential backoff and jitter.
+ *
+ * Implements exponential backoff to prevent thundering herd:
+ * - Attempt 1: baseDelay (default 1000ms)
+ * - Attempt 2: baseDelay * 2
+ * - Attempt 3: baseDelay * 4
+ * - ...capped at maxDelay
+ *
+ * Jitter (±10%) prevents synchronized retries from multiple clients.
+ *
+ * @param error - The error that triggered retry
+ * @param attempt - Current attempt number (0-indexed)
+ * @param options - Backoff configuration
+ * @returns Delay in milliseconds before next retry
+ *
+ * @example
+ * const delay = getBackoffDelay(error, 2, { baseDelay: 1000, maxDelay: 30000 });
+ * await Bun.sleep(delay);
+ * // Retry the operation
+ */
+function getBackoffDelay(
+  error: KitError,
+  attempt: number,
+  options?: {
+    baseDelay?: number;   // Default: 1000ms
+    maxDelay?: number;    // Default: 30000ms
+    useJitter?: boolean;  // Default: true
+  }
+): number;
+```
+
+#### Result Utilities
+
+Extensions to `better-result` for common patterns in the kit.
+
+```typescript
+/**
+ * Unwrap a Result, using a fallback function if it's an error.
+ *
+ * Unlike unwrapOr which takes a static default, unwrapOrElse
+ * lazily computes the default and has access to the error.
+ *
+ * @example
+ * const value = unwrapOrElse(result, (err) => {
+ *   logger.warn("Using fallback", { error: err._tag });
+ *   return defaultValue;
+ * });
+ */
+function unwrapOrElse<T, E>(
+  result: Result<T, E>,
+  defaultFn: (error: E) => T
+): T;
+
+/**
+ * Try a fallback Result if the first one is an error.
+ *
+ * Useful for chaining fallback strategies:
+ * - Try cache first, fall back to network
+ * - Try primary config, fall back to defaults
+ *
+ * @example
+ * const config = orElse(
+ *   loadUserConfig(),
+ *   loadDefaultConfig()
+ * );
+ */
+function orElse<T, E, F>(
+  result: Result<T, E>,
+  fallback: Result<T, F>
+): Result<T, F>;
+
+/**
+ * Combine two Results into a tuple, failing if either fails.
+ *
+ * Short-circuits on first error. Useful for parallel validation
+ * where you need both values to proceed.
+ *
+ * @example
+ * const result = combine2(
+ *   validateInput(input),
+ *   loadConfig()
+ * );
+ * if (result.isOk()) {
+ *   const [validated, config] = result.value;
+ * }
+ */
+function combine2<T1, T2, E>(
+  r1: Result<T1, E>,
+  r2: Result<T2, E>
+): Result<[T1, T2], E>;
+
+/**
+ * Combine three Results into a tuple, failing if any fails.
+ *
+ * @example
+ * const result = combine3(
+ *   validateInput(input),
+ *   loadConfig(),
+ *   resolveWorkspace()
+ * );
+ */
+function combine3<T1, T2, T3, E>(
+  r1: Result<T1, E>,
+  r2: Result<T2, E>,
+  r3: Result<T3, E>
+): Result<[T1, T2, T3], E>;
+```
+
+#### Assertion Utilities
+
+Runtime assertions that return Results instead of throwing. Use these for invariant checking that composes with the Result pattern.
+
+```typescript
+/**
+ * Non-empty array type — an array guaranteed to have at least one element.
+ */
+type NonEmptyArray<T> = [T, ...T[]];
+
+/**
+ * Assert that a value is defined (not null or undefined).
+ *
+ * Use at boundaries where you expect a value but need runtime verification.
+ *
+ * @example
+ * const result = assertDefined(map.get(key), `Key "${key}" not found in map`);
+ * if (result.isErr()) {
+ *   return result; // Propagate the AssertionError
+ * }
+ * const value = result.value; // Type narrowed, guaranteed non-null
+ */
+function assertDefined<T>(
+  value: T | null | undefined,
+  message?: string
+): Result<T, AssertionError>;
+
+/**
+ * Assert that an array is non-empty.
+ *
+ * Returns a NonEmptyArray type that allows safe head/tail access.
+ *
+ * @example
+ * const result = assertNonEmpty(items, "Expected at least one item");
+ * if (result.isOk()) {
+ *   const [first, ...rest] = result.value; // first is guaranteed to exist
+ * }
+ */
+function assertNonEmpty<T>(
+  arr: T[],
+  message?: string
+): Result<NonEmptyArray<T>, AssertionError>;
+
+/**
+ * Assert that a value matches a type predicate.
+ *
+ * Useful for narrowing union types or validating discriminated unions.
+ *
+ * @example
+ * const result = assertMatches(
+ *   event,
+ *   (e): e is UserEvent => e.type === "user",
+ *   "Expected user event"
+ * );
+ * if (result.isOk()) {
+ *   // result.value is typed as UserEvent
+ * }
+ */
+function assertMatches<T, U extends T>(
+  value: T,
+  predicate: (v: T) => v is U,
+  message?: string
+): Result<U, AssertionError>;
+
+/**
+ * AssertionError — thrown when a runtime assertion fails.
+ *
+ * Always indicates a programming error (invariant violation),
+ * not user input error.
+ */
+class AssertionError extends BaseKitError {
+  readonly _tag = "AssertionError";
+  readonly category = "internal" as const;
+  readonly code = ERROR_CODES.ASSERTION_FAILED;
+
+  constructor(message: string, context?: Record<string, unknown>) {
+    super(message, context);
   }
 }
 ```

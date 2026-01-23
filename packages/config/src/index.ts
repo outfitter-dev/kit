@@ -322,12 +322,23 @@ function findConfigFile(dir: string): string | undefined {
 
 /**
  * Get default search paths for an application.
+ * When XDG_CONFIG_HOME is set, includes both the XDG path and ~/.config fallback.
  */
 function getDefaultSearchPaths(appName: string): string[] {
-	return [
-		getConfigDir(appName),
-		// Could add project-local paths here: `./${appName}.config.{ext}`
-	];
+	const xdgConfigHome = process.env["XDG_CONFIG_HOME"];
+	const home = process.env["HOME"] ?? "";
+	const defaultConfigPath = join(home, ".config", appName);
+
+	// If XDG_CONFIG_HOME is set, search both the XDG path and ~/.config fallback
+	if (xdgConfigHome) {
+		const xdgPath = join(xdgConfigHome, appName);
+		// Only include both if they're different paths
+		if (xdgPath !== defaultConfigPath) {
+			return [xdgPath, defaultConfigPath];
+		}
+	}
+
+	return [defaultConfigPath];
 }
 
 /**

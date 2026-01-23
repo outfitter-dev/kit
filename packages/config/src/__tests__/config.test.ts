@@ -256,9 +256,9 @@ count = 42
 		});
 
 		afterEach(() => {
-			// Clean up fixture directories
-			rmSync("/tmp/test-config", { recursive: true, force: true });
-			rmSync("/tmp/xdg-config-test", { recursive: true, force: true });
+			// Only clean up fixtures created by this describe block's beforeEach
+			// Don't delete /tmp/xdg-config-test entirely as "error handling" tests need it
+			rmSync("/tmp/test-config/test-app", { recursive: true, force: true });
 		});
 
 		it("returns Result.ok with validated config on success", async () => {

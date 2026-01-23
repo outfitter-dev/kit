@@ -258,9 +258,7 @@ describe("loadCursor()", () => {
 		expect(result).toBeUndefined();
 	});
 
-	// TODO: Implement TTL enforcement - currently returns cursor regardless of age
-	// When TTL is implemented, this test should verify that expired cursors return undefined
-	test.skip("returns undefined for expired cursors when TTL is enforced", async () => {
+	test("returns undefined for expired cursors when maxAgeMs is exceeded", async () => {
 		// Create a cursor with an old timestamp (1 hour ago)
 		const oldState: PaginationState = {
 			cursor: "old-cursor",
@@ -274,9 +272,30 @@ describe("loadCursor()", () => {
 		const result = loadCursor({
 			command: "list",
 			toolName: "waymark",
+			maxAgeMs: 30 * 60 * 1000, // 30 minutes
 		});
 
 		expect(result).toBeUndefined();
+	});
+
+	test("returns state when cursor age is within maxAgeMs", async () => {
+		const freshState: PaginationState = {
+			cursor: "fresh-cursor",
+			command: "list",
+			timestamp: Date.now() - 5 * 60 * 1000, // 5 minutes ago
+			hasMore: true,
+		};
+
+		await createCursorFile(tempDir, "waymark", "list", freshState);
+
+		const result = loadCursor({
+			command: "list",
+			toolName: "waymark",
+			maxAgeMs: 30 * 60 * 1000, // 30 minutes
+		});
+
+		expect(result).toBeDefined();
+		expect(result?.cursor).toBe("fresh-cursor");
 	});
 
 	test("includes hasMore and total from saved state", async () => {

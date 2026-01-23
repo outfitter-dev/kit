@@ -7,6 +7,11 @@ const root = dirname(here);
 const source = join(root, "templates");
 const destination = join(root, "apps", "outfitter", "templates");
 
-await rm(destination, { recursive: true, force: true });
-await mkdir(destination, { recursive: true });
-await cp(source, destination, { recursive: true });
+try {
+	await rm(destination, { recursive: true, force: true });
+	await mkdir(destination, { recursive: true });
+	await cp(source, destination, { recursive: true });
+} catch (error) {
+	console.error("Failed to sync templates:", error);
+	process.exitCode = 1;
+}

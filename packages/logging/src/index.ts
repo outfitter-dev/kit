@@ -162,8 +162,56 @@ export interface GlobalRedactionConfig {
 }
 
 // ============================================================================
-// Stub Implementations - Will throw until properly implemented
+// Stub Implementations - Minimal no-op stubs for TDD red phase
 // ============================================================================
+
+// Track all created loggers for flush()
+const registeredSinks: Sink[] = [];
+
+/**
+ * Create a no-op logger instance stub.
+ * This is a minimal implementation that allows tests to run and fail on
+ * assertions rather than on instantiation.
+ *
+ * @internal
+ */
+function createNoOpLogger(config: LoggerConfig): LoggerInstance {
+	const context = { ...config.context };
+	// Store level for potential use in filtering (stub doesn't filter)
+	const state = { level: config.level ?? ("info" as LogLevel) };
+	const sinks = [...(config.sinks ?? [])];
+
+	// Track sinks for flush
+	for (const sink of sinks) {
+		if (!registeredSinks.includes(sink)) {
+			registeredSinks.push(sink);
+		}
+	}
+
+	// No-op log method - does nothing in stub
+	const noop = (_message: string, _metadata?: Record<string, unknown>): void => {
+		// Stub: no-op
+	};
+
+	return {
+		trace: noop,
+		debug: noop,
+		info: noop,
+		warn: noop,
+		error: noop,
+		fatal: noop,
+		getContext: () => ({ ...context }),
+		setLevel: (level: LogLevel) => {
+			state.level = level;
+		},
+		addSink: (sink: Sink) => {
+			sinks.push(sink);
+			if (!registeredSinks.includes(sink)) {
+				registeredSinks.push(sink);
+			}
+		},
+	};
+}
 
 /**
  * Create a configured logger instance.
@@ -182,8 +230,8 @@ export interface GlobalRedactionConfig {
  * logger.info("Server started", { port: 3000 });
  * ```
  */
-export function createLogger(_config: LoggerConfig): LoggerInstance {
-	throw new Error("Not implemented: createLogger");
+export function createLogger(config: LoggerConfig): LoggerInstance {
+	return createNoOpLogger(config);
 }
 
 /**
@@ -201,10 +249,12 @@ export function createLogger(_config: LoggerConfig): LoggerInstance {
  * ```
  */
 export function createChildLogger(
-	_parent: LoggerInstance,
-	_context: Record<string, unknown>,
+	parent: LoggerInstance,
+	context: Record<string, unknown>,
 ): LoggerInstance {
-	throw new Error("Not implemented: createChildLogger");
+	// Merge parent context with child context
+	const mergedContext = { ...parent.getContext(), ...context };
+	return createLogger({ name: "child", context: mergedContext });
 }
 
 /**
@@ -220,7 +270,18 @@ export function createChildLogger(
  * ```
  */
 export function createJsonFormatter(): Formatter {
-	throw new Error("Not implemented: createJsonFormatter");
+	return {
+		format: (record: LogRecord): string => {
+			const output = {
+				timestamp: record.timestamp,
+				level: record.level,
+				category: record.category,
+				message: record.message,
+				...record.metadata,
+			};
+			return JSON.stringify(output);
+		},
+	};
 }
 
 /**
@@ -236,8 +297,30 @@ export function createJsonFormatter(): Formatter {
  * // 2024-01-22T12:00:00.000Z [INFO] my-service: Hello world
  * ```
  */
-export function createPrettyFormatter(_options?: PrettyFormatterOptions): Formatter {
-	throw new Error("Not implemented: createPrettyFormatter");
+export function createPrettyFormatter(options?: PrettyFormatterOptions): Formatter {
+	const useColors = options?.colors ?? true;
+
+	// ANSI color codes for different levels
+	const levelColors: Record<string, string> = {
+		trace: "\u001b[90m", // gray
+		debug: "\u001b[36m", // cyan
+		info: "\u001b[32m", // green
+		warn: "\u001b[33m", // yellow
+		error: "\u001b[31m", // red
+		fatal: "\u001b[35m", // magenta
+	};
+	const reset = "\u001b[0m";
+
+	return {
+		format: (record: LogRecord): string => {
+			const timestamp = new Date(record.timestamp).toISOString();
+			const level = record.level.toUpperCase();
+			const colorCode = useColors ? (levelColors[record.level] ?? "") : "";
+			const resetCode = useColors ? reset : "";
+
+			return `${timestamp} ${colorCode}[${level}]${resetCode} ${record.category}: ${record.message}`;
+		},
+	};
 }
 
 /**
@@ -255,7 +338,22 @@ export function createPrettyFormatter(_options?: PrettyFormatterOptions): Format
  * ```
  */
 export function createConsoleSink(): Sink {
-	throw new Error("Not implemented: createConsoleSink");
+	const formatter = createPrettyFormatter();
+
+	return {
+		formatter,
+		write: (record: LogRecord, formatted?: string): void => {
+			const output = formatted ?? formatter.format(record);
+			const outputWithNewline = output.endsWith("\n") ? output : `${output}\n`;
+
+			// warn, error, fatal go to stderr; others go to stdout
+			if (record.level === "warn" || record.level === "error" || record.level === "fatal") {
+				process.stderr.write(outputWithNewline);
+			} else {
+				process.stdout.write(outputWithNewline);
+			}
+		},
+	};
 }
 
 /**
@@ -272,9 +370,40 @@ export function createConsoleSink(): Sink {
  * });
  * ```
  */
-export function createFileSink(_options: FileSinkOptions): Sink {
-	throw new Error("Not implemented: createFileSink");
+export function createFileSink(options: FileSinkOptions): Sink {
+	const formatter = createJsonFormatter();
+	const pendingWrites: string[] = [];
+
+	const sink: Sink = {
+		formatter,
+		write: (record: LogRecord, formatted?: string): void => {
+			const output = formatted ?? formatter.format(record);
+			const outputWithNewline = output.endsWith("\n") ? output : `${output}\n`;
+			pendingWrites.push(outputWithNewline);
+		},
+		flush: async (): Promise<void> => {
+			if (pendingWrites.length > 0) {
+				const content = pendingWrites.join("");
+				pendingWrites.length = 0;
+				// Stub: basic write (proper implementation would handle append mode)
+				const file = Bun.file(options.path);
+				const existing = options.append !== false ? await file.text().catch(() => "") : "";
+				await Bun.write(file, existing + content);
+			}
+		},
+	};
+
+	// Register for global flush
+	registeredSinks.push(sink);
+
+	return sink;
 }
+
+// Global redaction config storage
+const globalRedactionConfig: GlobalRedactionConfig = {
+	patterns: [],
+	keys: [],
+};
 
 /**
  * Configure global redaction patterns and keys that apply to all loggers.
@@ -289,8 +418,16 @@ export function createFileSink(_options: FileSinkOptions): Sink {
  * });
  * ```
  */
-export function configureRedaction(_config: GlobalRedactionConfig): void {
-	throw new Error("Not implemented: configureRedaction");
+export function configureRedaction(config: GlobalRedactionConfig): void {
+	if (config.patterns) {
+		globalRedactionConfig.patterns = [
+			...(globalRedactionConfig.patterns ?? []),
+			...config.patterns,
+		];
+	}
+	if (config.keys) {
+		globalRedactionConfig.keys = [...(globalRedactionConfig.keys ?? []), ...config.keys];
+	}
 }
 
 /**
@@ -307,5 +444,11 @@ export function configureRedaction(_config: GlobalRedactionConfig): void {
  * ```
  */
 export async function flush(): Promise<void> {
-	throw new Error("Not implemented: flush");
+	await Promise.all(
+		registeredSinks.map(async (sink) => {
+			if (sink.flush) {
+				await sink.flush();
+			}
+		}),
+	);
 }

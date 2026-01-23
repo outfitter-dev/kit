@@ -1,0 +1,3 @@
+# Binary lockfiles: always favor ours on merge (regenerate as needed)
+bun.lock merge=ours
+bun.lockb merge=ours

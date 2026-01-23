@@ -10,7 +10,7 @@
 
 import {
 	ConflictError,
-	type InternalError,
+	InternalError,
 	NotFoundError,
 	Result,
 	ValidationError,
@@ -310,7 +310,10 @@ export function resolveSafePath(
 	const normalizedBase = normalize(basePath);
 
 	// Use path-boundary check: must equal base or start with base + separator
-	if (normalizedResolved !== normalizedBase && !normalizedResolved.startsWith(normalizedBase + sep)) {
+	if (
+		normalizedResolved !== normalizedBase &&
+		!normalizedResolved.startsWith(normalizedBase + sep)
+	) {
 		return Result.err(
 			new ValidationError({
 				message: "Path escapes base directory",

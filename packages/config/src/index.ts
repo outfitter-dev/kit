@@ -42,6 +42,7 @@ export type { Env } from "./env.js";
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import type { TaggedErrorClass } from "@outfitter/contracts";
 import { NotFoundError, Result, TaggedError, ValidationError } from "@outfitter/contracts";
 import JSON5 from "json5";
 import { parse as parseToml } from "smol-toml";
@@ -52,7 +53,7 @@ import type { ZodSchema } from "zod";
 // Error Types
 // ============================================================================
 
-const ParseErrorBase = TaggedError("ParseError")<{
+type ParseErrorFields = {
 	/** Human-readable error message describing the parse failure */
 	message: string;
 	/** Name of the file that failed to parse */
@@ -61,7 +62,10 @@ const ParseErrorBase = TaggedError("ParseError")<{
 	line?: number;
 	/** Column number where the error occurred (if available) */
 	column?: number;
-}>();
+};
+
+const ParseErrorBase: TaggedErrorClass<"ParseError", ParseErrorFields> =
+	TaggedError("ParseError")<ParseErrorFields>();
 
 /**
  * Error thrown when a configuration file cannot be parsed.

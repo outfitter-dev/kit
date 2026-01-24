@@ -99,13 +99,12 @@ describe("retry<T>()", () => {
 
 	it("respects maxBackoffMs cap", async () => {
 		const delays: number[] = [];
-		let lastTime = Date.now();
+		const maxDelayMs = 25;
+		let attempts = 0;
 
 		const fn = async (): Promise<Result<string, NetworkError>> => {
-			const now = Date.now();
-			delays.push(now - lastTime);
-			lastTime = now;
-			if (delays.length < 5) {
+			attempts += 1;
+			if (attempts < 5) {
 				return Result.err(new NetworkError({ message: "fail" }));
 			}
 			return Result.ok("success");
@@ -114,14 +113,17 @@ describe("retry<T>()", () => {
 		await retry(fn, {
 			maxAttempts: 6,
 			initialDelayMs: 10,
-			maxDelayMs: 25, // Cap at 25ms
+			maxDelayMs, // Cap at 25ms
 			backoffMultiplier: 3,
 			jitter: false,
+			onRetry: (_attempt, _error, delayMs) => {
+				delays.push(delayMs);
+			},
 		});
 
 		// Delays should not exceed maxDelayMs
-		for (let i = 1; i < delays.length; i++) {
-			expect(delays[i]).toBeLessThanOrEqual(35); // Allow some tolerance
+		for (const delay of delays) {
+			expect(delay).toBeLessThanOrEqual(maxDelayMs);
 		}
 	});
 

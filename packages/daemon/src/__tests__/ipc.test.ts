@@ -406,6 +406,9 @@ describe("IPC Error Handling", () => {
 			void Bun.connect({
 				unix: socketPath,
 				socket: {
+					data() {
+						// No-op for this test; required by Bun.connect.
+					},
 					open(socket) {
 						socket.write("{not-json}\n");
 						socket.terminate();

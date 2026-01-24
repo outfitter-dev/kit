@@ -327,6 +327,9 @@ export interface CursorOptions {
 	/** Tool name for XDG path resolution */
 	readonly toolName: string;
 
+	/** Maximum age in milliseconds before a cursor is treated as expired */
+	readonly maxAgeMs?: number;
+
 	/** Whether there are more results (defaults to true) */
 	readonly hasMore?: boolean;
 

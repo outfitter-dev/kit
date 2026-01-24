@@ -317,6 +317,7 @@ const state = loadCursor({
   command: "list",
   toolName: "waymark",
   context: "workspace-123", // optional
+  maxAgeMs: 30 * 60 * 1000, // optional expiration window
 });
 
 if (state) {

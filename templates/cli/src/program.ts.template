@@ -1,0 +1,23 @@
+/**
+ * {{projectName}} - CLI program definition
+ */
+
+import { createCLI, command } from "@outfitter/cli";
+import { createLogger } from "@outfitter/logging";
+
+const logger = createLogger({ name: "{{binName}}" });
+
+export const program = createCLI({
+	name: "{{binName}}",
+	version: "0.1.0",
+	description: "{{description}}",
+});
+
+program.register(
+	command("hello [name]")
+		.description("Say hello")
+		.action(async ({ args }) => {
+			const name = args[0] ?? "World";
+			logger.info`Hello, ${name}!`;
+		}),
+);

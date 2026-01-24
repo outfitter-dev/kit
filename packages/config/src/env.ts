@@ -137,32 +137,6 @@ export function parseEnv<T extends z.ZodRawShape>(
 // ============================================================================
 
 /**
- * Type for the pre-parsed application environment.
- */
-export interface Env {
-	/** Runtime environment */
-	NODE_ENV: "development" | "test" | "production";
-	/** NO_COLOR env variable - true if colors should be disabled */
-	NO_COLOR?: boolean | undefined;
-	/** FORCE_COLOR env variable - true if colors should be forced */
-	FORCE_COLOR?: boolean | undefined;
-	/** CI env variable - true if running in CI */
-	CI?: boolean | undefined;
-	/** TERM env variable */
-	TERM?: string | undefined;
-	/** XDG config home path */
-	XDG_CONFIG_HOME?: string | undefined;
-	/** XDG data home path */
-	XDG_DATA_HOME?: string | undefined;
-	/** XDG state home path */
-	XDG_STATE_HOME?: string | undefined;
-	/** XDG cache home path */
-	XDG_CACHE_HOME?: string | undefined;
-	/** User home directory */
-	HOME?: string | undefined;
-}
-
-/**
  * Schema for common application environment variables.
  */
 const appEnvSchema = z.object({
@@ -181,6 +155,11 @@ const appEnvSchema = z.object({
 	XDG_CACHE_HOME: z.string().optional(),
 	HOME: z.string().optional(),
 });
+
+/**
+ * Type for the pre-parsed application environment.
+ */
+export type Env = z.infer<typeof appEnvSchema>;
 
 /**
  * Pre-parsed application environment.
@@ -207,7 +186,7 @@ const appEnvSchema = z.object({
  * }
  * ```
  */
-export const env: Env = parseEnv(appEnvSchema);
+export const env = parseEnv(appEnvSchema);
 
 // ============================================================================
 // Dynamic Environment Access

@@ -8,6 +8,7 @@
 
 import type { Result } from "@outfitter/contracts";
 import type { StorageError } from "@outfitter/contracts";
+import type { IndexMigrationRegistry } from "./migrations.js";
 
 // ============================================================================
 // Index Options
@@ -54,6 +55,39 @@ export interface IndexOptions {
 	 * @defaultValue "unicode61"
 	 */
 	tokenizer?: TokenizerType;
+
+	/**
+	 * Optional tool identifier recorded in index metadata.
+	 */
+	tool?: string;
+
+	/**
+	 * Optional tool version recorded in index metadata.
+	 */
+	toolVersion?: string;
+
+	/**
+	 * Optional migration registry for upgrading older index versions.
+	 */
+	migrations?: IndexMigrationRegistry;
+}
+
+// =============================================================================
+// Versioning Types
+// =============================================================================
+
+/**
+ * Metadata stored alongside the index to track version and provenance.
+ */
+export interface IndexMetadata {
+	/** File format version */
+	version: number;
+	/** When this index was created */
+	created: string;
+	/** Tool that created the index */
+	tool: string;
+	/** Tool version that created the index */
+	toolVersion: string;
 }
 
 // ============================================================================

@@ -18,7 +18,10 @@ import type {
 	SearchQuery,
 	SearchResult,
 	TokenizerType,
+	IndexMetadata,
 } from "./types.js";
+import { INDEX_META_KEY, INDEX_META_TABLE, INDEX_VERSION } from "./version.js";
+import type { IndexMigrationContext } from "./migrations.js";
 
 // ============================================================================
 // Constants
@@ -46,6 +49,12 @@ const VALID_TOKENIZERS: Record<TokenizerType, true> = {
 /** SQLite identifier rules for table names (prevent injection) */
 const TABLE_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
+/** Default tool metadata when not provided */
+const DEFAULT_TOOL = "outfitter-index";
+
+/** Default tool version when not provided */
+const DEFAULT_TOOL_VERSION = "0.0.0";
+
 // ============================================================================
 // Storage Error Factory
 // ============================================================================
@@ -72,6 +81,47 @@ function assertValidTokenizer(tokenizer: string): TokenizerType {
 		throw new Error(`Invalid tokenizer: ${tokenizer}`);
 	}
 	return tokenizer as TokenizerType;
+}
+
+function getUserVersion(db: Database): number {
+	const row = db.query("PRAGMA user_version").get() as { user_version: number } | undefined;
+	return row?.user_version ?? 0;
+}
+
+function setUserVersion(db: Database, version: number): void {
+	if (!Number.isInteger(version) || version < 0) {
+		throw new Error(`Invalid user_version: ${version}`);
+	}
+	db.run(`PRAGMA user_version = ${version}`);
+}
+
+function ensureMetaTable(db: Database): void {
+	db.run(
+		`CREATE TABLE IF NOT EXISTS ${INDEX_META_TABLE} (key TEXT PRIMARY KEY, value TEXT NOT NULL)`,
+	);
+}
+
+function readIndexMetadata(db: Database): IndexMetadata | null {
+	try {
+		const row = db
+			.query(`SELECT value FROM ${INDEX_META_TABLE} WHERE key = ?`)
+			.get(INDEX_META_KEY) as { value: string } | undefined;
+		if (!row) {
+			return null;
+		}
+		const parsed = JSON.parse(row.value) as IndexMetadata;
+		return parsed;
+	} catch {
+		return null;
+	}
+}
+
+function writeIndexMetadata(db: Database, metadata: IndexMetadata): void {
+	ensureMetaTable(db);
+	db.run(`INSERT OR REPLACE INTO ${INDEX_META_TABLE} (key, value) VALUES (?, ?)`, [
+		INDEX_META_KEY,
+		JSON.stringify(metadata),
+	]);
 }
 
 // ============================================================================
@@ -122,6 +172,8 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
 	assertValidTableName(tableName);
 
 	const tokenizer = assertValidTokenizer(options.tokenizer ?? DEFAULT_TOKENIZER);
+	const tool = options.tool ?? DEFAULT_TOOL;
+	const toolVersion = options.toolVersion ?? DEFAULT_TOOL_VERSION;
 
 	// Ensure parent directory exists
 	const dir = dirname(options.path);
@@ -134,6 +186,49 @@ export function createIndex<T = unknown>(options: IndexOptions): Index<T> {
 
 	// Enable WAL mode for better concurrency
 	db.run("PRAGMA journal_mode=WAL");
+
+	const currentVersion = getUserVersion(db);
+	if (currentVersion === 0) {
+		const metadata: IndexMetadata = {
+			version: INDEX_VERSION,
+			created: new Date().toISOString(),
+			tool,
+			toolVersion,
+		};
+		setUserVersion(db, INDEX_VERSION);
+		writeIndexMetadata(db, metadata);
+	} else if (currentVersion !== INDEX_VERSION) {
+		if (!options.migrations) {
+			throw new Error(
+				`Index version ${currentVersion} does not match ${INDEX_VERSION}. Provide migrations or rebuild the index.`,
+			);
+		}
+
+		const context: IndexMigrationContext = { db };
+		const result = options.migrations.migrate(context, currentVersion, INDEX_VERSION);
+		if (result.isErr()) {
+			throw new Error(`Failed to migrate index: ${result.error.message}`);
+		}
+
+		const existing = readIndexMetadata(db);
+		const metadata: IndexMetadata = {
+			version: INDEX_VERSION,
+			created: existing?.created ?? new Date().toISOString(),
+			tool,
+			toolVersion,
+		};
+
+		setUserVersion(db, INDEX_VERSION);
+		writeIndexMetadata(db, metadata);
+	} else if (!readIndexMetadata(db)) {
+		const metadata: IndexMetadata = {
+			version: INDEX_VERSION,
+			created: new Date().toISOString(),
+			tool,
+			toolVersion,
+		};
+		writeIndexMetadata(db, metadata);
+	}
 
 	// Create FTS5 virtual table with specified tokenizer
 	// Use content, id UNINDEXED, metadata UNINDEXED pattern

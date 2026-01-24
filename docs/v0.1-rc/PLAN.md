@@ -17,13 +17,14 @@ Freeze `SPEC.md` and `PLAN.md` as historical baselines, then drive a focused v0.
 - Tooling tier packages unless required for RC (`@outfitter/scripts`, `@outfitter/actions`, `@outfitter/release`).
 
 ## Remaining Work (v0.1-rc)
-[ ] `@outfitter/testing`: add spec-compat APIs (createMCPTestHarness wrapper + alias), add `captureCLI`/`mockStdin`, add mock factories.
-[ ] Templates: implement unified placeholder set (projectName/binName/packageName/description/author/year) with aliases; `author` can be org, `year` optional.
-[ ] Templates: add missing scripts (`test:watch`, `lint:fix`) and define a standard script set.
-[ ] `outfitter init`: add TTY wizard for template + naming; keep deterministic default for non-TTY.
-[ ] `outfitter init`: implement hybrid install path (`--local/--workspace`) + publish `0.1.0-*` for real installs.
-[ ] `@outfitter/mcp`: implement tool-search compatibility + minimal core tools (docs/config/query); explicit stdio transport for RC. Track HTTP + auto-negotiation in Linear (MONO-76, MONO-77).
-[ ] `@outfitter/index`: add version headers + migration scaffold; track compactor/watcher hooks in Linear (MONO-78, MONO-79).
+[x] `@outfitter/testing`: add spec-compat APIs (createMCPTestHarness wrapper + alias), add `captureCLI`/`mockStdin`, add mock factories.
+[x] Templates: implement unified placeholder set (projectName/binName/packageName/description/author/year) with aliases; `author` can be org, `year` optional.
+[x] Templates: add missing scripts (`test:watch`, `lint:fix`) and define a standard script set.
+[x] `outfitter init`: add TTY wizard for template + naming; keep deterministic default for non-TTY.
+[x] `outfitter init`: implement hybrid install path (`--local/--workspace`) for local dev.
+[ ] Publish `0.1.0-*` packages for real installs.
+[x] `@outfitter/mcp`: implement tool-search compatibility + minimal core tools (docs/config/query); explicit stdio transport for RC. Track HTTP + auto-negotiation in Linear (MONO-76, MONO-77).
+[x] `@outfitter/index`: add version headers + migration scaffold; track compactor/watcher hooks in Linear (MONO-78, MONO-79).
 [ ] Consider capability manifest (CLI ↔ MCP parity) based on `navigator/packages/core/src/capabilities/manifest.ts` (in the `outfitter/navigator` repo).
 [ ] Run scaffold smoke tests for `cli`, `mcp`, `daemon` templates and record results.
 [ ] Migrate Waymark (local) to use kit packages; verify tests + dev workflow.

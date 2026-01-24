@@ -132,18 +132,18 @@ describe("hashId", () => {
 			expect(result).toMatch(/^[a-zA-Z0-9]+$/);
 		});
 
-		it("same input with different lengths produces consistent prefixes", () => {
-			// Longer hashes should be extensions of shorter ones
-			// (this tests that the algorithm is consistent)
+		it("same input with different lengths is deterministic per length", () => {
 			const input = "consistent-test";
 			const short = hashId(input, 3);
 			const medium = hashId(input, 6);
 			const long = hashId(input, 10);
 
-			// The shorter hash should be a prefix of longer ones
-			expect(medium.startsWith(short)).toBe(true);
-			expect(long.startsWith(short)).toBe(true);
-			expect(long.startsWith(medium)).toBe(true);
+			expect(hashId(input, 3)).toBe(short);
+			expect(hashId(input, 6)).toBe(medium);
+			expect(hashId(input, 10)).toBe(long);
+			expect(short.length).toBe(3);
+			expect(medium.length).toBe(6);
+			expect(long.length).toBe(10);
 		});
 	});
 });

@@ -377,9 +377,10 @@ describe("Shutdown Handlers", () => {
 
 		// State should still be stopped even after timeout
 		expect(daemon.state).toBe("stopped");
-		// The daemon should have handled the timeout gracefully
-		// Either returning an error or completing anyway
-		expect(result.isOk() || result.isErr()).toBe(true);
+		expect(result.isErr()).toBe(true);
+		if (result.isErr()) {
+			expect(result.error.code).toBe("SHUTDOWN_TIMEOUT");
+		}
 	});
 });
 

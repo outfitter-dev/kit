@@ -213,7 +213,7 @@ describe("IPC Message Exchange", () => {
 		const client = createIpcClient(socketPath);
 		await client.connect();
 
-		const response = await client.send<{ echo: string }>({ hello: "world" });
+		const response = await client.send<{ echo: { hello: string } }>({ hello: "world" });
 		expect(response).toEqual({ echo: { hello: "world" } });
 
 		client.close();
@@ -402,7 +402,21 @@ describe("IPC Error Handling", () => {
 		await server.listen();
 
 		// Server should handle invalid JSON without crashing
-		// This test verifies robustness
+		await new Promise<void>((resolve, reject) => {
+			void Bun.connect({
+				unix: socketPath,
+				socket: {
+					open(socket) {
+						socket.write("{not-json}\n");
+						socket.terminate();
+						resolve();
+					},
+					error(_socket, error) {
+						reject(error);
+					},
+				},
+			});
+		});
 
 		const client = createIpcClient(socketPath);
 		await client.connect();

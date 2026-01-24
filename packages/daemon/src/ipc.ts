@@ -409,7 +409,7 @@ export function createIpcClient(socketPath: string): IpcClient {
 		},
 
 		close(): void {
-			if (!isConnected && !socket) return;
+			if (!isConnected || !socket) return;
 
 			try {
 				socket?.terminate();

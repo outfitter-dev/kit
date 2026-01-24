@@ -5,6 +5,24 @@
  * Provides a unified interface for loading, validating, and merging
  * configuration from multiple sources (files, environment, defaults).
  *
+ * @example
+ * ```typescript
+ * import { loadConfig, resolveConfig, getConfigDir } from "@outfitter/config";
+ * import { z } from "zod";
+ *
+ * // Define schema
+ * const AppConfigSchema = z.object({
+ *   apiKey: z.string(),
+ *   timeout: z.number().default(5000),
+ * });
+ *
+ * // Load from XDG paths
+ * const result = await loadConfig("myapp", AppConfigSchema);
+ * if (result.isOk()) {
+ *   console.log("Config loaded:", result.value);
+ * }
+ * ```
+ *
  * @packageDocumentation
  */
 
@@ -21,12 +39,27 @@ import type { ZodSchema } from "zod";
 // ============================================================================
 
 /**
- * Configuration file parse error.
+ * Error thrown when a configuration file cannot be parsed.
+ *
+ * Contains details about the parse failure including the filename
+ * and optionally the line/column where the error occurred.
+ *
+ * @example
+ * ```typescript
+ * const result = parseConfigFile("invalid toml [", "config.toml");
+ * if (result.isErr() && result.error._tag === "ParseError") {
+ *   console.error(`Parse error in ${result.error.filename}: ${result.error.message}`);
+ * }
+ * ```
  */
 export class ParseError extends TaggedError("ParseError")<{
+	/** Human-readable error message describing the parse failure */
 	message: string;
+	/** Name of the file that failed to parse */
 	filename: string;
+	/** Line number where the error occurred (if available) */
 	line?: number;
+	/** Column number where the error occurred (if available) */
 	column?: number;
 }>() {
 	readonly category = "validation" as const;
@@ -38,7 +71,22 @@ export class ParseError extends TaggedError("ParseError")<{
 
 /**
  * Get the XDG config directory for an application.
- * Uses XDG_CONFIG_HOME if set, otherwise defaults to ~/.config
+ *
+ * Uses `XDG_CONFIG_HOME` if set, otherwise defaults to `~/.config`.
+ * This follows the XDG Base Directory Specification for storing
+ * user-specific configuration files.
+ *
+ * @param appName - Application name used as subdirectory
+ * @returns Absolute path to the application's config directory
+ *
+ * @example
+ * ```typescript
+ * // With XDG_CONFIG_HOME="/custom/config"
+ * getConfigDir("myapp"); // "/custom/config/myapp"
+ *
+ * // Without XDG_CONFIG_HOME (uses default)
+ * getConfigDir("myapp"); // "/home/user/.config/myapp"
+ * ```
  */
 export function getConfigDir(appName: string): string {
 	const xdgConfigHome = process.env["XDG_CONFIG_HOME"];
@@ -50,7 +98,22 @@ export function getConfigDir(appName: string): string {
 
 /**
  * Get the XDG data directory for an application.
- * Uses XDG_DATA_HOME if set, otherwise defaults to ~/.local/share
+ *
+ * Uses `XDG_DATA_HOME` if set, otherwise defaults to `~/.local/share`.
+ * This follows the XDG Base Directory Specification for storing
+ * user-specific data files (databases, generated content, etc.).
+ *
+ * @param appName - Application name used as subdirectory
+ * @returns Absolute path to the application's data directory
+ *
+ * @example
+ * ```typescript
+ * // With XDG_DATA_HOME="/custom/data"
+ * getDataDir("myapp"); // "/custom/data/myapp"
+ *
+ * // Without XDG_DATA_HOME (uses default)
+ * getDataDir("myapp"); // "/home/user/.local/share/myapp"
+ * ```
  */
 export function getDataDir(appName: string): string {
 	const xdgDataHome = process.env["XDG_DATA_HOME"];
@@ -62,7 +125,22 @@ export function getDataDir(appName: string): string {
 
 /**
  * Get the XDG cache directory for an application.
- * Uses XDG_CACHE_HOME if set, otherwise defaults to ~/.cache
+ *
+ * Uses `XDG_CACHE_HOME` if set, otherwise defaults to `~/.cache`.
+ * This follows the XDG Base Directory Specification for storing
+ * non-essential cached data that can be regenerated.
+ *
+ * @param appName - Application name used as subdirectory
+ * @returns Absolute path to the application's cache directory
+ *
+ * @example
+ * ```typescript
+ * // With XDG_CACHE_HOME="/custom/cache"
+ * getCacheDir("myapp"); // "/custom/cache/myapp"
+ *
+ * // Without XDG_CACHE_HOME (uses default)
+ * getCacheDir("myapp"); // "/home/user/.cache/myapp"
+ * ```
  */
 export function getCacheDir(appName: string): string {
 	const xdgCacheHome = process.env["XDG_CACHE_HOME"];
@@ -74,7 +152,22 @@ export function getCacheDir(appName: string): string {
 
 /**
  * Get the XDG state directory for an application.
- * Uses XDG_STATE_HOME if set, otherwise defaults to ~/.local/state
+ *
+ * Uses `XDG_STATE_HOME` if set, otherwise defaults to `~/.local/state`.
+ * This follows the XDG Base Directory Specification for storing
+ * state data that should persist between restarts (logs, history, etc.).
+ *
+ * @param appName - Application name used as subdirectory
+ * @returns Absolute path to the application's state directory
+ *
+ * @example
+ * ```typescript
+ * // With XDG_STATE_HOME="/custom/state"
+ * getStateDir("myapp"); // "/custom/state/myapp"
+ *
+ * // Without XDG_STATE_HOME (uses default)
+ * getStateDir("myapp"); // "/home/user/.local/state/myapp"
+ * ```
  */
 export function getStateDir(appName: string): string {
 	const xdgStateHome = process.env["XDG_STATE_HOME"];
@@ -90,6 +183,7 @@ export function getStateDir(appName: string): string {
 
 /**
  * Check if a value is a plain object (not array, null, etc.)
+ * @internal
  */
 function isPlainObject(value: unknown): value is Record<string, unknown> {
 	if (value === null || typeof value !== "object") {
@@ -103,11 +197,42 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Deep merge two objects.
- * - Recursively merges nested objects
+ * Deep merge two objects with configurable merge semantics.
+ *
+ * Merge behavior:
+ * - Recursively merges nested plain objects
  * - Arrays are replaced (not concatenated)
- * - null explicitly replaces
- * - undefined is skipped (doesn't override)
+ * - `null` explicitly replaces the target value
+ * - `undefined` is skipped (does not override)
+ *
+ * @typeParam T - The type of the target object
+ * @param target - Base object to merge into (not mutated)
+ * @param source - Object with values to merge
+ * @returns New object with merged values
+ *
+ * @example
+ * ```typescript
+ * const defaults = { server: { port: 3000, host: "localhost" } };
+ * const overrides = { server: { port: 8080 } };
+ *
+ * const merged = deepMerge(defaults, overrides);
+ * // { server: { port: 8080, host: "localhost" } }
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Arrays replace, not merge
+ * const target = { tags: ["a", "b"] };
+ * const source = { tags: ["c"] };
+ * deepMerge(target, source); // { tags: ["c"] }
+ *
+ * // undefined is skipped
+ * const base = { a: 1, b: 2 };
+ * deepMerge(base, { a: undefined, b: 3 }); // { a: 1, b: 3 }
+ *
+ * // null explicitly replaces
+ * deepMerge(base, { a: null }); // { a: null, b: 2 }
+ * ```
  */
 export function deepMerge<T extends object>(target: T, source: Partial<T>): T {
 	// Create a new object to avoid mutating the original
@@ -156,6 +281,7 @@ export function deepMerge<T extends object>(target: T, source: Partial<T>): T {
 
 /**
  * Get the file extension from a filename (lowercase, without dot).
+ * @internal
  */
 function getExtension(filename: string): string {
 	const lastDot = filename.lastIndexOf(".");
@@ -166,8 +292,48 @@ function getExtension(filename: string): string {
 }
 
 /**
- * Parse a configuration file content based on its filename extension.
- * Supports TOML (.toml), YAML (.yaml/.yml), JSON (.json), and JSON5 (.json5).
+ * Parse configuration file content based on filename extension.
+ *
+ * Supports multiple formats:
+ * - `.toml` - Parsed with smol-toml (preferred for config)
+ * - `.yaml`, `.yml` - Parsed with yaml (merge key support enabled)
+ * - `.json` - Parsed with strict JSON.parse
+ * - `.json5` - Parsed with json5 (comments and trailing commas allowed)
+ *
+ * @param content - Raw file content to parse
+ * @param filename - Filename used to determine format (by extension)
+ * @returns Result containing parsed object or ParseError
+ *
+ * @example
+ * ```typescript
+ * const toml = `
+ * [server]
+ * port = 3000
+ * host = "localhost"
+ * `;
+ *
+ * const result = parseConfigFile(toml, "config.toml");
+ * if (result.isOk()) {
+ *   console.log(result.value.server.port); // 3000
+ * }
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // YAML with anchors/aliases
+ * const yaml = `
+ * defaults: &defaults
+ *   timeout: 5000
+ * server:
+ *   <<: *defaults
+ *   port: 3000
+ * `;
+ *
+ * const result = parseConfigFile(yaml, "config.yaml");
+ * if (result.isOk()) {
+ *   console.log(result.value.server.timeout); // 5000
+ * }
+ * ```
  */
 export function parseConfigFile(
 	content: string,
@@ -228,7 +394,22 @@ export function parseConfigFile(
 // ============================================================================
 
 /**
- * Configuration sources for resolution.
+ * Configuration sources for multi-layer resolution.
+ *
+ * Sources are merged in precedence order (lowest to highest):
+ * `defaults` < `file` < `env` < `flags`
+ *
+ * @typeParam T - The configuration type
+ *
+ * @example
+ * ```typescript
+ * const sources: ConfigSources<AppConfig> = {
+ *   defaults: { timeout: 5000, debug: false },
+ *   file: loadedFromDisk,
+ *   env: { timeout: parseInt(process.env.TIMEOUT!) },
+ *   flags: { debug: cliArgs.debug },
+ * };
+ * ```
  */
 export interface ConfigSources<T> {
 	/** Default values (lowest precedence) */
@@ -242,10 +423,39 @@ export interface ConfigSources<T> {
 }
 
 /**
- * Resolve configuration from multiple sources with precedence:
- * flags > env > file > defaults
+ * Resolve configuration from multiple sources with precedence.
  *
- * Validates the merged result against the provided Zod schema.
+ * Merges sources in order: `defaults` < `file` < `env` < `flags`.
+ * Higher precedence sources override lower ones. Nested objects
+ * are deep-merged; arrays are replaced.
+ *
+ * The merged result is validated against the provided Zod schema.
+ *
+ * @typeParam T - The configuration type (inferred from schema)
+ * @param schema - Zod schema for validation
+ * @param sources - Configuration sources to merge
+ * @returns Result containing validated config or ValidationError/ParseError
+ *
+ * @example
+ * ```typescript
+ * const AppSchema = z.object({
+ *   port: z.number().min(1).max(65535),
+ *   host: z.string(),
+ *   debug: z.boolean().default(false),
+ * });
+ *
+ * const result = resolveConfig(AppSchema, {
+ *   defaults: { port: 3000, host: "localhost" },
+ *   file: { port: 8080 },
+ *   env: { debug: true },
+ *   flags: { port: 9000 },
+ * });
+ *
+ * if (result.isOk()) {
+ *   // { port: 9000, host: "localhost", debug: true }
+ *   console.log(result.value);
+ * }
+ * ```
  */
 export function resolveConfig<T>(
 	schema: ZodSchema<T>,
@@ -299,16 +509,28 @@ export function resolveConfig<T>(
 const CONFIG_EXTENSIONS = ["toml", "yaml", "yml", "json", "json5"];
 
 /**
- * Options for loadConfig.
+ * Options for the {@link loadConfig} function.
+ *
+ * @example
+ * ```typescript
+ * const options: LoadConfigOptions = {
+ *   searchPaths: ["/etc/myapp", "/opt/myapp/config"],
+ * };
+ * ```
  */
 export interface LoadConfigOptions {
-	/** Custom search paths (overrides default XDG paths) */
+	/**
+	 * Custom search paths to check for config files.
+	 * When provided, overrides the default XDG-based search paths.
+	 * Paths are searched in order; first match wins.
+	 */
 	searchPaths?: string[];
 }
 
 /**
  * Find the first existing config file in the given directory.
  * Searches for config.{toml,yaml,yml,json,json5} in preference order.
+ * @internal
  */
 function findConfigFile(dir: string): string | undefined {
 	for (const ext of CONFIG_EXTENSIONS) {
@@ -323,6 +545,7 @@ function findConfigFile(dir: string): string | undefined {
 /**
  * Get default search paths for an application.
  * When XDG_CONFIG_HOME is set, includes both the XDG path and ~/.config fallback.
+ * @internal
  */
 function getDefaultSearchPaths(appName: string): string[] {
 	const xdgConfigHome = process.env["XDG_CONFIG_HOME"];
@@ -342,14 +565,52 @@ function getDefaultSearchPaths(appName: string): string[] {
 }
 
 /**
- * Load configuration for an application.
+ * Load configuration for an application from XDG-compliant paths.
  *
  * Search order (first found wins):
- * 1. Custom searchPaths if provided
- * 2. $XDG_CONFIG_HOME/{appName}/config.{toml,yaml,json}
- * 3. ~/.config/{appName}/config.{toml,yaml,json}
+ * 1. Custom `searchPaths` if provided in options
+ * 2. `$XDG_CONFIG_HOME/{appName}/config.{ext}`
+ * 3. `~/.config/{appName}/config.{ext}`
  *
- * File format preference: TOML > YAML > JSON > JSON5
+ * File format preference: `.toml` > `.yaml` > `.yml` > `.json` > `.json5`
+ *
+ * @typeParam T - The configuration type (inferred from schema)
+ * @param appName - Application name for XDG directory lookup
+ * @param schema - Zod schema for validation
+ * @param options - Optional configuration (custom search paths)
+ * @returns Result containing validated config or NotFoundError/ValidationError/ParseError
+ *
+ * @example
+ * ```typescript
+ * import { loadConfig } from "@outfitter/config";
+ * import { z } from "zod";
+ *
+ * const AppConfigSchema = z.object({
+ *   apiKey: z.string(),
+ *   timeout: z.number().default(5000),
+ *   features: z.object({
+ *     darkMode: z.boolean().default(false),
+ *   }),
+ * });
+ *
+ * // Searches ~/.config/myapp/config.{toml,yaml,json,...}
+ * const result = await loadConfig("myapp", AppConfigSchema);
+ *
+ * if (result.isOk()) {
+ *   console.log("API Key:", result.value.apiKey);
+ *   console.log("Timeout:", result.value.timeout);
+ * } else {
+ *   console.error("Failed to load config:", result.error.message);
+ * }
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With custom search paths
+ * const result = await loadConfig("myapp", AppConfigSchema, {
+ *   searchPaths: ["/etc/myapp", "/opt/myapp/config"],
+ * });
+ * ```
  */
 export async function loadConfig<T>(
 	appName: string,

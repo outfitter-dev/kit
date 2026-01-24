@@ -20,3 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ParseError` - Tagged error class for configuration parsing failures
 - `ConfigSources<T>` - Type for multi-layer configuration sources
 - `LoadConfigOptions` - Options interface for `loadConfig()`
+
+### Changed
+
+- Align package versions to 0.1.0
+
+### Dependencies
+
+- Updated dependencies
+  - @outfitter/contracts@0.1.0
+  - @outfitter/types@0.1.0

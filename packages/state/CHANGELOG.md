@@ -20,3 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Graceful handling of corrupted persistence files (starts empty rather than crash)
 - Nested scope support for hierarchical namespace organization
 - `prune()` method to bulk-remove expired cursors from stores
+
+### Changed
+
+- Align package versions to 0.1.0
+
+### Dependencies
+
+- Updated dependencies
+  - @outfitter/contracts@0.1.0
+  - @outfitter/types@0.1.0

@@ -25,5 +25,16 @@
 - Error types:
   - `DaemonError` for lifecycle operations
   - `StaleSocketError`, `ConnectionRefusedError`, `ConnectionTimeoutError`, `ProtocolError` for IPC
-  - `LockError` for lock acquisition failures
-  - `DaemonConnectionError` union type for exhaustive matching
+- `LockError` for lock acquisition failures
+- `DaemonConnectionError` union type for exhaustive matching
+
+### Changed
+
+- Align package versions to 0.1.0
+
+### Dependencies
+
+- Updated dependencies
+  - @outfitter/contracts@0.1.0
+  - @outfitter/file-ops@0.1.0
+  - @outfitter/logging@0.1.0

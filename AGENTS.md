@@ -6,7 +6,9 @@ Guidelines for AI agents and developers working in this repository.
 
 Outfitter is a Bun-first monorepo providing shared infrastructure for AI-agent-ready tooling. It includes reusable libraries for CLI, MCP servers, daemons, and indexing, plus an umbrella CLI (`outfitter`) for scaffolding.
 
-**Status**: v0.1.0-rc.0 (release candidate)
+**Status**: v0.1.0-rc.1 (release candidate)
+
+**Linear Team**: Stack (`OS`)
 
 ## Project Structure
 

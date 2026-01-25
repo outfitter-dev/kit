@@ -1,8 +1,8 @@
-# Outfitter Kit — Implementation Plan
+# Outfitter — Implementation Plan
 
 ## Overview
 
-This plan sequences the implementation of Outfitter Kit using a **hybrid harvest-then-build** approach:
+This plan sequences the implementation of Outfitter using a **hybrid harvest-then-build** approach:
 
 1. **Harvest** behavioral tests from existing repos (waymark, firewatch)
 2. **Build** fresh packages that pass those tests
@@ -585,7 +585,7 @@ kit/
 - Generated project passes lint/type/test
 - Dev commands (`bun run dev`, `bun run test:watch`) work
 
-### 6.2 `@outfitter/kit` Meta-package
+### 6.2 `@outfitter/stack` Meta-package
 
 | Component | Description |
 |-----------|-------------|

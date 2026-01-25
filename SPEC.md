@@ -1,4 +1,4 @@
-# Outfitter Kit — SPEC.md
+# Outfitter — SPEC.md
 
 ## Purpose
 
@@ -50,7 +50,7 @@ Designing primarily for Bun runtime while maintaining Node compatibility where n
 const BUN_MIN_VERSION = "1.3.6";
 
 if (typeof Bun === "undefined") {
-  console.error("Outfitter Kit requires Bun runtime. Install from https://bun.sh");
+  console.error("Outfitter requires Bun runtime. Install from https://bun.sh");
   process.exit(1);
 }
 
@@ -1392,14 +1392,14 @@ Legend:
 
 ### Name
 
-* **`@outfitter/kit`**
+* **`@outfitter/stack`**
 
 ### Behavior: version coordination only
 
-`@outfitter/kit` is a **coordination package**, not a re-export surface. It serves one purpose: ensuring compatible versions across kit packages.
+`@outfitter/stack` is a **coordination package**, not a re-export surface. It serves one purpose: ensuring compatible versions across Outfitter packages.
 
-* **peerDependencies manifest**: declares the blessed version range for each kit package
-* **No re-exports**: consumers import from actual packages (`@outfitter/cli`, not `@outfitter/kit/cli`)
+* **peerDependencies manifest**: declares the blessed version range for each Outfitter package
+* **No re-exports**: consumers import from actual packages (`@outfitter/cli`, not `@outfitter/stack/cli`)
 * **No code**: the package contains no runtime code, only version constraints
 
 ### Why no re-exports
@@ -1413,7 +1413,7 @@ Re-export surfaces create maintenance burden and obscure actual dependencies. Pr
 
 With Bun workspaces + lockfile, version coordination happens automatically within the monorepo. For external consumers:
 
-* `@outfitter/kit` declares peerDependencies on blessed versions
+* `@outfitter/stack` declares peerDependencies on blessed versions
 * Package managers resolve compatible versions
 * Renovate/dependabot can group kit package updates
 
@@ -1423,7 +1423,7 @@ With Bun workspaces + lockfile, version coordination happens automatically withi
 // package.json
 {
   "dependencies": {
-    "@outfitter/kit": "^1.0.0",
+    "@outfitter/stack": "^1.0.0",
     "@outfitter/cli": "^1.0.0",
     "@outfitter/config": "^1.0.0"
   }
@@ -1438,10 +1438,10 @@ import { loadConfig } from "@outfitter/config";
 
 ### Blessed versions documentation
 
-Each kit release includes a `VERSIONS.md` documenting the tested combination:
+Each release includes a `VERSIONS.md` documenting the tested combination:
 
 ```markdown
-# @outfitter/kit v1.2.0 — Blessed Versions
+# @outfitter/stack v1.2.0 — Blessed Versions
 
 | Package | Version | Notes |
 |---------|---------|-------|
@@ -1456,7 +1456,7 @@ Each kit release includes a `VERSIONS.md` documenting the tested combination:
 
 ### Lane 1: Library consumption
 
-Projects install kit packages directly and import from them. `@outfitter/kit` provides version coordination but no re-exports—imports always come from the actual package.
+Projects install Outfitter packages directly and import from them. `@outfitter/stack` provides version coordination but no re-exports—imports always come from the actual package.
 
 ### Lane 2: Zero-install runner
 
@@ -3891,12 +3891,12 @@ Initial reference repos (all `outfitter-dev/*`):
 ### Version model
 
 * Packages version independently by "temperature."
-* `@outfitter/kit` pins a known-good set.
+* `@outfitter/stack` pins a known-good set.
 
 ### Canary
 
 * Canary releases are supported.
-* `@outfitter/kit` can have a `canary` tag that pins canary versions of hot-tier packages.
+* `@outfitter/stack` can have a `canary` tag that pins canary versions of hot-tier packages.
 
 ## Milestones
 
@@ -3965,7 +3965,7 @@ Initial reference repos (all `outfitter-dev/*`):
 
 * `outfitter` umbrella CLI for scaffolding and repo normalization
 * `outfitter init` templates for cli, mcp, daemon
-* `@outfitter/kit` meta-package published (version coordination only, no re-exports)
+* `@outfitter/stack` meta-package published (version coordination only, no re-exports)
 * `VERSIONS.md` documenting blessed version combinations
 
 ## Error recovery and resilience

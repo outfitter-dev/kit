@@ -1,7 +1,7 @@
 # Firewatch → Kit Migration
 
-**Date**: 2026-01-25  
-**Status**: Draft
+**Date**: 2026-01-25
+**Status**: Draft (verified 2026-01-25)
 
 ## Snapshot
 - **Repo**: `/Users/mg/Developer/outfitter/firewatch`
@@ -57,8 +57,13 @@
 
 ## Risks / Decisions
 - **Plugin assets**: decide if `packages/claude-plugin/firewatch` becomes `apps/` or `docs/` assets.
-- **Formatting migration**: large diff risk; may need a dedicated formatting PR.
+- **Formatting migration**: large diff risk (oxlint/oxfmt → Biome); may need a dedicated formatting PR.
 - **Test layout move**: can be deferred if tooling supports current layout.
+- **MCP error handling**: tools rely on thrown errors propagating up; Kit expects Result types.
+- **Ultracite dependency**: will be removed with Biome migration.
+
+## Verified Status (2026-01-25)
+All documented claims verified accurate. Zod v4 already adopted across the repo.
 
 ## Quick Wins
 - Add `@outfitter/contracts` + Result in core without changing CLI/MCP.

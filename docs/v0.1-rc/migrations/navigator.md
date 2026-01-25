@@ -1,19 +1,21 @@
 # Navigator → Kit Migration
 
-**Date**: 2026-01-25  
-**Status**: Draft
+**Date**: 2026-01-25
+**Status**: Draft (verified 2026-01-25)
 
 ## Snapshot
 - **Repo**: `/Users/mg/Developer/outfitter/navigator`
 - **Shape**: Monorepo (`packages/*`) + extension package
 - **Workspaces**: `packages/*`
 - **Runtime**: Bun + TypeScript (ESM)
-- **Tooling**: Biome (single quotes), Bun test, Turbo-style scripts
-- **Surfaces**:
+- **Tooling**: Biome 1.9.4 (single quotes), Bun test, Turbo-style scripts
+- **Surfaces** (in scope):
   - CLI: `nav` (`packages/cli/src/index.ts`)
   - MCP: `navigator-mcp` (`packages/mcp/src/index.ts`)
   - HTTP server: `packages/server/src/index.ts`
-  - Extension: `packages/extension` (Vite/CRX)
+- **Out of scope**:
+  - Extension: `packages/extension` (browser surface, separate concerns)
+  - Agents: `packages/agents` (content-only, no package.json)
 
 ## Key Entrypoints
 - **CLI**: `packages/cli/src/index.ts`
@@ -23,11 +25,13 @@
 - **Capability manifest**: `packages/core/src/capabilities/manifest.ts`
 
 ## Kit Deltas
-- **Formatting**: Biome single quotes / semicolons as-needed vs Kit tabs/double quotes.
-- **Handler contract**: core + server aren’t aligned to Kit Result/error taxonomy.
-- **Adapters**: CLI/MCP do not use Kit adapters.
+- **Formatting**: Biome 1.9.4 (single quotes, semicolons as-needed) vs Kit 2.x (tabs, double quotes, semicolons always).
+- **Handler contract**: core + server use ad-hoc patterns, not Kit Result/error taxonomy.
+- **Adapters**: CLI/MCP use raw Commander + MCP SDK directly.
+- **Commander**: v13 (Kit prefers v14+).
+- **Prompt/spinner stack**: `@inquirer/select` + `ora` vs Kit `@clack/prompts`.
 - **Tests**: `packages/*/tests` vs `src/__tests__` layout.
-- **Extension**: non-Kit surface that may remain outside migration scope.
+- **TS strict flags**: Missing `noPropertyAccessFromIndexSignature`, `verbatimModuleSyntax`, `noImplicitReturns`, `noFallthroughCasesInSwitch`.
 
 ## Migration Plan (Phased)
 ### Phase 0 — Inventory
@@ -56,9 +60,10 @@
 - Ensure extension continues to function if out of migration scope.
 
 ## Risks / Decisions
-- **Extension scope**: keep as separate app or migrate into Kit `apps/`?
-- **Capability manifest**: align existing manifest to Kit `capabilities.ts` or keep separate.
-- **Formatting**: large diff risk; consider a formatting-only PR.
+- **Extension scope**: Decided — out of scope. Leave untouched with separate tooling/release cycle.
+- **Capability manifest**: align existing manifest to Kit action registry or keep separate.
+- **Formatting**: large diff risk (Biome 1.x → 2.x major upgrade); consider a formatting-only PR.
+- **Prompt stack replacement**: UX may change when moving to `@clack/prompts`.
 
 ## Quick Wins
 - Introduce Kit contracts layer without refactoring transports.

@@ -1,7 +1,7 @@
 # North → Kit Migration
 
-**Date**: 2026-01-25  
-**Status**: Draft
+**Date**: 2026-01-25
+**Status**: Draft (verified 2026-01-25)
 
 ## Snapshot
 - **Repo**: `/Users/mg/Developer/outfitter/north`
@@ -23,9 +23,12 @@
 ## Kit Deltas
 - **Native deps**: `better-sqlite3` + `@ast-grep/napi` are externalized; consider Kit `@outfitter/index` or `bun:sqlite` to reduce native coupling.
 - **Adapters**: CLI/MCP use raw Commander + MCP SDK.
-- **Formatting**: Biome spaces vs Kit tabs/double quotes.
-- **Deps**: zod v4 + commander v12 (Kit prefers zod v4 / commander v14+).
-- **Handler contract**: no Kit Result/error taxonomy in core.
+- **Formatting**: Biome spaces vs Kit tabs (quotes already match — both use double quotes).
+- **Commander**: v12 (Kit prefers v14+).
+- **Handler contract**: ad-hoc `{ success: boolean }` returns instead of Kit Result/error taxonomy.
+- **TS strict flags**: Missing `exactOptionalPropertyTypes`, `noPropertyAccessFromIndexSignature`, `verbatimModuleSyntax`.
+- **Prompt/spinner stack**: `chalk` + `ora` vs Kit `@outfitter/ui` + `@outfitter/logging`.
+- **Tests**: Collocated `*.test.ts` next to source vs Kit `src/__tests__/` layout.
 
 ## Migration Plan (Phased)
 ### Phase 0 — Inventory
@@ -55,8 +58,9 @@
 
 ## Risks / Decisions
 - **Native deps**: decide whether to keep native SQLite/ast-grep or switch to Kit index stack.
-- **Zod version**: ensure any v3 usage is upgraded to v4 for baseline parity.
+- **Zod version**: Already on v4 — no migration needed.
 - **Script parity**: avoid breaking existing automation (harness/scripts).
+- **Bun-native alternatives**: Consider `Bun.Glob` over `glob`, native APIs where available.
 
 ## Quick Wins
 - Add Kit contracts + error taxonomy without changing CLI/MCP.

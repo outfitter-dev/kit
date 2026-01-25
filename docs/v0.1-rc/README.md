@@ -1,4 +1,4 @@
-# Outfitter Kit v0.1-rc
+# Outfitter v0.1-rc
 
 **Date**: 2026-01-24  
 **Status**: Active

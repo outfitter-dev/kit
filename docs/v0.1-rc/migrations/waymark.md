@@ -1,7 +1,7 @@
 # Waymark → Kit Migration
 
-**Date**: 2026-01-25  
-**Status**: Draft
+**Date**: 2026-01-25
+**Status**: Draft (verified 2026-01-25)
 
 ## Snapshot
 - **Repo**: `/Users/mg/Developer/outfitter/waymark`
@@ -22,10 +22,12 @@
 - **Grammar**: `packages/grammar/src/index.ts`
 
 ## Kit Deltas
-- **Zod drift**: core/cli use v4, MCP uses v3; Kit prefers v4.
+- **Zod drift**: core/cli use v4, but `apps/mcp` still uses v3 (`^3.23.8`) — needs upgrade.
 - **Logging/UX**: pino/ora/inquirer vs Kit logtape + clack.
 - **Adapters**: CLI/MCP use raw Commander + MCP SDK.
 - **Handler contract**: no Kit Result/error taxonomy in core.
+- **Exit codes**: Custom taxonomy (`usageError=2`, `configError=3`, `ioError=4`) differs from Kit's 10-category mapping.
+- **Config loading**: MCP uses custom config pattern vs Kit `@outfitter/config`.
 - **Agents assets**: `packages/agents` is not a package; decide where it belongs.
 
 ## Migration Plan (Phased)
@@ -54,9 +56,11 @@
 - Validate output parity for core commands.
 
 ## Risks / Decisions
-- **Zod migration**: v3 → v4 alignment requires careful schema updates.
+- **Zod migration**: `apps/mcp` needs v3 → v4 upgrade; core/cli already on v4.
 - **Logging/UX**: replacing prompts/spinners may change UX.
+- **Exit code remapping**: Current codes have different semantics than Kit taxonomy.
 - **Agent assets**: decide if this becomes `docs/` or template content.
+- **Test coverage**: Multiple packages have placeholder test scripts (`|| echo 'No tests yet'`).
 
 ## Quick Wins
 - Introduce Kit contracts + error taxonomy in core.

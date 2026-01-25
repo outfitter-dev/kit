@@ -1,7 +1,7 @@
 {
-	"name": "@outfitter/kit",
-	"description": "Version coordination meta-package for Outfitter Kit",
-	"version": "0.1.0-rc.0",
+	"name": "@outfitter/stack",
+	"description": "Version coordination meta-package for Outfitter",
+	"version": "0.1.0-rc.1",
 	"type": "module",
 	"files": [
 		"dist",
@@ -75,7 +75,7 @@
 		}
 	},
 	"scripts": {
-		"build": "bunup --filter @outfitter/kit",
+		"build": "bunup --filter @outfitter/stack",
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
@@ -84,6 +84,11 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/outfitter-dev/outfitter.git",
+		"directory": "packages/stack"
 	},
 	"license": "MIT"
 }

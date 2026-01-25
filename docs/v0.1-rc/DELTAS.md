@@ -10,9 +10,9 @@ Legend:
 
 | Area | Spec/Plan Expectation | Current Code | Status | RC Action |
 | --- | --- | --- | --- | --- |
-| `@outfitter/testing` MCP harness | `createMCPTestHarness({ tools, fixtures? })` | `createMcpHarness(server, { fixturesDir? })` | **Keep + compat** | Keep server-based API; add `createMCPTestHarness` wrapper + alias for spec compatibility. |
-| `@outfitter/testing` CLI helpers | `captureCLI`, `mockStdin` | `createCliHarness(command)` | **Keep + add** | Keep harness; add `captureCLI` + `mockStdin` for unit-level testing. |
-| `@outfitter/testing` mock factories | `createTestContext`, `createTestLogger`, `createTestConfig` | Not implemented | **Align to spec** | Implement these helpers in `@outfitter/testing`. |
+| `@outfitter/testing` MCP harness | `createMCPTestHarness({ tools, fixtures? })` | `createMcpHarness(server, { fixturesDir? })` | **Keep + compat** | Done: server-based API + `createMCPTestHarness` wrapper and alias. |
+| `@outfitter/testing` CLI helpers | `captureCLI`, `mockStdin` | `createCliHarness(command)` | **Keep + add** | Done: `captureCLI` + `mockStdin` added alongside harness. |
+| `@outfitter/testing` mock factories | `createTestContext`, `createTestLogger`, `createTestConfig` | Not implemented | **Align to spec** | Done: helpers implemented in `@outfitter/testing`. |
 | `@outfitter/testing` fixtures/utils | Spec does not mention | `createFixture`, `withTempDir`, `withEnv` | **Keep** | Document as improvement. |
 | Templates: placeholder vars | `{{name}}`, `{{packageName}}`, `{{description}}`, `{{author}}`, `{{year}}` | `{{projectName}}`, `{{binName}}`, `{{description}}` (+ `{{name}}` in basic) | **Keep + unify** | Support unified placeholder set (projectName/binName/packageName/description/author/year) with aliases; note `year` optional (for LICENSE/NOTICE headers). Author can be person or org. |
 | Templates: scripts | `test:watch`, `lint:fix`, `dev:daemon` (for daemon) | Missing `test:watch`/`lint:fix` (CLI/MCP/Daemon) | **Align to spec** | Add missing scripts; define a standard script set for templates. |

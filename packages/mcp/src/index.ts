@@ -74,3 +74,7 @@ export {
 
 // Transport helpers
 export { connectStdio, createSdkServer, type McpToolResponse } from "./transport.js";
+
+// Action adapter
+export { buildMcpTools } from "./actions.js";
+export type { BuildMcpToolsOptions } from "./actions.js";

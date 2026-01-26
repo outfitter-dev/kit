@@ -550,10 +550,16 @@ async function findUnmatchedKitMentions(filePath: string): Promise<string[]> {
 }
 
 async function main() {
-	console.log(DRY_RUN ? "🔍 DRY RUN MODE\n" : "✏️  APPLYING CHANGES\n");
+	const writeLine = (message = ""): void => {
+		process.stdout.write(`${message}\n`);
+	};
+
+	writeLine(DRY_RUN ? "🔍 DRY RUN MODE" : "✏️  APPLYING CHANGES");
+	writeLine();
 
 	const files = await findFiles();
-	console.log(`Scanning ${files.length} files...\n`);
+	writeLine(`Scanning ${files.length} files...`);
+	writeLine();
 
 	const allChanges: Change[] = [];
 	const allUnmatched: string[] = [];
@@ -576,34 +582,43 @@ async function main() {
 
 	// Print changes
 	if (allChanges.length > 0) {
-		console.log("📝 Changes:\n");
+		writeLine("📝 Changes:");
+		writeLine();
 		for (const [file, changes] of changesByFile) {
-			console.log(`  ${file}:`);
+			writeLine(`  ${file}:`);
 			for (const change of changes) {
-				console.log(`    L${change.line}: "${change.before}" → "${change.after}"`);
+				writeLine(`    L${change.line}: "${change.before}" → "${change.after}"`);
 			}
-			console.log();
+			writeLine();
 		}
 	}
 
 	// Print unmatched (potential issues)
 	if (allUnmatched.length > 0) {
-		console.log("\n⚠️  UNMATCHED 'kit' mentions (need manual review):\n");
+		writeLine();
+		writeLine("⚠️  UNMATCHED 'kit' mentions (need manual review):");
+		writeLine();
 		for (const line of allUnmatched) {
-			console.log(`  ${line}`);
+			writeLine(`  ${line}`);
 		}
 	}
 
 	// Summary
-	console.log("\n📊 Summary:");
-	console.log(`  Files scanned: ${files.length}`);
-	console.log(`  Changes ${DRY_RUN ? "to make" : "made"}: ${allChanges.length}`);
-	console.log(`  Files affected: ${changesByFile.size}`);
-	console.log(`  Unmatched mentions: ${allUnmatched.length}`);
+	writeLine();
+	writeLine("📊 Summary:");
+	writeLine(`  Files scanned: ${files.length}`);
+	writeLine(`  Changes ${DRY_RUN ? "to make" : "made"}: ${allChanges.length}`);
+	writeLine(`  Files affected: ${changesByFile.size}`);
+	writeLine(`  Unmatched mentions: ${allUnmatched.length}`);
 
 	if (DRY_RUN && allChanges.length > 0) {
-		console.log("\n💡 Run with --apply to make these changes");
+		writeLine();
+		writeLine("💡 Run with --apply to make these changes");
 	}
 }
 
-main().catch(console.error);
+main().catch((error) => {
+	const message = error instanceof Error ? error.message : String(error);
+	process.stderr.write(`${message}\n`);
+	process.exitCode = 1;
+});

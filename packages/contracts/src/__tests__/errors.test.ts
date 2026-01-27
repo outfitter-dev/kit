@@ -14,7 +14,9 @@ import {
   AuthError,
   CancelledError,
   ConflictError,
+  ERROR_CODES,
   type ErrorCategory,
+  type ErrorCode,
   exitCodeMap,
   getExitCode,
   getStatusCode,
@@ -515,5 +517,204 @@ describe("getStatusCode", () => {
     expect(getStatusCode("internal")).toBe(500);
     expect(getStatusCode("auth")).toBe(401);
     expect(getStatusCode("cancelled")).toBe(499);
+  });
+});
+
+// ============================================================================
+// ERROR_CODES Tests (Granular Numeric Error Codes)
+// ============================================================================
+
+describe("ERROR_CODES", () => {
+  it("includes all 10 error categories", () => {
+    const categories = Object.keys(ERROR_CODES);
+    expect(categories).toContain("validation");
+    expect(categories).toContain("not_found");
+    expect(categories).toContain("conflict");
+    expect(categories).toContain("permission");
+    expect(categories).toContain("timeout");
+    expect(categories).toContain("rate_limit");
+    expect(categories).toContain("network");
+    expect(categories).toContain("internal");
+    expect(categories).toContain("auth");
+    expect(categories).toContain("cancelled");
+    expect(categories).toHaveLength(10);
+  });
+
+  it("has at least one error code per category", () => {
+    for (const [_category, codes] of Object.entries(ERROR_CODES)) {
+      const codeCount = Object.keys(codes).length;
+      expect(codeCount).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it("has unique error codes across all categories", () => {
+    const allCodes: number[] = [];
+    for (const codes of Object.values(ERROR_CODES)) {
+      allCodes.push(...Object.values(codes));
+    }
+    const uniqueCodes = new Set(allCodes);
+    expect(uniqueCodes.size).toBe(allCodes.length);
+  });
+
+  it("has validation codes in 1000-1999 range", () => {
+    for (const code of Object.values(ERROR_CODES.validation)) {
+      expect(code).toBeGreaterThanOrEqual(1000);
+      expect(code).toBeLessThan(2000);
+    }
+  });
+
+  it("has not_found codes in 2000-2999 range", () => {
+    for (const code of Object.values(ERROR_CODES.not_found)) {
+      expect(code).toBeGreaterThanOrEqual(2000);
+      expect(code).toBeLessThan(3000);
+    }
+  });
+
+  it("has conflict codes in 3000-3999 range", () => {
+    for (const code of Object.values(ERROR_CODES.conflict)) {
+      expect(code).toBeGreaterThanOrEqual(3000);
+      expect(code).toBeLessThan(4000);
+    }
+  });
+
+  it("has permission codes in 4000-4999 range", () => {
+    for (const code of Object.values(ERROR_CODES.permission)) {
+      expect(code).toBeGreaterThanOrEqual(4000);
+      expect(code).toBeLessThan(5000);
+    }
+  });
+
+  it("has timeout codes in 5000-5999 range", () => {
+    for (const code of Object.values(ERROR_CODES.timeout)) {
+      expect(code).toBeGreaterThanOrEqual(5000);
+      expect(code).toBeLessThan(6000);
+    }
+  });
+
+  it("has rate_limit codes in 6000-6999 range", () => {
+    for (const code of Object.values(ERROR_CODES.rate_limit)) {
+      expect(code).toBeGreaterThanOrEqual(6000);
+      expect(code).toBeLessThan(7000);
+    }
+  });
+
+  it("has network codes in 7000-7999 range", () => {
+    for (const code of Object.values(ERROR_CODES.network)) {
+      expect(code).toBeGreaterThanOrEqual(7000);
+      expect(code).toBeLessThan(8000);
+    }
+  });
+
+  it("has internal codes in 8000-8999 range", () => {
+    for (const code of Object.values(ERROR_CODES.internal)) {
+      expect(code).toBeGreaterThanOrEqual(8000);
+      expect(code).toBeLessThan(9000);
+    }
+  });
+
+  it("has auth codes in 9000-9999 range", () => {
+    for (const code of Object.values(ERROR_CODES.auth)) {
+      expect(code).toBeGreaterThanOrEqual(9000);
+      expect(code).toBeLessThan(10_000);
+    }
+  });
+
+  it("has cancelled codes in 10000-10999 range", () => {
+    for (const code of Object.values(ERROR_CODES.cancelled)) {
+      expect(code).toBeGreaterThanOrEqual(10_000);
+      expect(code).toBeLessThan(11_000);
+    }
+  });
+
+  it("has expected validation error codes", () => {
+    expect(ERROR_CODES.validation.FIELD_REQUIRED).toBe(1001);
+    expect(ERROR_CODES.validation.INVALID_FORMAT).toBe(1002);
+    expect(ERROR_CODES.validation.OUT_OF_RANGE).toBe(1003);
+    expect(ERROR_CODES.validation.TYPE_MISMATCH).toBe(1004);
+  });
+
+  it("has expected not_found error codes", () => {
+    expect(ERROR_CODES.not_found.RESOURCE_NOT_FOUND).toBe(2001);
+    expect(ERROR_CODES.not_found.FILE_NOT_FOUND).toBe(2002);
+  });
+
+  it("has expected conflict error codes", () => {
+    expect(ERROR_CODES.conflict.ALREADY_EXISTS).toBe(3001);
+    expect(ERROR_CODES.conflict.VERSION_MISMATCH).toBe(3002);
+  });
+
+  it("has expected permission error codes", () => {
+    expect(ERROR_CODES.permission.FORBIDDEN).toBe(4001);
+    expect(ERROR_CODES.permission.INSUFFICIENT_RIGHTS).toBe(4002);
+  });
+
+  it("has expected timeout error codes", () => {
+    expect(ERROR_CODES.timeout.OPERATION_TIMEOUT).toBe(5001);
+    expect(ERROR_CODES.timeout.CONNECTION_TIMEOUT).toBe(5002);
+  });
+
+  it("has expected rate_limit error codes", () => {
+    expect(ERROR_CODES.rate_limit.QUOTA_EXCEEDED).toBe(6001);
+    expect(ERROR_CODES.rate_limit.THROTTLED).toBe(6002);
+  });
+
+  it("has expected network error codes", () => {
+    expect(ERROR_CODES.network.CONNECTION_REFUSED).toBe(7001);
+    expect(ERROR_CODES.network.DNS_FAILED).toBe(7002);
+  });
+
+  it("has expected internal error codes", () => {
+    expect(ERROR_CODES.internal.UNEXPECTED_STATE).toBe(8001);
+    expect(ERROR_CODES.internal.ASSERTION_FAILED).toBe(8002);
+  });
+
+  it("has expected auth error codes", () => {
+    expect(ERROR_CODES.auth.INVALID_TOKEN).toBe(9001);
+    expect(ERROR_CODES.auth.EXPIRED_TOKEN).toBe(9002);
+  });
+
+  it("has expected cancelled error codes", () => {
+    expect(ERROR_CODES.cancelled.USER_CANCELLED).toBe(10_001);
+    expect(ERROR_CODES.cancelled.SIGNAL_RECEIVED).toBe(10_002);
+  });
+});
+
+// ============================================================================
+// ErrorCode Type Tests
+// ============================================================================
+
+describe("ErrorCode type", () => {
+  it("is a union of all error code numbers", () => {
+    // Type-level validation: ErrorCode should accept any valid error code
+    const validCode1: ErrorCode = 1001;
+    const validCode2: ErrorCode = 9002;
+    const validCode3: ErrorCode = 10_001;
+
+    // Runtime validation: all codes should be numbers
+    expect(typeof validCode1).toBe("number");
+    expect(typeof validCode2).toBe("number");
+    expect(typeof validCode3).toBe("number");
+  });
+
+  it("includes codes from all categories", () => {
+    // Collect all error codes as ErrorCode type
+    const codes: ErrorCode[] = [
+      ERROR_CODES.validation.FIELD_REQUIRED,
+      ERROR_CODES.not_found.RESOURCE_NOT_FOUND,
+      ERROR_CODES.conflict.ALREADY_EXISTS,
+      ERROR_CODES.permission.FORBIDDEN,
+      ERROR_CODES.timeout.OPERATION_TIMEOUT,
+      ERROR_CODES.rate_limit.QUOTA_EXCEEDED,
+      ERROR_CODES.network.CONNECTION_REFUSED,
+      ERROR_CODES.internal.UNEXPECTED_STATE,
+      ERROR_CODES.auth.INVALID_TOKEN,
+      ERROR_CODES.cancelled.USER_CANCELLED,
+    ];
+
+    // All should be valid ErrorCode values
+    expect(codes).toHaveLength(10);
+    for (const code of codes) {
+      expect(typeof code).toBe("number");
+    }
   });
 });

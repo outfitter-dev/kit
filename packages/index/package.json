@@ -43,7 +43,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "bunup --filter @outfitter/index",
+    "build": "cd ../.. && bunup --filter @outfitter/index",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
     "test": "bun test",

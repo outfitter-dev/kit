@@ -90,8 +90,11 @@ export {
   AuthError,
   CancelledError,
   ConflictError,
+  // Granular error codes
+  ERROR_CODES,
   // Types
   type ErrorCategory,
+  type ErrorCode,
   // Maps
   exitCodeMap,
   // Helper functions

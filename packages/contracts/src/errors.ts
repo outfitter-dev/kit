@@ -57,6 +57,73 @@ export const statusCodeMap: Record<ErrorCategory, number> = {
 };
 
 /**
+ * Numeric error codes for granular error identification.
+ *
+ * Ranges by category:
+ * - validation: 1000-1999
+ * - not_found: 2000-2999
+ * - conflict: 3000-3999
+ * - permission: 4000-4999
+ * - timeout: 5000-5999
+ * - rate_limit: 6000-6999
+ * - network: 7000-7999
+ * - internal: 8000-8999
+ * - auth: 9000-9999
+ * - cancelled: 10000-10999
+ */
+export const ERROR_CODES = {
+  validation: {
+    FIELD_REQUIRED: 1001,
+    INVALID_FORMAT: 1002,
+    OUT_OF_RANGE: 1003,
+    TYPE_MISMATCH: 1004,
+  },
+  not_found: {
+    RESOURCE_NOT_FOUND: 2001,
+    FILE_NOT_FOUND: 2002,
+  },
+  conflict: {
+    ALREADY_EXISTS: 3001,
+    VERSION_MISMATCH: 3002,
+  },
+  permission: {
+    FORBIDDEN: 4001,
+    INSUFFICIENT_RIGHTS: 4002,
+  },
+  timeout: {
+    OPERATION_TIMEOUT: 5001,
+    CONNECTION_TIMEOUT: 5002,
+  },
+  rate_limit: {
+    QUOTA_EXCEEDED: 6001,
+    THROTTLED: 6002,
+  },
+  network: {
+    CONNECTION_REFUSED: 7001,
+    DNS_FAILED: 7002,
+  },
+  internal: {
+    UNEXPECTED_STATE: 8001,
+    ASSERTION_FAILED: 8002,
+  },
+  auth: {
+    INVALID_TOKEN: 9001,
+    EXPIRED_TOKEN: 9002,
+  },
+  cancelled: {
+    USER_CANCELLED: 10_001,
+    SIGNAL_RECEIVED: 10_002,
+  },
+} as const;
+
+/**
+ * Union type of all numeric error codes.
+ * Useful for type-safe error code handling.
+ */
+export type ErrorCode =
+  (typeof ERROR_CODES)[keyof typeof ERROR_CODES][keyof (typeof ERROR_CODES)[keyof typeof ERROR_CODES]];
+
+/**
  * Serialized error format for JSON transport.
  */
 export interface SerializedError {

@@ -21,6 +21,12 @@
         "default": "./dist/render/index.js"
       }
     },
+    "./render/format": {
+      "import": {
+        "types": "./dist/render/format.d.ts",
+        "default": "./dist/render/format.js"
+      }
+    },
     "./render/shapes": {
       "import": {
         "types": "./dist/render/shapes.d.ts",
@@ -55,6 +61,12 @@
       "import": {
         "types": "./dist/render/format-relative.d.ts",
         "default": "./dist/render/format-relative.js"
+      }
+    },
+    "./render/date": {
+      "import": {
+        "types": "./dist/render/date.d.ts",
+        "default": "./dist/render/date.js"
       }
     },
     "./render/json": {
@@ -133,7 +145,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "bunup --filter @outfitter/cli",
+    "build": "cd ../.. && bunup --filter @outfitter/cli",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "lint": "biome lint ./src",

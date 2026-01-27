@@ -109,7 +109,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "bunup --filter @outfitter/contracts",
+    "build": "cd ../.. && bunup --filter @outfitter/contracts",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
     "test": "bun test",

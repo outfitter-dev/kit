@@ -61,7 +61,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "bunup --filter @outfitter/types",
+    "build": "cd ../.. && bunup --filter @outfitter/types",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"

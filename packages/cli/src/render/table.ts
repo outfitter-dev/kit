@@ -1,11 +1,16 @@
 /**
  * Table rendering utilities.
  *
- * Renders arrays of objects as ASCII tables with borders.
+ * Renders arrays of objects as tables with Unicode box-drawing borders.
  *
  * @packageDocumentation
  */
 
+import {
+  type BorderCharacters,
+  type BorderStyle,
+  getBorderCharacters,
+} from "./borders.js";
 import { getStringWidth, padText, truncateText } from "./text.js";
 
 /**
@@ -16,6 +21,7 @@ import { getStringWidth, padText, truncateText } from "./text.js";
  * const options: TableOptions = {
  *   headers: { id: "ID", name: "Name" },
  *   columnWidths: { description: 20 },
+ *   border: "rounded",
  * };
  * ```
  */
@@ -30,14 +36,25 @@ export interface TableOptions {
    * If not specified, the object key is used as the header.
    */
   headers?: Record<string, string>;
+  /**
+   * Border style for the table.
+   * @default "single"
+   */
+  border?: BorderStyle;
+  /**
+   * Compact mode removes all borders and uses space separators.
+   * When true, overrides the border option.
+   * @default false
+   */
+  compact?: boolean;
 }
 
 /**
- * Renders an array of objects as an ASCII table with borders.
+ * Renders an array of objects as a table with Unicode box-drawing borders.
  *
  * Automatically calculates column widths based on content unless
- * overridden in options. Supports custom header labels and
- * truncates cell content that exceeds column width.
+ * overridden in options. Supports custom header labels, border styles,
+ * and truncates cell content that exceeds column width.
  *
  * @param data - Array of objects to render as rows
  * @param options - Table rendering options
@@ -57,12 +74,12 @@ export interface TableOptions {
  * );
  *
  * console.log(table);
- * // +----+-------+----------+
- * // | ID | Name  | status   |
- * // +----+-------+----------+
- * // | 1  | Alice | Active   |
- * // | 2  | Bob   | Inactive |
- * // +----+-------+----------+
+ * // ┌────┬───────┬──────────┐
+ * // │ ID │ Name  │ status   │
+ * // ├────┼───────┼──────────┤
+ * // │ 1  │ Alice │ Active   │
+ * // │ 2  │ Bob   │ Inactive │
+ * // └────┴───────┴──────────┘
  * ```
  */
 export function renderTable(
@@ -107,46 +124,157 @@ export function renderTable(
     columnWidths[key] = optionWidth ?? Math.max(headerWidth, maxDataWidth);
   }
 
+  // Determine border style
+  const compact = options?.compact ?? false;
+  const borderStyle: BorderStyle = compact
+    ? "none"
+    : (options?.border ?? "single");
+  const chars = getBorderCharacters(borderStyle);
+
+  // Check if we have borders
+  const hasBorders = borderStyle !== "none";
+
   // Build table
+  return hasBorders
+    ? renderWithBorders(data, keys, columnWidths, getHeader, chars)
+    : renderCompact(data, keys, columnWidths, getHeader);
+}
+
+/**
+ * Renders a table with Unicode borders.
+ */
+function renderWithBorders(
+  data: Record<string, unknown>[],
+  keys: string[],
+  columnWidths: Record<string, number>,
+  getHeader: (key: string) => string,
+  chars: BorderCharacters
+): string {
   const lines: string[] = [];
 
-  // Header separator
-  const headerSep = `+${keys.map((k) => "-".repeat((columnWidths[k] ?? 0) + 2)).join("+")}+`;
+  // Calculate column widths for border drawing (content width + 2 for padding)
+  const colWidthsForBorder = keys.map((k) => (columnWidths[k] ?? 0) + 2);
+
+  // Top border
+  lines.push(drawHorizontalBorder(chars, colWidthsForBorder, "top"));
 
   // Header row
-  const headerRow = `|${keys
-    .map((k) => {
-      const header = getHeader(k);
-      const width = columnWidths[k] ?? 0;
-      return ` ${padText(header, width)} `;
-    })
-    .join("|")}|`;
+  lines.push(
+    drawDataRow(
+      keys.map((k) => getHeader(k)),
+      keys.map((k) => columnWidths[k] ?? 0),
+      chars.vertical
+    )
+  );
 
-  lines.push(headerSep);
-  lines.push(headerRow);
-  lines.push(headerSep);
+  // Header separator
+  lines.push(drawHorizontalBorder(chars, colWidthsForBorder, "middle"));
 
   // Data rows
   for (const row of data) {
-    const rowStr = `|${keys
-      .map((k) => {
-        const value = row[k];
-        let strValue =
-          value === undefined || value === null ? "" : String(value);
-        const width = columnWidths[k] ?? 0;
+    const values = keys.map((k) => {
+      const value = row[k];
+      let strValue = value === undefined || value === null ? "" : String(value);
+      const width = columnWidths[k] ?? 0;
 
-        // Truncate if needed
-        if (getStringWidth(strValue) > width) {
-          strValue = truncateText(strValue, width);
-        }
+      // Truncate if needed
+      if (getStringWidth(strValue) > width) {
+        strValue = truncateText(strValue, width);
+      }
 
-        return ` ${padText(strValue, width)} `;
-      })
-      .join("|")}|`;
-    lines.push(rowStr);
+      return strValue;
+    });
+
+    lines.push(
+      drawDataRow(
+        values,
+        keys.map((k) => columnWidths[k] ?? 0),
+        chars.vertical
+      )
+    );
   }
 
-  lines.push(headerSep);
+  // Bottom border
+  lines.push(drawHorizontalBorder(chars, colWidthsForBorder, "bottom"));
 
   return lines.join("\n");
+}
+
+/**
+ * Renders a compact table without borders.
+ */
+function renderCompact(
+  data: Record<string, unknown>[],
+  keys: string[],
+  columnWidths: Record<string, number>,
+  getHeader: (key: string) => string
+): string {
+  const lines: string[] = [];
+
+  // Header row
+  const headerValues = keys.map((k) => {
+    const header = getHeader(k);
+    const width = columnWidths[k] ?? 0;
+    return padText(header, width);
+  });
+  lines.push(headerValues.join("  "));
+
+  // Data rows
+  for (const row of data) {
+    const values = keys.map((k) => {
+      const value = row[k];
+      let strValue = value === undefined || value === null ? "" : String(value);
+      const width = columnWidths[k] ?? 0;
+
+      // Truncate if needed
+      if (getStringWidth(strValue) > width) {
+        strValue = truncateText(strValue, width);
+      }
+
+      return padText(strValue, width);
+    });
+    lines.push(values.join("  "));
+  }
+
+  return lines.join("\n");
+}
+
+/**
+ * Draws a horizontal border line with intersections.
+ */
+function drawHorizontalBorder(
+  chars: BorderCharacters,
+  colWidths: number[],
+  position: "top" | "middle" | "bottom"
+): string {
+  const positionChars = {
+    top: { left: chars.topLeft, right: chars.topRight, cross: chars.topT },
+    middle: { left: chars.leftT, right: chars.rightT, cross: chars.cross },
+    bottom: {
+      left: chars.bottomLeft,
+      right: chars.bottomRight,
+      cross: chars.bottomT,
+    },
+  } as const;
+
+  const { left, right, cross } = positionChars[position];
+  const segments = colWidths.map((w) => chars.horizontal.repeat(w));
+
+  return `${left}${segments.join(cross)}${right}`;
+}
+
+/**
+ * Draws a data row with vertical separators.
+ */
+function drawDataRow(
+  values: string[],
+  widths: number[],
+  vertical: string
+): string {
+  const cells = values.map((value, i) => {
+    const width = widths[i] ?? 0;
+    return ` ${padText(value, width)} `;
+  });
+
+  return `${vertical}${cells.join(vertical)}${vertical}`;
 }

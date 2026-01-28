@@ -30,7 +30,7 @@ import {
 
 describe("Output Shapes", () => {
   describe("renderTable()", () => {
-    it("renders data as ASCII table", () => {
+    it("renders data with Unicode borders", () => {
       const data = [
         { name: "Alice", age: 30 },
         { name: "Bob", age: 25 },
@@ -44,8 +44,8 @@ describe("Output Shapes", () => {
       expect(result).toContain("Bob");
       expect(result).toContain("30");
       expect(result).toContain("25");
-      // Should have table structure (borders or separators)
-      expect(result).toMatch(/[|+-]/);
+      // Should have table structure with Unicode box-drawing characters
+      expect(result).toMatch(/[│─┌┐└┘]/);
     });
 
     it("handles empty rows gracefully", () => {

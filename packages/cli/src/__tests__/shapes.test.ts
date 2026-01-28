@@ -121,8 +121,8 @@ describe("render() with Collection", () => {
     expect(result).toContain("Bob");
     expect(result).toContain("30");
     expect(result).toContain("25");
-    // Should have table structure (borders)
-    expect(result).toMatch(/[|+-]/);
+    // Should have table structure (Unicode borders)
+    expect(result).toMatch(/[│─┌┐└┘]/);
   });
 
   it("renders Collection with primitive items as list", () => {

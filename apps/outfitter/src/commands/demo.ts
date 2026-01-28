@@ -18,6 +18,7 @@ import {
 
 // Import sections to register them
 import "./demo/colors.js";
+import "./demo/table.js";
 
 // =============================================================================
 // Types

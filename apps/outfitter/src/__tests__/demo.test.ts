@@ -239,3 +239,74 @@ describe("colors demo section", () => {
     expect(result.output).toContain("THEME COLORS");
   });
 });
+
+// =============================================================================
+// Table Section Tests
+// =============================================================================
+
+describe("table demo section", () => {
+  test("table section is registered", async () => {
+    // Import demo to trigger section registration
+    await import("../commands/demo.js");
+
+    const section = getSection("table");
+    expect(section).toBeDefined();
+    expect(section?.id).toBe("table");
+  });
+
+  test("table section produces output with basic table", async () => {
+    await import("../commands/demo.js");
+
+    const output = runSection("table");
+
+    expect(output).toBeDefined();
+    expect(output).toContain("BASIC TABLE");
+    expect(output).toContain("renderTable");
+  });
+
+  test("table section includes custom headers example", async () => {
+    await import("../commands/demo.js");
+
+    const output = runSection("table");
+
+    expect(output).toContain("CUSTOM HEADERS");
+    expect(output).toContain("Task ID");
+    expect(output).toContain("Assignee");
+  });
+
+  test("table section includes column width constraint", async () => {
+    await import("../commands/demo.js");
+
+    const output = runSection("table");
+
+    expect(output).toContain("COLUMN WIDTH CONSTRAINT");
+    expect(output).toContain("columnWidths");
+  });
+
+  test("table section includes wide characters example", async () => {
+    await import("../commands/demo.js");
+
+    const output = runSection("table");
+
+    expect(output).toContain("WIDE CHARACTERS");
+    expect(output).toContain("山田太郎");
+  });
+
+  test("table section includes limitations", async () => {
+    await import("../commands/demo.js");
+
+    const output = runSection("table");
+
+    expect(output).toContain("KNOWN LIMITATIONS");
+    expect(output).toContain("ASCII borders only");
+  });
+
+  test("runDemo with table section works", async () => {
+    const { runDemo } = await import("../commands/demo.js");
+
+    const result = runDemo({ section: "table" });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.output).toContain("BASIC TABLE");
+  });
+});

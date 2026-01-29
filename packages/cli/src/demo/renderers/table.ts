@@ -7,6 +7,7 @@
 import type { Theme } from "../../render/colors.js";
 import { renderTable } from "../../render/table.js";
 import { BORDER_STYLE_META, getBorderStyles } from "../registry.js";
+import { demoSection } from "../section.js";
 import { getExample } from "../templates.js";
 import type { DemoConfig } from "../types.js";
 
@@ -22,8 +23,7 @@ export function renderTableDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Basic Table Section
   // ==========================================================================
-  lines.push("BASIC TABLE");
-  lines.push("===========");
+  lines.push(demoSection("Basic Table"));
   lines.push("");
 
   if (showCode) {
@@ -43,8 +43,7 @@ export function renderTableDemo(config: DemoConfig, theme: Theme): string {
   // Custom Headers Section
   // ==========================================================================
   lines.push("");
-  lines.push("CUSTOM HEADERS");
-  lines.push("==============");
+  lines.push(demoSection("Custom Headers"));
   lines.push("");
 
   if (showCode) {
@@ -64,8 +63,7 @@ export function renderTableDemo(config: DemoConfig, theme: Theme): string {
   // Border Styles Section
   // ==========================================================================
   lines.push("");
-  lines.push("BORDER STYLES");
-  lines.push("=============");
+  lines.push(demoSection("Border Styles"));
   lines.push("");
 
   const styles = getBorderStyles().filter((s) => s !== "none");
@@ -89,8 +87,7 @@ export function renderTableDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Compact Mode Section
   // ==========================================================================
-  lines.push("COMPACT MODE");
-  lines.push("============");
+  lines.push(demoSection("Compact Mode"));
   lines.push("");
 
   if (showCode) {
@@ -108,8 +105,7 @@ export function renderTableDemo(config: DemoConfig, theme: Theme): string {
   // Wide Characters Section
   // ==========================================================================
   lines.push("");
-  lines.push("WIDE CHARACTERS (CJK/Emoji)");
-  lines.push("===========================");
+  lines.push(demoSection("Wide Characters (CJK/Emoji)"));
   lines.push("");
 
   if (showCode) {

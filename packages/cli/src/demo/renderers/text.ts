@@ -13,6 +13,7 @@ import {
   truncateText,
   wrapText,
 } from "../../render/text.js";
+import { demoSection } from "../section.js";
 import type { DemoConfig } from "../types.js";
 
 /**
@@ -26,8 +27,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // String Width Section
   // ==========================================================================
-  lines.push("STRING WIDTH");
-  lines.push("============");
+  lines.push(demoSection("String Width"));
   lines.push("");
 
   if (showCode) {
@@ -56,8 +56,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Text Wrapping Section
   // ==========================================================================
-  lines.push("TEXT WRAPPING");
-  lines.push("=============");
+  lines.push(demoSection("Text Wrapping"));
   lines.push("");
 
   if (showCode) {
@@ -83,8 +82,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Truncation Section
   // ==========================================================================
-  lines.push("TRUNCATION");
-  lines.push("==========");
+  lines.push(demoSection("Truncation"));
   lines.push("");
 
   if (showCode) {
@@ -108,8 +106,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Padding Section
   // ==========================================================================
-  lines.push("PADDING");
-  lines.push("=======");
+  lines.push(demoSection("Padding"));
   lines.push("");
 
   if (showCode) {
@@ -127,8 +124,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Pluralize Section
   // ==========================================================================
-  lines.push("PLURALIZE");
-  lines.push("=========");
+  lines.push(demoSection("Pluralize"));
   lines.push("");
 
   if (showCode) {
@@ -156,8 +152,7 @@ export function renderTextDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Slugify Section
   // ==========================================================================
-  lines.push("SLUGIFY");
-  lines.push("=======");
+  lines.push(demoSection("Slugify"));
   lines.push("");
 
   if (showCode) {

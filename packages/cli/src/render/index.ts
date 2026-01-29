@@ -60,6 +60,14 @@ export {
 } from "./indicators.js";
 // JSON and text rendering
 export { renderJson, renderText } from "./json.js";
+// Layout utilities
+export {
+  type Alignment,
+  type HorizontalLayoutOptions,
+  joinHorizontal,
+  joinVertical,
+  type VerticalLayoutOptions,
+} from "./layout.js";
 
 // List rendering
 export {

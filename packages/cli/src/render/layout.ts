@@ -5,6 +5,7 @@
  */
 
 import { type BoxOptions, normalizeBorders, normalizePadding } from "./box.js";
+import type { LayoutContext, WidthMode } from "./types.js";
 
 // ============================================================================
 // Width Utilities
@@ -94,6 +95,109 @@ export function getContentWidth(options: BoxOptions): number {
 
   // No fixed width - use terminal width, clamped to non-negative
   return Math.max(0, getTerminalWidth() - horizontal);
+}
+
+/**
+ * Resolves a width mode to a concrete character width.
+ *
+ * Width modes allow flexible sizing relative to terminal or container:
+ * - `"text"` → 0 (content-sized, no constraint)
+ * - `"full"` → terminal width
+ * - `"container"` → container width (requires context)
+ * - `number` → fixed width
+ * - `"${number}%"` → percentage of container/terminal
+ *
+ * @param mode - Width specification
+ * @param ctx - Layout context for container-relative modes
+ * @returns Resolved width in characters
+ * @throws Error if "container" mode used without context
+ *
+ * @example
+ * ```typescript
+ * import { resolveWidth, createLayoutContext } from "@outfitter/cli/render";
+ *
+ * resolveWidth("full");           // → 120 (terminal width)
+ * resolveWidth(50);               // → 50
+ * resolveWidth("50%");            // → 60 (half of terminal)
+ *
+ * const ctx = createLayoutContext({ width: 80, padding: 1 });
+ * resolveWidth("50%", ctx);       // → 38 (half of context width)
+ * resolveWidth("container", ctx); // → 76 (context width)
+ * ```
+ */
+export function resolveWidth(mode: WidthMode, ctx?: LayoutContext): number {
+  // Fixed numeric width
+  if (typeof mode === "number") {
+    return mode;
+  }
+
+  // Text mode - content-sized (no constraint)
+  if (mode === "text") {
+    return 0;
+  }
+
+  // Full terminal width
+  if (mode === "full") {
+    return getTerminalWidth();
+  }
+
+  // Container width (requires context)
+  if (mode === "container") {
+    if (!ctx) {
+      throw new Error("container width mode requires LayoutContext");
+    }
+    return ctx.width;
+  }
+
+  // Percentage mode (e.g., "50%")
+  // At this point, mode must be a percentage string
+  const percent = Number.parseInt(mode.slice(0, -1), 10);
+  const baseWidth = ctx?.width ?? getTerminalWidth();
+  return Math.floor(baseWidth * (percent / 100));
+}
+
+/**
+ * Creates a layout context from box options.
+ *
+ * Layout contexts propagate width information through nested components,
+ * enabling relative sizing like `"50%"` or `"container"`.
+ *
+ * @param options - Box options defining the container
+ * @param parent - Parent context for chained calculations
+ * @returns New layout context with calculated content width
+ *
+ * @example
+ * ```typescript
+ * import { createLayoutContext, resolveWidth, createBox } from "@outfitter/cli/render";
+ *
+ * // Outer container
+ * const outerOpts = { width: 80, padding: 1 };
+ * const outerCtx = createLayoutContext(outerOpts);
+ * // outerCtx.width = 76 (80 - 4 overhead)
+ *
+ * // Nested component at 50% width
+ * const innerWidth = resolveWidth("50%", outerCtx);
+ * const innerOpts = { width: innerWidth, padding: 1 };
+ * const innerCtx = createLayoutContext(innerOpts, outerCtx);
+ * // innerCtx.width = 34 (38 - 4 overhead)
+ * ```
+ */
+export function createLayoutContext(
+  options: BoxOptions,
+  parent?: LayoutContext
+): LayoutContext {
+  // If no width specified and parent exists, use parent width as base
+  const effectiveOptions = { ...options };
+  if (effectiveOptions.width === undefined && parent) {
+    effectiveOptions.width = parent.width;
+  }
+
+  const width = getContentWidth(effectiveOptions);
+
+  return {
+    width,
+    ...(parent && { parent }),
+  };
 }
 
 // ============================================================================

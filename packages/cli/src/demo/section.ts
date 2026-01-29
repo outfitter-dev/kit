@@ -19,9 +19,9 @@ import { joinVertical } from "../render/layout.js";
  * Options for creating a demo section.
  */
 export interface SectionOptions {
-  /** Separator character style (default: "=") */
+  /** Separator character style (default: "─") */
   separator?: SeparatorStyle;
-  /** Case transformation (default: "upper") */
+  /** Case transformation (default: "title") */
   case?: CaseMode;
 }
 
@@ -29,17 +29,17 @@ export interface SectionOptions {
  * Options for creating a subsection.
  */
 export interface SubsectionOptions {
-  /** Separator character style (default: "-") */
+  /** Separator character style (default: "─") */
   separator?: SeparatorStyle;
-  /** Case transformation (default: "upper") */
+  /** Case transformation (default: "title") */
   case?: CaseMode;
 }
 
 /**
  * Creates a demo section heading.
  *
- * Sections are major divisions in a demo, rendered with uppercase text
- * and `=` separators by default.
+ * Sections are major divisions in a demo, rendered with title case text
+ * and thin Unicode line separators by default.
  *
  * @param title - The section title
  * @param options - Optional rendering options
@@ -50,22 +50,22 @@ export interface SubsectionOptions {
  * import { demoSection } from "@outfitter/cli/demo";
  *
  * console.log(demoSection("Theme Colors"));
- * // THEME COLORS
- * // ============
+ * // Theme Colors
+ * // ────────────
  * ```
  */
 export function demoSection(title: string, options?: SectionOptions): string {
   return renderHeading(title, {
-    separator: options?.separator ?? "=",
-    case: options?.case ?? "upper",
+    separator: options?.separator ?? "─",
+    case: options?.case ?? "title",
   });
 }
 
 /**
  * Creates a demo subsection heading.
  *
- * Subsections are minor divisions within a section, rendered with uppercase
- * text and `-` separators by default.
+ * Subsections are minor divisions within a section, rendered with title case
+ * text and thin Unicode line separators by default.
  *
  * @param title - The subsection title
  * @param options - Optional rendering options
@@ -76,8 +76,8 @@ export function demoSection(title: string, options?: SectionOptions): string {
  * import { demoSubsection } from "@outfitter/cli/demo";
  *
  * console.log(demoSubsection("Status"));
- * // STATUS
- * // ------
+ * // Status
+ * // ──────
  * ```
  */
 export function demoSubsection(
@@ -85,8 +85,8 @@ export function demoSubsection(
   options?: SubsectionOptions
 ): string {
   return renderHeading(title, {
-    separator: options?.separator ?? "-",
-    case: options?.case ?? "upper",
+    separator: options?.separator ?? "─",
+    case: options?.case ?? "title",
   });
 }
 

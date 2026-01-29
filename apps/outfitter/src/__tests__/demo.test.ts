@@ -195,7 +195,7 @@ describe("colors demo section", () => {
     const output = runSection("colors");
 
     expect(output).toBeDefined();
-    expect(output).toContain("THEME COLORS");
+    expect(output).toContain("Theme Colors");
     expect(output).toContain("createTheme");
     expect(output).toContain("theme.success");
     expect(output).toContain("theme.error");
@@ -206,7 +206,7 @@ describe("colors demo section", () => {
 
     const output = runSection("colors");
 
-    expect(output).toContain("DIRECT COLORS");
+    expect(output).toContain("Direct Colors");
     expect(output).toContain("applyColor");
   });
 
@@ -215,7 +215,7 @@ describe("colors demo section", () => {
 
     const output = runSection("colors");
 
-    expect(output).toContain("RAW TOKENS");
+    expect(output).toContain("Raw Tokens");
     expect(output).toContain("createTokens");
   });
 
@@ -224,7 +224,7 @@ describe("colors demo section", () => {
 
     const output = runSection("colors");
 
-    expect(output).toContain("ENVIRONMENT");
+    expect(output).toContain("Environment");
     expect(output).toContain("Colors:");
     expect(output).toContain("NO_COLOR:");
     expect(output).toContain("FORCE_COLOR:");
@@ -236,7 +236,7 @@ describe("colors demo section", () => {
     const result = await runDemo({ section: "colors" });
 
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("THEME COLORS");
+    expect(result.output).toContain("Theme Colors");
   });
 });
 
@@ -260,7 +260,7 @@ describe("table demo section", () => {
     const output = runSection("table");
 
     expect(output).toBeDefined();
-    expect(output).toContain("BASIC TABLE");
+    expect(output).toContain("Basic Table");
     expect(output).toContain("renderTable");
   });
 
@@ -269,7 +269,7 @@ describe("table demo section", () => {
 
     const output = runSection("table");
 
-    expect(output).toContain("CUSTOM HEADERS");
+    expect(output).toContain("Custom Headers");
     expect(output).toContain("Task ID");
     expect(output).toContain("Assignee");
   });
@@ -279,7 +279,7 @@ describe("table demo section", () => {
 
     const output = runSection("table");
 
-    expect(output).toContain("BORDER STYLES");
+    expect(output).toContain("Border Styles");
     expect(output).toContain("single");
     expect(output).toContain("double");
     expect(output).toContain("rounded");
@@ -291,7 +291,7 @@ describe("table demo section", () => {
 
     const output = runSection("table");
 
-    expect(output).toContain("WIDE CHARACTERS");
+    expect(output).toContain("Wide Characters");
     expect(output).toContain("山田太郎");
   });
 
@@ -300,7 +300,7 @@ describe("table demo section", () => {
 
     const output = runSection("table");
 
-    expect(output).toContain("COMPACT MODE");
+    expect(output).toContain("Compact Mode");
     expect(output).toContain("compact: true");
   });
 
@@ -310,7 +310,7 @@ describe("table demo section", () => {
     const result = await runDemo({ section: "table" });
 
     expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("BASIC TABLE");
+    expect(result.output).toContain("Basic Table");
   });
 });
 

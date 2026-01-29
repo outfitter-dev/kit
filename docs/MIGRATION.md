@@ -32,7 +32,8 @@ program.parse();
 **After** — Outfitter CLI with typed commands and automatic output handling:
 
 ```typescript
-import { createCLI, command, output, exitWithError } from "@outfitter/cli";
+import { createCLI, command } from "@outfitter/cli/command";
+import { output, exitWithError } from "@outfitter/cli/output";
 import { createContext } from "@outfitter/contracts";
 import { listItems } from "./handlers/list-items.js";
 

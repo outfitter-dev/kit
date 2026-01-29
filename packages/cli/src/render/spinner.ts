@@ -128,7 +128,7 @@ export function getSpinnerFrame(style: SpinnerStyle, elapsed: number): string {
  * Renders a static spinner frame with optional message.
  *
  * This is the non-interactive version for logging and non-TTY contexts.
- * For animated spinners in interactive terminals, use `createSpinner()`.
+ * For animated spinners, use the elapsed parameter with `getSpinnerFrame()`.
  *
  * @param style - The spinner style to use
  * @param message - Optional message to display after the spinner

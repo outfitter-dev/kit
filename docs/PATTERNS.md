@@ -300,7 +300,7 @@ CLI output adapts to the environment: human-readable for terminals, JSON for pip
 ### Automatic Detection
 
 ```typescript
-import { output } from "@outfitter/cli";
+import { output } from "@outfitter/cli/output";
 
 await output(data); // Human for TTY, JSON for pipes
 ```
@@ -347,7 +347,7 @@ $XDG_STATE_HOME/{toolName}/cursors/{command}/cursor.json
 ### Using Pagination
 
 ```typescript
-import { loadCursor, saveCursor, clearCursor } from "@outfitter/cli";
+import { loadCursor, saveCursor, clearCursor } from "@outfitter/cli/pagination";
 
 const options = { command: "list", toolName: "myapp" };
 

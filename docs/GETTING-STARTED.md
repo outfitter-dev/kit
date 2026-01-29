@@ -108,7 +108,8 @@ export const listNotes: Handler<ListNotesInput, ListNotesOutput, NotFoundError> 
 Create `src/cli.ts`:
 
 ```typescript
-import { createCLI, command, output, exitWithError } from "@outfitter/cli";
+import { createCLI, command } from "@outfitter/cli/command";
+import { output, exitWithError } from "@outfitter/cli/output";
 import { createContext } from "@outfitter/contracts";
 import { listNotes } from "./handlers/list-notes.js";
 

@@ -11,7 +11,9 @@ bun add @outfitter/cli
 ## Quick Start
 
 ```typescript
-import { output, collectIds, loadCursor, saveCursor } from "@outfitter/cli";
+import { output } from "@outfitter/cli/output";
+import { collectIds } from "@outfitter/cli/input";
+import { loadCursor, saveCursor } from "@outfitter/cli/pagination";
 
 // Output data with automatic mode detection
 output({ id: "123", name: "Example" });
@@ -37,7 +39,7 @@ Output data to the console with automatic mode selection.
 Defaults to human-friendly output for TTY, JSON for non-TTY. Override via `mode` option or `OUTFITTER_JSON`/`OUTFITTER_JSONL` environment variables.
 
 ```typescript
-import { output } from "@outfitter/cli";
+import { output } from "@outfitter/cli/output";
 
 // Basic usage - mode auto-detected
 output(results);
@@ -73,7 +75,7 @@ output(errors, { stream: process.stderr });
 Exit the process with an error message and appropriate exit code.
 
 ```typescript
-import { exitWithError } from "@outfitter/cli";
+import { exitWithError } from "@outfitter/cli/output";
 
 try {
   await riskyOperation();
@@ -89,7 +91,7 @@ try {
 Collect IDs from various input formats: space-separated, comma-separated, repeated flags, `@file`, and stdin.
 
 ```typescript
-import { collectIds } from "@outfitter/cli";
+import { collectIds } from "@outfitter/cli/input";
 
 // All these produce the same result:
 // myapp show id1 id2 id3
@@ -116,7 +118,7 @@ const ids = await collectIds(args.ids, {
 Expand `@file` references to file contents. Returns input unchanged if not a file reference.
 
 ```typescript
-import { expandFileArg } from "@outfitter/cli";
+import { expandFileArg } from "@outfitter/cli/input";
 
 // myapp create @template.md
 const content = await expandFileArg(args.content);
@@ -141,7 +143,7 @@ const content = await expandFileArg(args.content, {
 Parse and expand glob patterns using `Bun.Glob`.
 
 ```typescript
-import { parseGlob } from "@outfitter/cli";
+import { parseGlob } from "@outfitter/cli/input";
 
 const files = await parseGlob("src/**/*.ts", {
   cwd: workspaceRoot,
@@ -165,7 +167,7 @@ const files = await parseGlob("src/**/*.ts", {
 Parse `key=value` pairs from CLI input.
 
 ```typescript
-import { parseKeyValue } from "@outfitter/cli";
+import { parseKeyValue } from "@outfitter/cli/input";
 
 // --set key=value --set key2=value2
 // --set key=value,key2=value2
@@ -182,7 +184,7 @@ if (result.isOk()) {
 Parse numeric or date range inputs.
 
 ```typescript
-import { parseRange } from "@outfitter/cli";
+import { parseRange } from "@outfitter/cli/input";
 
 // Numeric range
 const numResult = parseRange("1-10", "number");
@@ -202,7 +204,7 @@ const single = parseRange("5", "number");
 Parse filter expressions from CLI input.
 
 ```typescript
-import { parseFilter } from "@outfitter/cli";
+import { parseFilter } from "@outfitter/cli/input";
 
 const result = parseFilter("status:active,priority:>=high,!archived:true");
 
@@ -232,7 +234,7 @@ if (result.isOk()) {
 Parse sort specification from CLI input.
 
 ```typescript
-import { parseSortSpec } from "@outfitter/cli";
+import { parseSortSpec } from "@outfitter/cli/input";
 
 const result = parseSortSpec("modified:desc,title:asc");
 
@@ -249,7 +251,7 @@ if (result.isOk()) {
 Normalize an identifier with validation.
 
 ```typescript
-import { normalizeId } from "@outfitter/cli";
+import { normalizeId } from "@outfitter/cli/input";
 
 const result = normalizeId("  MY-ID  ", {
   trim: true,
@@ -279,7 +281,7 @@ if (result.isOk()) {
 Prompt for confirmation before destructive operations. Respects `--yes` flag for non-interactive mode.
 
 ```typescript
-import { confirmDestructive } from "@outfitter/cli";
+import { confirmDestructive } from "@outfitter/cli/input";
 
 const result = await confirmDestructive({
   message: "Delete 5 notes?",
@@ -311,7 +313,7 @@ $XDG_STATE_HOME/{toolName}/cursors/{command}[/{context}]/cursor.json
 Load persisted pagination state for a command.
 
 ```typescript
-import { loadCursor } from "@outfitter/cli";
+import { loadCursor } from "@outfitter/cli/pagination";
 
 const state = loadCursor({
   command: "list",
@@ -331,7 +333,7 @@ if (state) {
 Save pagination state for a command.
 
 ```typescript
-import { saveCursor } from "@outfitter/cli";
+import { saveCursor } from "@outfitter/cli/pagination";
 
 const results = await listNotes({ limit: 20 });
 
@@ -348,7 +350,7 @@ if (results.hasMore) {
 Clear persisted pagination state for a command.
 
 ```typescript
-import { clearCursor } from "@outfitter/cli";
+import { clearCursor } from "@outfitter/cli/pagination";
 
 // User passed --reset flag
 if (flags.reset) {
@@ -412,23 +414,10 @@ exitWithError(error); // Exits with code 2
 All types are exported for TypeScript consumers:
 
 ```typescript
-import type {
-  // Core types
-  CLIConfig,
-  CommandConfig,
-  CommandAction,
-  CommandFlags,
-  // Output types
-  OutputMode,
-  OutputOptions,
-  // Input types
-  CollectIdsOptions,
-  ExpandFileOptions,
-  ParseGlobOptions,
-  // Pagination types
-  PaginationState,
-  CursorOptions,
-} from "@outfitter/cli";
+import type { CLIConfig, CommandConfig, CommandAction, CommandFlags } from "@outfitter/cli/command";
+import type { OutputMode, OutputOptions } from "@outfitter/cli/output";
+import type { CollectIdsOptions, ExpandFileOptions, ParseGlobOptions } from "@outfitter/cli/input";
+import type { PaginationState, CursorOptions } from "@outfitter/cli/pagination";
 ```
 
 ## License

@@ -7,17 +7,22 @@
  * - getTerminalWidth (2 tests)
  * - getContentWidth (6 tests)
  * - getBoxOverhead (4 tests)
+ * - resolveWidth (6 tests)
+ * - createLayoutContext (4 tests)
  *
- * Total: 22 tests
+ * Total: 32 tests
  */
 import { describe, expect, it } from "bun:test";
 import {
+  createLayoutContext,
   getBoxOverhead,
   getContentWidth,
   getTerminalWidth,
   joinHorizontal,
   joinVertical,
+  resolveWidth,
 } from "../render/layout.js";
+import type { LayoutContext } from "../render/types.js";
 
 // ============================================================================
 // joinHorizontal Tests
@@ -247,5 +252,107 @@ describe("getBoxOverhead", () => {
     });
     expect(result.horizontal).toBe(4);
     expect(result.vertical).toBe(0);
+  });
+});
+
+// ============================================================================
+// resolveWidth Tests (6 tests)
+// ============================================================================
+
+describe("resolveWidth", () => {
+  describe("numeric width", () => {
+    it("returns the number directly", () => {
+      const result = resolveWidth(50);
+      expect(result).toBe(50);
+    });
+  });
+
+  describe("text mode", () => {
+    it("returns 0 for text mode (content-sized)", () => {
+      // "text" means width should be determined by content
+      // The function returns 0 to indicate no constraint
+      const result = resolveWidth("text");
+      expect(result).toBe(0);
+    });
+  });
+
+  describe("full mode", () => {
+    it("returns terminal width", () => {
+      const result = resolveWidth("full");
+      const expected = getTerminalWidth();
+      expect(result).toBe(expected);
+    });
+  });
+
+  describe("container mode", () => {
+    it("throws without context", () => {
+      expect(() => resolveWidth("container")).toThrow(
+        "container width mode requires LayoutContext"
+      );
+    });
+
+    it("returns context width when context provided", () => {
+      const ctx: LayoutContext = { width: 60 };
+      const result = resolveWidth("container", ctx);
+      expect(result).toBe(60);
+    });
+  });
+
+  describe("percentage mode", () => {
+    it("calculates percentage of terminal width without context", () => {
+      const terminal = getTerminalWidth();
+      const result = resolveWidth("50%");
+      expect(result).toBe(Math.floor(terminal * 0.5));
+    });
+
+    it("calculates percentage of context width when context provided", () => {
+      const ctx: LayoutContext = { width: 100 };
+      const result = resolveWidth("50%", ctx);
+      expect(result).toBe(50);
+    });
+
+    it("handles 100%", () => {
+      const ctx: LayoutContext = { width: 80 };
+      const result = resolveWidth("100%", ctx);
+      expect(result).toBe(80);
+    });
+
+    it("rounds down to integer", () => {
+      const ctx: LayoutContext = { width: 100 };
+      const result = resolveWidth("33%", ctx);
+      expect(result).toBe(33); // 100 * 0.33 = 33
+    });
+  });
+});
+
+// ============================================================================
+// createLayoutContext Tests (4 tests)
+// ============================================================================
+
+describe("createLayoutContext", () => {
+  it("creates context from box options with fixed width", () => {
+    const ctx = createLayoutContext({ width: 40, padding: 1 });
+    // Content width: 40 - 4 (default overhead) = 36
+    expect(ctx.width).toBe(36);
+  });
+
+  it("creates context from terminal width when no width specified", () => {
+    const ctx = createLayoutContext({});
+    const expected = getTerminalWidth() - 4; // Default overhead
+    expect(ctx.width).toBe(expected);
+  });
+
+  it("chains with parent context", () => {
+    const parent: LayoutContext = { width: 100 };
+    const ctx = createLayoutContext({ width: 60, padding: 1 }, parent);
+    expect(ctx.width).toBe(56); // 60 - 4 overhead
+    expect(ctx.parent).toBe(parent);
+  });
+
+  it("uses parent width when width not specified", () => {
+    const parent: LayoutContext = { width: 80 };
+    // When no width specified, use parent width minus own overhead
+    const ctx = createLayoutContext({ padding: 1 }, parent);
+    expect(ctx.width).toBe(76); // 80 - 4 overhead
   });
 });

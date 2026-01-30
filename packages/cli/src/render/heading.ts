@@ -5,6 +5,8 @@
  */
 
 import { getTerminalWidth } from "./layout.js";
+import type { WidthMode } from "./types.js";
+
 /**
  * Separator style for headings.
  */
@@ -12,11 +14,13 @@ export type SeparatorStyle = "=" | "-" | "─" | "━" | "═";
 
 /**
  * Width mode for headings.
- * - "text" - match the text width
- * - "full" - full terminal width
- * - number - fixed width
+ *
+ * Note: Headings only support "text", "full", and numeric widths.
+ * Use the shared WidthMode type for full container-relative support.
+ *
+ * @see WidthMode for the complete type definition
  */
-export type WidthMode = "text" | "full" | number;
+export type HeadingWidthMode = Extract<WidthMode, "text" | "full" | number>;
 
 /**
  * Case transformation for heading text.
@@ -30,7 +34,7 @@ export interface HeadingOptions {
   /** Separator character/style (default: "=") */
   separator?: SeparatorStyle;
   /** Width mode (default: "text") */
-  width?: WidthMode;
+  width?: HeadingWidthMode;
   /** Case transformation (default: "upper") */
   case?: CaseMode;
 }

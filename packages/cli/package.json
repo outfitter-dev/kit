@@ -15,12 +15,6 @@
         "default": "./dist/output.js"
       }
     },
-    "./tree": {
-      "import": {
-        "types": "./dist/tree/index.d.ts",
-        "default": "./dist/tree/index.js"
-      }
-    },
     "./demo": {
       "import": {
         "types": "./dist/demo/index.d.ts",
@@ -51,10 +45,46 @@
         "default": "./dist/box/index.js"
       }
     },
+    "./tree": {
+      "import": {
+        "types": "./dist/tree/index.d.ts",
+        "default": "./dist/tree/index.js"
+      }
+    },
+    "./demo/section": {
+      "import": {
+        "types": "./dist/demo/section.d.ts",
+        "default": "./dist/demo/section.js"
+      }
+    },
     "./render": {
       "import": {
         "types": "./dist/render/index.d.ts",
         "default": "./dist/render/index.js"
+      }
+    },
+    "./terminal": {
+      "import": {
+        "types": "./dist/terminal/index.d.ts",
+        "default": "./dist/terminal/index.js"
+      }
+    },
+    "./terminal/detection": {
+      "import": {
+        "types": "./dist/terminal/detection.d.ts",
+        "default": "./dist/terminal/detection.js"
+      }
+    },
+    "./prompt/text": {
+      "import": {
+        "types": "./dist/prompt/text.d.ts",
+        "default": "./dist/prompt/text.js"
+      }
+    },
+    "./prompt/types": {
+      "import": {
+        "types": "./dist/prompt/types.d.ts",
+        "default": "./dist/prompt/types.js"
       }
     },
     "./prompt/validators": {

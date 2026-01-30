@@ -58,9 +58,9 @@ export { formatRelative } from "./format-relative.js";
 export {
   type CaseMode,
   type HeadingOptions,
+  type HeadingWidthMode,
   renderHeading,
   type SeparatorStyle,
-  type WidthMode,
 } from "./heading.js";
 // Indicators
 export {
@@ -77,15 +77,16 @@ export { renderJson, renderText } from "./json.js";
 // Layout utilities
 export {
   type Alignment,
+  createLayoutContext,
   getBoxOverhead,
   getContentWidth,
   getTerminalWidth,
   type HorizontalLayoutOptions,
   joinHorizontal,
   joinVertical,
+  resolveWidth,
   type VerticalLayoutOptions,
 } from "./layout.js";
-
 // List rendering
 export {
   type ListItem,
@@ -96,7 +97,6 @@ export {
 } from "./list.js";
 // Markdown rendering
 export { renderMarkdown } from "./markdown.js";
-
 // Progress rendering
 export { type ProgressOptions, renderProgress } from "./progress.js";
 // Separator rendering
@@ -154,3 +154,5 @@ export {
   type TreeGuideStyle,
   type TreeOptions,
 } from "./tree.js";
+// Shared render types
+export type { LayoutContext, WidthMode } from "./types.js";

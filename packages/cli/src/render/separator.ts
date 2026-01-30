@@ -5,7 +5,15 @@
  */
 
 import { getTerminalWidth } from "./layout.js";
-import type { WidthMode } from "./heading.js";
+import type { WidthMode } from "./types.js";
+
+/**
+ * Width mode for separators.
+ *
+ * Separators only support "text", "full", and numeric widths.
+ * Container-relative modes require context, which separators don't use.
+ */
+type SeparatorWidthMode = Extract<WidthMode, "text" | "full" | number>;
 
 /**
  * Separator style for dividers.
@@ -21,7 +29,7 @@ export interface SeparatorOptions {
   /** Separator style (default: "─") */
   style?: DividerStyle;
   /** Width mode (default: 40) */
-  width?: WidthMode;
+  width?: SeparatorWidthMode;
 }
 
 /**

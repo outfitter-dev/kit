@@ -10,6 +10,7 @@ import {
   getProgressIndicator,
   INDICATORS,
 } from "../../render/indicators.js";
+import { demoSection, demoSubsection } from "../section.js";
 import type { DemoConfig } from "../types.js";
 
 /**
@@ -26,8 +27,7 @@ export function renderIndicatorsDemo(
   // ==========================================================================
   // Overview Section
   // ==========================================================================
-  lines.push("INDICATORS");
-  lines.push("==========");
+  lines.push(demoSection("Indicators"));
   lines.push("");
 
   if (showCode) {
@@ -43,8 +43,7 @@ export function renderIndicatorsDemo(
   // ==========================================================================
   // Status Indicators
   // ==========================================================================
-  lines.push("STATUS");
-  lines.push("------");
+  lines.push(demoSubsection("Status"));
   lines.push("");
 
   for (const [name, indicator] of Object.entries(INDICATORS.status)) {
@@ -70,8 +69,7 @@ export function renderIndicatorsDemo(
   // ==========================================================================
   // Marker Indicators
   // ==========================================================================
-  lines.push("MARKERS");
-  lines.push("-------");
+  lines.push(demoSubsection("Markers"));
   lines.push("");
 
   // Group markers by type for better display
@@ -106,8 +104,7 @@ export function renderIndicatorsDemo(
   // ==========================================================================
   // Progress Indicators
   // ==========================================================================
-  lines.push("PROGRESS");
-  lines.push("--------");
+  lines.push(demoSubsection("Progress"));
   lines.push("");
 
   // Show progress styles visually
@@ -141,8 +138,7 @@ export function renderIndicatorsDemo(
   // ==========================================================================
   // Triangle Indicators
   // ==========================================================================
-  lines.push("TRIANGLES");
-  lines.push("---------");
+  lines.push(demoSubsection("Triangles"));
   lines.push("");
 
   const triangleGroups = {
@@ -163,8 +159,7 @@ export function renderIndicatorsDemo(
   // ==========================================================================
   // Special Indicators
   // ==========================================================================
-  lines.push("SPECIAL");
-  lines.push("-------");
+  lines.push(demoSubsection("Special"));
   lines.push("");
 
   for (const [name, indicator] of Object.entries(INDICATORS.special)) {
@@ -177,8 +172,7 @@ export function renderIndicatorsDemo(
   // ==========================================================================
   // Directional Indicators
   // ==========================================================================
-  lines.push("DIRECTIONAL");
-  lines.push("-----------");
+  lines.push(demoSubsection("Directional"));
   lines.push("");
 
   for (const [name, indicator] of Object.entries(INDICATORS.directional)) {
@@ -191,8 +185,7 @@ export function renderIndicatorsDemo(
   // ==========================================================================
   // Math Indicators
   // ==========================================================================
-  lines.push("MATH");
-  lines.push("----");
+  lines.push(demoSubsection("Math"));
   lines.push("");
 
   for (const [name, indicator] of Object.entries(INDICATORS.math)) {
@@ -205,8 +198,7 @@ export function renderIndicatorsDemo(
   // ==========================================================================
   // Usage Notes
   // ==========================================================================
-  lines.push("USAGE");
-  lines.push("-----");
+  lines.push(demoSubsection("Usage"));
   lines.push("");
   lines.push("• getIndicator(category, name) — auto-detects Unicode support");
   lines.push(

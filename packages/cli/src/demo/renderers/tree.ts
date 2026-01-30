@@ -10,6 +10,7 @@ import {
   TREE_GUIDES,
   type TreeGuideStyle,
 } from "../../render/tree.js";
+import { demoSection } from "../section.js";
 import { getExample } from "../templates.js";
 import type { DemoConfig } from "../types.js";
 
@@ -24,8 +25,7 @@ export function renderTreeDemo(config: DemoConfig, _theme: Theme): string {
   // ==========================================================================
   // Basic Tree Section
   // ==========================================================================
-  lines.push("BASIC TREE");
-  lines.push("==========");
+  lines.push(demoSection("Basic Tree"));
   lines.push("");
 
   if (showCode) {
@@ -52,8 +52,7 @@ export function renderTreeDemo(config: DemoConfig, _theme: Theme): string {
   // ==========================================================================
   // Guide Styles Section
   // ==========================================================================
-  lines.push("GUIDE STYLES");
-  lines.push("============");
+  lines.push(demoSection("Guide Styles"));
   lines.push("");
 
   const guideDemo = {
@@ -85,8 +84,7 @@ export function renderTreeDemo(config: DemoConfig, _theme: Theme): string {
   // ==========================================================================
   // Max Depth Section
   // ==========================================================================
-  lines.push("MAX DEPTH");
-  lines.push("=========");
+  lines.push(demoSection("Max Depth"));
   lines.push("");
 
   const deepTree = {
@@ -114,8 +112,7 @@ export function renderTreeDemo(config: DemoConfig, _theme: Theme): string {
   // ==========================================================================
   // Custom Labels Section
   // ==========================================================================
-  lines.push("CUSTOM LABELS");
-  lines.push("=============");
+  lines.push(demoSection("Custom Labels"));
   lines.push("");
 
   const fileTree = {
@@ -157,8 +154,7 @@ export function renderTreeDemo(config: DemoConfig, _theme: Theme): string {
   // ==========================================================================
   // Usage Notes Section
   // ==========================================================================
-  lines.push("USAGE NOTES");
-  lines.push("===========");
+  lines.push(demoSection("Usage Notes"));
   lines.push("");
   lines.push("• Objects become branches with children");
   lines.push("• null values become leaf nodes (terminal)");

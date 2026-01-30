@@ -7,6 +7,7 @@
 import type { Theme } from "../../render/colors.js";
 import { renderList } from "../../render/list.js";
 import { getListStyles, LIST_STYLE_META } from "../registry.js";
+import { demoSection } from "../section.js";
 import { getExample } from "../templates.js";
 import type { DemoConfig } from "../types.js";
 
@@ -22,8 +23,7 @@ export function renderListDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // List Styles Section
   // ==========================================================================
-  lines.push("LIST STYLES");
-  lines.push("===========");
+  lines.push(demoSection("List Styles"));
   lines.push("");
 
   if (showCode) {
@@ -65,8 +65,7 @@ export function renderListDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Nested Lists Section
   // ==========================================================================
-  lines.push("NESTED LISTS");
-  lines.push("============");
+  lines.push(demoSection("Nested Lists"));
   lines.push("");
 
   const nestedItems = [
@@ -95,8 +94,7 @@ export function renderListDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Numbered Nesting Section
   // ==========================================================================
-  lines.push("NUMBERED WITH NESTING");
-  lines.push("=====================");
+  lines.push(demoSection("Numbered with Nesting"));
   lines.push("");
 
   const numberedNested = [
@@ -124,8 +122,7 @@ export function renderListDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Mixed Styles Section
   // ==========================================================================
-  lines.push("MIXED STYLES");
-  lines.push("============");
+  lines.push(demoSection("Mixed Styles"));
   lines.push("");
 
   if (showDescriptions) {

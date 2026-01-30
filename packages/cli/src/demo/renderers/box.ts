@@ -7,6 +7,7 @@
 import { createBox, renderBox } from "../../render/box.js";
 import type { Theme } from "../../render/colors.js";
 import { BORDER_STYLE_META, getBorderStyles } from "../registry.js";
+import { demoSection } from "../section.js";
 import { getExample } from "../templates.js";
 import type { DemoConfig } from "../types.js";
 
@@ -22,8 +23,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Basic Box Section
   // ==========================================================================
-  lines.push("BASIC BOX");
-  lines.push("=========");
+  lines.push(demoSection("Basic Box"));
   lines.push("");
 
   if (showCode) {
@@ -44,8 +44,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Box with Title Section
   // ==========================================================================
-  lines.push("BOX WITH TITLE");
-  lines.push("==============");
+  lines.push(demoSection("Box with Title"));
   lines.push("");
 
   const title = getExample("boxTitle", config.examples);
@@ -61,8 +60,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Border Styles Section
   // ==========================================================================
-  lines.push("BORDER STYLES");
-  lines.push("=============");
+  lines.push(demoSection("Border Styles"));
   lines.push("");
 
   const styles = getBorderStyles().filter((s) => s !== "none");
@@ -83,8 +81,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Alignment Section
   // ==========================================================================
-  lines.push("ALIGNMENT");
-  lines.push("=========");
+  lines.push(demoSection("Alignment"));
   lines.push("");
 
   const alignments: Array<"left" | "center" | "right"> = [
@@ -104,8 +101,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Multi-line Content Section
   // ==========================================================================
-  lines.push("MULTI-LINE CONTENT");
-  lines.push("==================");
+  lines.push(demoSection("Multi-Line Content"));
   lines.push("");
 
   const multiLine = ["Line one", "Line two", "Line three"];
@@ -121,8 +117,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Sections with Dividers
   // ==========================================================================
-  lines.push("SECTIONS WITH DIVIDERS");
-  lines.push("======================");
+  lines.push(demoSection("Sections with Dividers"));
   lines.push("");
 
   if (showDescriptions) {
@@ -183,8 +178,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Partial Borders
   // ==========================================================================
-  lines.push("PARTIAL BORDERS");
-  lines.push("===============");
+  lines.push(demoSection("Partial Borders"));
   lines.push("");
 
   if (showDescriptions) {
@@ -229,8 +223,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Margin
   // ==========================================================================
-  lines.push("MARGIN");
-  lines.push("======");
+  lines.push(demoSection("Margin"));
   lines.push("");
 
   if (showDescriptions) {
@@ -249,8 +242,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Individual Padding
   // ==========================================================================
-  lines.push("INDIVIDUAL PADDING");
-  lines.push("==================");
+  lines.push(demoSection("Individual Padding"));
   lines.push("");
 
   if (showDescriptions) {
@@ -275,8 +267,7 @@ export function renderBoxDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Nested Boxes
   // ==========================================================================
-  lines.push("NESTED BOXES");
-  lines.push("============");
+  lines.push(demoSection("Nested Boxes"));
   lines.push("");
 
   if (showDescriptions) {

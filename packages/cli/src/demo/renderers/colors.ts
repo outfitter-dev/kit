@@ -17,6 +17,7 @@ import {
   resolveForceColorEnv,
 } from "../../terminal/detection.js";
 import { getThemeMethodsByCategory } from "../registry.js";
+import { demoSection } from "../section.js";
 import { getExample } from "../templates.js";
 import type { DemoConfig } from "../types.js";
 
@@ -33,8 +34,7 @@ export function renderColorsDemo(config: DemoConfig, theme: Theme): string {
   // ==========================================================================
   // Theme Colors Section
   // ==========================================================================
-  lines.push("THEME COLORS (createTheme)");
-  lines.push("==========================");
+  lines.push(demoSection("Theme Colors (createTheme)", { case: "none" }));
   lines.push("");
 
   if (showCode) {
@@ -57,8 +57,7 @@ export function renderColorsDemo(config: DemoConfig, theme: Theme): string {
   // Utility Methods Section
   // ==========================================================================
   lines.push("");
-  lines.push("UTILITY METHODS");
-  lines.push("===============");
+  lines.push(demoSection("Utility Methods"));
   lines.push("");
 
   const { utility } = getThemeMethodsByCategory();
@@ -75,8 +74,7 @@ export function renderColorsDemo(config: DemoConfig, theme: Theme): string {
   // Direct Colors Section
   // ==========================================================================
   lines.push("");
-  lines.push("DIRECT COLORS (applyColor)");
-  lines.push("==========================");
+  lines.push(demoSection("Direct Colors (applyColor)", { case: "none" }));
   lines.push("");
 
   if (showCode) {
@@ -104,8 +102,7 @@ export function renderColorsDemo(config: DemoConfig, theme: Theme): string {
   // Raw Tokens Section
   // ==========================================================================
   lines.push("");
-  lines.push("RAW TOKENS (createTokens)");
-  lines.push("=========================");
+  lines.push(demoSection("Raw Tokens (createTokens)", { case: "none" }));
   lines.push("");
 
   if (showCode) {
@@ -149,8 +146,7 @@ export function renderColorsDemo(config: DemoConfig, theme: Theme): string {
   // Environment Section
   // ==========================================================================
   lines.push("");
-  lines.push("ENVIRONMENT");
-  lines.push("===========");
+  lines.push(demoSection("Environment"));
 
   const noColor = hasNoColorEnv();
   const forceColor = resolveForceColorEnv();

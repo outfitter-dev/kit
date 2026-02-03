@@ -41,7 +41,7 @@ export {
 } from "./env.js";
 
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import type { TaggedErrorClass } from "@outfitter/contracts";
 import {
   NotFoundError,
@@ -88,6 +88,26 @@ const ParseErrorBase: TaggedErrorClass<"ParseError", ParseErrorFields> =
  * ```
  */
 export class ParseError extends ParseErrorBase {
+  readonly category = "validation" as const;
+}
+
+// biome-ignore lint/style/useConsistentTypeDefinitions: type required for TaggedError constraint
+type CircularExtendsErrorFields = {
+  /** Human-readable error message */
+  message: string;
+  /** The config file paths that form the circular reference */
+  chain: string[];
+};
+
+const CircularExtendsErrorBase: TaggedErrorClass<
+  "CircularExtendsError",
+  CircularExtendsErrorFields
+> = TaggedError("CircularExtendsError")<CircularExtendsErrorFields>();
+
+/**
+ * Error thrown when a circular extends reference is detected.
+ */
+export class CircularExtendsError extends CircularExtendsErrorBase {
   readonly category = "validation" as const;
 }
 
@@ -651,6 +671,7 @@ export function loadConfig<T>(
   | InstanceType<typeof NotFoundError>
   | InstanceType<typeof ValidationError>
   | InstanceType<typeof ParseError>
+  | InstanceType<typeof CircularExtendsError>
 > {
   // Determine search paths
   const searchPaths = options?.searchPaths
@@ -678,30 +699,15 @@ export function loadConfig<T>(
     );
   }
 
-  // Read and parse the config file
-  let content: string;
-  try {
-    content = readFileSync(configFilePath, "utf-8");
-  } catch {
-    return Result.err(
-      new NotFoundError({
-        message: `Failed to read config file: ${configFilePath}`,
-        resourceType: "config",
-        resourceId: configFilePath,
-      })
-    );
-  }
+  // Load config file with extends support
+  const loadResult = loadConfigFileWithExtends(configFilePath);
 
-  // Parse the config file
-  const filename = configFilePath.split("/").pop() ?? "config";
-  const parseResult = parseConfigFile(content, filename);
-
-  if (parseResult.isErr()) {
-    return Result.err(parseResult.error);
+  if (loadResult.isErr()) {
+    return Result.err(loadResult.error);
   }
 
   // Validate against schema
-  const parsed = parseResult.unwrap();
+  const parsed = loadResult.unwrap();
   const validateResult = schema.safeParse(parsed);
 
   if (!validateResult.success) {
@@ -720,4 +726,187 @@ export function loadConfig<T>(
   }
 
   return Result.ok(validateResult.data);
+}
+
+// ============================================================================
+// Config Extends Support
+// ============================================================================
+
+/**
+ * Resolve an extends path relative to the config file that contains it.
+ * @internal
+ */
+function resolveExtendsPath(extendsValue: string, fromFile: string): string {
+  if (isAbsolute(extendsValue)) {
+    return extendsValue;
+  }
+  // Resolve relative to the directory containing the config file
+  return resolve(dirname(fromFile), extendsValue);
+}
+
+/**
+ * Load a config file and recursively resolve any extends references.
+ * @internal
+ */
+function loadConfigFileWithExtends(
+  filePath: string,
+  visited: Set<string> = new Set()
+): Result<
+  Record<string, unknown>,
+  | InstanceType<typeof NotFoundError>
+  | InstanceType<typeof ParseError>
+  | InstanceType<typeof CircularExtendsError>
+> {
+  // Normalize path for circular detection
+  const normalizedPath = resolve(filePath);
+
+  // Check for circular reference
+  if (visited.has(normalizedPath)) {
+    return Result.err(
+      new CircularExtendsError({
+        message: `Circular extends detected: ${[...visited, normalizedPath].join(" -> ")}`,
+        chain: [...visited, normalizedPath],
+      })
+    );
+  }
+
+  // Check file exists
+  if (!existsSync(filePath)) {
+    return Result.err(
+      new NotFoundError({
+        message: `Config file not found: ${filePath}`,
+        resourceType: "config",
+        resourceId: filePath,
+      })
+    );
+  }
+
+  // Read file
+  let content: string;
+  try {
+    content = readFileSync(filePath, "utf-8");
+  } catch {
+    return Result.err(
+      new NotFoundError({
+        message: `Failed to read config file: ${filePath}`,
+        resourceType: "config",
+        resourceId: filePath,
+      })
+    );
+  }
+
+  // Parse file
+  const filename = filePath.split("/").pop() ?? "config";
+  const parseResult = parseConfigFile(content, filename);
+
+  if (parseResult.isErr()) {
+    return Result.err(parseResult.error);
+  }
+
+  const parsed = parseResult.unwrap();
+
+  // Check for extends field
+  const extendsValue = parsed["extends"];
+  if (extendsValue === undefined) {
+    // No extends field, return parsed config as-is
+    return Result.ok(parsed);
+  }
+  if (typeof extendsValue !== "string") {
+    // extends exists but is not a string - this is an error
+    return Result.err(
+      new ParseError({
+        message: `Invalid "extends" value in ${filePath}: expected string, got ${typeof extendsValue}`,
+        filename: filePath,
+      })
+    );
+  }
+
+  // Mark current file as visited before recursing
+  visited.add(normalizedPath);
+
+  // Resolve the extends path
+  const extendsPath = resolveExtendsPath(extendsValue, filePath);
+
+  // Recursively load the base config
+  const baseResult = loadConfigFileWithExtends(extendsPath, visited);
+
+  if (baseResult.isErr()) {
+    return Result.err(baseResult.error);
+  }
+
+  // Merge: base config <- current config (current overrides base)
+  const baseConfig = baseResult.unwrap();
+  const { extends: __, ...currentConfig } = parsed;
+
+  return Result.ok(deepMerge(baseConfig, currentConfig));
+}
+
+// ============================================================================
+// Environment Variable Mapping
+// ============================================================================
+
+/**
+ * Map environment variables to config object based on prefix.
+ *
+ * Environment variables are mapped as follows:
+ * - `PREFIX_KEY` -> `{ key: value }`
+ * - `PREFIX_NESTED__KEY` -> `{ nested: { key: value } }`
+ *
+ * Only returns values for keys that have matching env vars set.
+ * Values are returned as strings; use Zod coercion for type conversion.
+ *
+ * @param prefix - Environment variable prefix (e.g., "MYAPP")
+ * @param schema - Zod schema to determine valid keys (optional, for filtering)
+ * @returns Partial config object with mapped values
+ *
+ * @example
+ * ```typescript
+ * // With MYAPP_PORT=8080 and MYAPP_DB__HOST=localhost
+ * const schema = z.object({
+ *   port: z.coerce.number(),
+ *   db: z.object({ host: z.string() }),
+ * });
+ *
+ * const envConfig = mapEnvToConfig("MYAPP", schema);
+ * // { port: "8080", db: { host: "localhost" } }
+ *
+ * const result = resolveConfig(schema, { env: envConfig });
+ * ```
+ */
+export function mapEnvToConfig<T>(
+  prefix: string,
+  _schema?: ZodSchema<T>
+): Partial<T> {
+  const result: Record<string, unknown> = {};
+  const prefixWithUnderscore = `${prefix}_`;
+
+  for (const [key, value] of Object.entries(process.env)) {
+    if (!key.startsWith(prefixWithUnderscore) || value === undefined) {
+      continue;
+    }
+
+    // Remove prefix and convert to lowercase path
+    const configPath = key
+      .slice(prefixWithUnderscore.length)
+      .toLowerCase()
+      .split("__");
+
+    // Set nested value
+    let current = result;
+    for (let i = 0; i < configPath.length - 1; i++) {
+      const segment = configPath[i];
+      if (segment === undefined) continue;
+      if (!(segment in current)) {
+        current[segment] = {};
+      }
+      current = current[segment] as Record<string, unknown>;
+    }
+
+    const lastSegment = configPath.at(-1);
+    if (lastSegment !== undefined) {
+      current[lastSegment] = value;
+    }
+  }
+
+  return result as Partial<T>;
 }

@@ -32,6 +32,7 @@ import {
   getDataDir,
   getStateDir,
   loadConfig,
+  mapEnvToConfig,
   parseConfigFile,
   resolveConfig,
 } from "../index.js";
@@ -737,6 +738,306 @@ describe("Integration: Full Config Workflow", () => {
       expect(config.name).toBe("test-app");
       expect(config.server.port).toBe(8080); // env override
       expect(config.server.host).toBe("localhost"); // from file
+    }
+  });
+});
+
+// ============================================================================
+// Config Extends Tests
+// ============================================================================
+
+describe("Config Extends", () => {
+  const EXTENDS_TEST_DIR = "/tmp/config-extends-test";
+
+  beforeAll(() => {
+    // Create test directory structure
+    mkdirSync(`${EXTENDS_TEST_DIR}/base`, { recursive: true });
+    mkdirSync(`${EXTENDS_TEST_DIR}/app`, { recursive: true });
+    mkdirSync(`${EXTENDS_TEST_DIR}/circular-a`, { recursive: true });
+    mkdirSync(`${EXTENDS_TEST_DIR}/circular-b`, { recursive: true });
+    mkdirSync(`${EXTENDS_TEST_DIR}/chain`, { recursive: true });
+
+    // Base config
+    writeFileSync(
+      `${EXTENDS_TEST_DIR}/base/config.toml`,
+      `port = 3000
+host = "localhost"
+timeout = 5000
+`
+    );
+
+    // App config extending base with relative path
+    writeFileSync(
+      `${EXTENDS_TEST_DIR}/app/config.toml`,
+      `extends = "../base/config.toml"
+port = 8080
+name = "my-app"
+`
+    );
+
+    // Circular reference A -> B
+    writeFileSync(
+      `${EXTENDS_TEST_DIR}/circular-a/config.toml`,
+      `extends = "../circular-b/config.toml"
+value = "a"
+`
+    );
+
+    // Circular reference B -> A
+    writeFileSync(
+      `${EXTENDS_TEST_DIR}/circular-b/config.toml`,
+      `extends = "../circular-a/config.toml"
+value = "b"
+`
+    );
+
+    // Chain: grandparent -> parent -> child
+    writeFileSync(
+      `${EXTENDS_TEST_DIR}/chain/grandparent.toml`,
+      `level = "grandparent"
+fromGrandparent = true
+`
+    );
+
+    writeFileSync(
+      `${EXTENDS_TEST_DIR}/chain/parent.toml`,
+      `extends = "./grandparent.toml"
+level = "parent"
+fromParent = true
+`
+    );
+
+    writeFileSync(
+      `${EXTENDS_TEST_DIR}/chain/config.toml`,
+      `extends = "./parent.toml"
+level = "child"
+fromChild = true
+`
+    );
+  });
+
+  afterAll(() => {
+    rmSync(EXTENDS_TEST_DIR, { recursive: true, force: true });
+  });
+
+  it("resolves relative extends path and merges configs", () => {
+    const schema = z.object({
+      port: z.number(),
+      host: z.string(),
+      timeout: z.number(),
+      name: z.string(),
+    });
+
+    const result = loadConfig("app", schema, {
+      searchPaths: [EXTENDS_TEST_DIR],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const config = result.unwrap();
+      expect(config.port).toBe(8080); // overridden by app
+      expect(config.host).toBe("localhost"); // from base
+      expect(config.timeout).toBe(5000); // from base
+      expect(config.name).toBe("my-app"); // only in app
+    }
+  });
+
+  it("detects circular extends and returns error", () => {
+    const schema = z.object({ value: z.string() });
+
+    const result = loadConfig("circular-a", schema, {
+      searchPaths: [EXTENDS_TEST_DIR],
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("circular");
+    }
+  });
+
+  it("handles multi-level extends chain", () => {
+    const schema = z.object({
+      level: z.string(),
+      fromGrandparent: z.boolean(),
+      fromParent: z.boolean(),
+      fromChild: z.boolean(),
+    });
+
+    const result = loadConfig("chain", schema, {
+      searchPaths: [EXTENDS_TEST_DIR],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      const config = result.unwrap();
+      expect(config.level).toBe("child"); // most specific wins
+      expect(config.fromGrandparent).toBe(true);
+      expect(config.fromParent).toBe(true);
+      expect(config.fromChild).toBe(true);
+    }
+  });
+
+  it("returns error when extends is not a string", () => {
+    const dir = `${EXTENDS_TEST_DIR}/invalid-extends`;
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      `${dir}/config.toml`,
+      `extends = 123
+value = "test"
+`
+    );
+
+    const schema = z.object({ value: z.string() });
+    const result = loadConfig("invalid-extends", schema, {
+      searchPaths: [EXTENDS_TEST_DIR],
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("extends");
+      expect(result.error.message).toContain("string");
+    }
+
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("returns error when extended file does not exist", () => {
+    const dir = `${EXTENDS_TEST_DIR}/missing-extends`;
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      `${dir}/config.toml`,
+      `extends = "./nonexistent.toml"
+value = "test"
+`
+    );
+
+    const schema = z.object({ value: z.string() });
+    const result = loadConfig("missing-extends", schema, {
+      searchPaths: [EXTENDS_TEST_DIR],
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain("not found");
+    }
+
+    rmSync(dir, { recursive: true, force: true });
+  });
+});
+
+// ============================================================================
+// Env Prefix Mapping Tests
+// ============================================================================
+
+describe("Env Prefix Mapping", () => {
+  const originalEnv = { ...process.env };
+
+  afterEach(() => {
+    // Restore original env
+    for (const key of Object.keys(process.env)) {
+      if (key.startsWith("TESTAPP_")) {
+        delete process.env[key];
+      }
+    }
+    Object.assign(process.env, originalEnv);
+  });
+
+  it("maps simple env vars to config keys", () => {
+    process.env["TESTAPP_PORT"] = "8080";
+    process.env["TESTAPP_HOST"] = "0.0.0.0";
+
+    const schema = z.object({
+      port: z.coerce.number(),
+      host: z.string(),
+    });
+
+    const result = resolveConfig(schema, {
+      defaults: { port: 3000, host: "localhost" },
+      env: mapEnvToConfig("TESTAPP", schema),
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.port).toBe(8080);
+      expect(result.value.host).toBe("0.0.0.0");
+    }
+  });
+
+  it("maps nested env vars using __ separator", () => {
+    process.env["TESTAPP_DATABASE__HOST"] = "db.example.com";
+    process.env["TESTAPP_DATABASE__PORT"] = "5432";
+
+    const schema = z.object({
+      database: z.object({
+        host: z.string(),
+        port: z.coerce.number(),
+      }),
+    });
+
+    const result = resolveConfig(schema, {
+      defaults: { database: { host: "localhost", port: 5432 } },
+      env: mapEnvToConfig("TESTAPP", schema),
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.database.host).toBe("db.example.com");
+      expect(result.value.database.port).toBe(5432);
+    }
+  });
+
+  it("ignores env vars not matching prefix", () => {
+    process.env["TESTAPP_PORT"] = "8080";
+    process.env["OTHER_PORT"] = "9999";
+
+    const schema = z.object({
+      port: z.coerce.number(),
+    });
+
+    const result = resolveConfig(schema, {
+      defaults: { port: 3000 },
+      env: mapEnvToConfig("TESTAPP", schema),
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.port).toBe(8080); // not 9999
+    }
+  });
+
+  it("maps all env vars with prefix (schema filters during validation)", () => {
+    process.env["TESTAPP_PORT"] = "8080";
+    process.env["TESTAPP_EXTRA"] = "mapped";
+
+    const schema = z.object({
+      port: z.coerce.number(),
+    });
+
+    const mapped = mapEnvToConfig("TESTAPP", schema);
+
+    // All prefixed vars are mapped; Zod's passthrough/strict handles unknowns
+    expect(mapped.port).toBe("8080");
+    expect((mapped as Record<string, unknown>)["extra"]).toBe("mapped");
+  });
+
+  it("handles boolean coercion", () => {
+    process.env["TESTAPP_DEBUG"] = "true";
+    process.env["TESTAPP_VERBOSE"] = "1";
+
+    const schema = z.object({
+      debug: z.coerce.boolean(),
+      verbose: z.coerce.boolean(),
+    });
+
+    const result = resolveConfig(schema, {
+      defaults: { debug: false, verbose: false },
+      env: mapEnvToConfig("TESTAPP", schema),
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.debug).toBe(true);
+      expect(result.value.verbose).toBe(true);
     }
   });
 });

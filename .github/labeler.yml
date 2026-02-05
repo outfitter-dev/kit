@@ -1,0 +1,132 @@
+# Path-based auto-labeling for PRs
+# Used by: .github/workflows/auto-label.yml
+#
+# Docs: https://github.com/actions/labeler
+
+# =============================================================================
+# PACKAGES
+# =============================================================================
+
+package/contracts:
+  - changed-files:
+      - any-glob-to-any-file: packages/contracts/**
+
+package/cli:
+  - changed-files:
+      - any-glob-to-any-file: packages/cli/**
+
+package/mcp:
+  - changed-files:
+      - any-glob-to-any-file: packages/mcp/**
+
+package/config:
+  - changed-files:
+      - any-glob-to-any-file: packages/config/**
+
+package/logging:
+  - changed-files:
+      - any-glob-to-any-file: packages/logging/**
+
+package/daemon:
+  - changed-files:
+      - any-glob-to-any-file: packages/daemon/**
+
+package/file-ops:
+  - changed-files:
+      - any-glob-to-any-file: packages/file-ops/**
+
+package/state:
+  - changed-files:
+      - any-glob-to-any-file: packages/state/**
+
+package/index:
+  - changed-files:
+      - any-glob-to-any-file: packages/index/**
+
+package/testing:
+  - changed-files:
+      - any-glob-to-any-file: packages/testing/**
+
+package/tooling:
+  - changed-files:
+      - any-glob-to-any-file: packages/tooling/**
+
+package/types:
+  - changed-files:
+      - any-glob-to-any-file: packages/types/**
+
+# =============================================================================
+# AREAS
+# =============================================================================
+
+area/agents:
+  - changed-files:
+      - any-glob-to-any-file:
+          - CLAUDE.md
+          - AGENTS.md
+          - .claude/**
+          - packages/claude-plugin/**
+          - "**/skills/**"
+          - "**/agents/**"
+
+area/ci-cd:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**
+          - .github/actions/**
+
+area/infra:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**
+          - scripts/**
+          - lefthook.yml
+          - .bun-version
+
+area/monorepo:
+  - changed-files:
+      - any-glob-to-any-file:
+          - turbo.json
+          - bun.lock
+          - package.json
+          - tsconfig.json
+          - biome.json
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - docs/**
+
+testing:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.test.ts"
+          - "**/__tests__/**"
+          - "**/fixtures/**"
+
+deps:
+  - changed-files:
+      - any-glob-to-any-file:
+          - bun.lock
+          - "**/package.json"
+
+# =============================================================================
+# RELEASE (based on changeset files)
+# =============================================================================
+
+release:patch:
+  - changed-files:
+      - any-glob-to-any-file: .changeset/*.md
+    # Note: Actual version detection would need a custom action
+    # This just detects changesets exist
+
+# =============================================================================
+# TOOLS
+# =============================================================================
+
+graphite:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .graphite/**
+          - .graphiterc*

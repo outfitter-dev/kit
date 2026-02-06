@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: This skill should be used when designing systems, evaluating architectures, making technology decisions, or planning for scale. Provides technology selection frameworks, scalability planning, and architectural tradeoff analysis.
+description: "This skill should be used when designing systems, evaluating architectures, making technology decisions, or planning for scale. Provides technology selection frameworks, scalability planning, and architectural tradeoff analysis."
 metadata:
   version: "2.1.0"
 ---
@@ -23,7 +23,7 @@ NOT for: trivial tech choices, premature optimization, undocumented requirements
 
 <stages>
 
-Load the **maintain-tasks** skill for stage tracking. Stages advance only, never regress.
+Load the `maintain-tasks` skill for stage tracking. Stages advance only, never regress.
 
 | Stage | Trigger | activeForm |
 |-------|---------|------------|

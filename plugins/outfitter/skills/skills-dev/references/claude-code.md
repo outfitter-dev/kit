@@ -27,7 +27,7 @@ Claude Code extends the base Agent Skills specification with additional frontmat
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `allowed-tools` | string | Space-separated list of tools the skill can use without permission prompts |
+| `allowed-tools` | string | Comma-separated list of tools the skill can use without permission prompts |
 | `user-invocable` | boolean | Default `true`. Set to `false` to prevent slash command access |
 | `disable-model-invocation` | boolean | Prevents automatic activation; requires manual invocation via Skill tool |
 | `context` | string | `inherit` (default) or `fork` for isolated subagent execution |
@@ -42,8 +42,8 @@ Claude Code extends the base Agent Skills specification with additional frontmat
 ---
 name: code-review
 version: 1.0.0
-description: Reviews code for bugs, security issues, and best practices. Use when reviewing PRs, auditing code, or before merging.
-allowed-tools: Read Grep Glob Bash(git diff *)
+description: "Reviews code for bugs, security issues, and best practices. Use when reviewing PRs, auditing code, or before merging."
+allowed-tools: Read, Grep, Glob, Bash(git diff *)
 argument-hint: [file or directory]
 model: sonnet
 ---
@@ -60,14 +60,14 @@ Use `allowed-tools` to specify which tools Claude can use when a skill is active
 ### Syntax
 
 ```yaml
-# Space-separated list
-allowed-tools: Read Grep Glob
+# Comma-separated list
+allowed-tools: Read, Grep, Glob
 
 # With Bash patterns
-allowed-tools: Read Write Bash(git *) Bash(npm run *)
+allowed-tools: Read, Write, Bash(git *), Bash(npm run *)
 
 # MCP tools (double underscore format)
-allowed-tools: Read mcp__linear__create_issue mcp__memory__store
+allowed-tools: Read, mcp__linear__create_issue, mcp__memory__store
 ```
 
 ### Bash Pattern Syntax
@@ -82,19 +82,19 @@ allowed-tools: Read mcp__linear__create_issue mcp__memory__store
 
 ```yaml
 # Read-only analysis
-allowed-tools: Read Grep Glob
+allowed-tools: Read, Grep, Glob
 
 # File modifications
-allowed-tools: Read Edit Write
+allowed-tools: Read, Edit, Write
 
 # Git operations
-allowed-tools: Read Write Bash(git *)
+allowed-tools: Read, Write, Bash(git *)
 
 # Testing workflows
-allowed-tools: Read Write Bash(bun test:*) Bash(npm test:*)
+allowed-tools: Read, Write, Bash(bun test:*), Bash(npm test:*)
 
 # Full development
-allowed-tools: Read Edit Write Bash(git *) Bash(bun *) Bash(npm *)
+allowed-tools: Read, Edit, Write, Bash(git *), Bash(bun *), Bash(npm *)
 ```
 
 ### Tool Names (Case-Sensitive)
@@ -124,7 +124,7 @@ Skills are callable as slash commands by default (`user-invocable: true`). Use `
 ```yaml
 ---
 name: code-review
-description: Reviews code for bugs and best practices...
+description: "Reviews code for bugs and best practices."
 argument-hint: [file or PR number]
 ---
 ```
@@ -138,7 +138,7 @@ For skills that should only activate automatically (not manually invoked):
 ```yaml
 ---
 name: internal-validator
-description: Validates internal state when specific patterns are detected...
+description: "Validates internal state when specific patterns are detected."
 user-invocable: false
 ---
 ```
@@ -318,10 +318,10 @@ chmod +x scripts/*.sh
 
 ```yaml
 # Before (too vague)
-description: Helps with files
+description: "Helps with files"
 
 # After (specific with triggers)
-description: Parse and validate JSON files including schema validation. Use when working with JSON data, .json files, or configuration files.
+description: "Parses and validates JSON files including schema validation. Use when working with JSON data or configuration files."
 ```
 
 **Add trigger keywords** that users naturally say:
@@ -335,10 +335,10 @@ description: Parse and validate JSON files including schema validation. Use when
 
 ```yaml
 # Correct
-allowed-tools: Read Grep Glob
+allowed-tools: Read, Grep, Glob
 
 # Wrong
-allowed-tools: read grep glob
+allowed-tools: read, grep, glob
 ```
 
 **Bash patterns need wildcards:**
@@ -398,7 +398,7 @@ Skills activate automatically when commands need their expertise:
 
 ```markdown
 ---
-description: Analyze PDF file
+description: "Analyze PDF file."
 ---
 
 Analyze this PDF file: $ARGUMENTS
@@ -552,8 +552,8 @@ export async function blockAtSubmit() {
 ```yaml
 ---
 name: linear-standup
-description: Generates team standup reports from Linear issues
-allowed-tools: mcp__linear__get_issues mcp__linear__get_projects
+description: "Generates team standup reports from Linear issues."
+allowed-tools: mcp__linear__get_issues, mcp__linear__get_projects
 ---
 
 # Linear Standup Skill
@@ -589,7 +589,7 @@ With restrictions: Listed tools run immediately.
 
 ```yaml
 # Fast (no prompts for these tools)
-allowed-tools: Read Grep Glob
+allowed-tools: Read, Grep, Glob
 ```
 
 ---

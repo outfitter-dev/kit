@@ -1,6 +1,6 @@
 ---
 name: research
-description: This skill should be used when researching best practices, evaluating technologies, comparing approaches, or when "research", "evaluation", or "comparison" are mentioned.
+description: "This skill should be used when researching best practices, evaluating technologies, comparing approaches, or when research, evaluation, or comparison are mentioned."
 metadata:
   version: "2.1.0"
   related-skills:
@@ -33,7 +33,7 @@ NOT for: quick lookups, well-known patterns, time-critical debugging without inv
 
 <stages>
 
-Load the **maintain-tasks** skill for stage tracking. Stages advance only, never regress.
+Load the `maintain-tasks` skill for stage tracking. Stages advance only, never regress.
 
 | Stage | Trigger | activeForm |
 |-------|---------|------------|

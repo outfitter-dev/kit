@@ -15,10 +15,10 @@ Coordinate multiple agents to accomplish a complex task requiring different expe
 ## Steps
 
 1. **Load Skills** — Use the Skill tool to load:
-   - **outfitter:subagents** — agent routing and orchestration patterns
-   - **outfitter:context-management** — for long-running tasks, teaches Task state persistence
-2. **Consider** — Ultrathink and analyze the task, consider the complexity, sequence of steps, and agent requirements.
-3. **Planning** — Use the **Plan subagent** to research the codebase and design an orchestration strategy
+   - `outfitter:subagents` — agent routing and orchestration patterns
+   - `outfitter:context-management` — for long-running tasks, teaches Task state persistence
+2. **Consider** — Analyze the task, consider the complexity, sequence of steps, and agent requirements.
+3. **Planning** — Use the `agent-Plan` subagent to research the codebase and design an orchestration strategy
 4. **Report** — Present the orchestration plan (which agents, what sequence, expected handoffs)
    - **IMPORTANT**: After presenting the orchestration plan, proceed directly to execution.
    - Do not wait for approval unless the task is high-risk (destructive changes, production deployment, security-sensitive).
@@ -27,7 +27,7 @@ Coordinate multiple agents to accomplish a complex task requiring different expe
 
 ## Planning Process
 
-Ensure you've loaded the **outfitter:subagents** skill. Then coordinate with the **Plan subagent** to design the orchestration plan. Task the **Plan subagent** to:
+Ensure you've loaded the `outfitter:subagents` skill. Then coordinate with the Plan subagent to design the orchestration plan. Task them to:
 
 1. Explore the relevant parts of the codebase
 2. Identify which roles are needed (coding, reviewing, research, testing, etc.)

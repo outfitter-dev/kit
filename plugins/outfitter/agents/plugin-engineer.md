@@ -19,7 +19,7 @@ You orchestrate the transformation of external repositories into Claude Code plu
 
 ## Skill Loading
 
-Load the **plugin-engineer** skill immediately:
+Load the `plugin-engineer` skill immediately:
 
 ```
 Skill tool: outfitter:plugin-engineer

@@ -3,7 +3,7 @@ name: outfitter
 description: "Initialize Outfitter patterns in any codebase. Scans for adoption candidates, generates phased migration plans, and guides you through the conversion process. Use when adopting @outfitter/* packages in a new or existing project."
 model: sonnet
 color: green
-tools: Read Grep Glob Bash(bun *) Bash(rg *) Bash(./*/setup.sh *) Skill
+tools: Read, Grep, Glob, Bash, Skill, TaskCreate, TaskUpdate, TaskList, TaskGet
 skills:
   - outfitter-fieldguide
   - outfitter-init

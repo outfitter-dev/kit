@@ -1,14 +1,15 @@
 ---
 name: skills-dev
-description: This skill should be used when creating skills, writing SKILL.md files, or when "create skill", "new skill", "validate skill", or "SKILL.md" are mentioned. Covers cross-platform Agent Skills specification.
+description: "Creates and validates Agent Skills (SKILL.md). Use when creating skills, writing frontmatter, or validating skill structure."
 metadata:
-  version: "2.1.0"
+  version: "2.2.0"
+  author: outfitter
   related-skills:
     - claude-skills
     - claude-plugins
     - claude-agents
     - codex-config
-allowed-tools: Read Write Edit Grep Glob Bash TaskCreate TaskUpdate TaskList TaskGet AskUserQuestion
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---
 
 # Skills Development
@@ -57,7 +58,7 @@ skill-name/
 ```yaml
 ---
 name: skill-name
-description: What it does and when to use it. Include trigger keywords.
+description: "What it does and when to use it. Include trigger keywords."
 version: 1.0.0                         # optional, recommended
 license: Apache-2.0                    # optional
 compatibility: Requires git and jq     # optional
@@ -71,13 +72,15 @@ metadata:                              # optional
 | Field | Required | Constraints |
 |-------|----------|-------------|
 | `name` | Yes | 2-64 chars, lowercase/numbers/hyphens, must match directory |
-| `description` | Yes | 10-1024 chars, describes what + when |
+| `description` | Yes | 10-1024 chars, quoted, describes what + when |
 | `version` | No | Semantic version (MAJOR.MINOR.PATCH) |
 | `license` | No | License name or reference |
 | `compatibility` | No | 1-500 chars, environment requirements |
 | `metadata` | No | Object for custom fields |
 
-**Note**: Platform-specific fields (e.g., Claude's `allowed-tools`, `user-invocable`) should be added per-platform. See [claude-code.md](references/claude-code.md) for Claude Code extensions.
+**Important**:
+- Always wrap `description` in double quotes — values containing colons, commas, or special characters can break YAML parsing otherwise.
+- Platform-specific fields (e.g., Claude's `allowed-tools`, `user-invocable`) should be added per-platform. See [claude-code.md](references/claude-code.md) for Claude Code extensions.
 
 ### Custom Frontmatter
 
@@ -86,7 +89,7 @@ Custom fields **must** be nested under `metadata`:
 ```yaml
 ---
 name: my-skill
-description: ...
+description: "..."
 metadata:
   author: your-org
   version: "1.0"
@@ -102,7 +105,7 @@ Top-level custom fields are not allowed and may cause parsing errors.
 **[WHAT] + [WHEN] + [TRIGGERS]**
 
 ```yaml
-description: Extracts text and tables from PDF files, fills forms, merges documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
+description: "Extracts text and tables from PDF files, fills forms, merges documents. Use when working with PDF files or document extraction."
 ```
 
 **Checklist:**
@@ -120,6 +123,7 @@ description: Extracts text and tables from PDF files, fills forms, merges docume
 
 - [ ] Opens with `---` on line 1, closes with `---`
 - [ ] `name` and `description` present (required)
+- [ ] `description` wrapped in double quotes
 - [ ] Uses spaces, not tabs
 - [ ] Special characters quoted
 

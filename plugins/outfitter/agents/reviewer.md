@@ -31,29 +31,29 @@ Load skills using the **Skill tool** with the skill name.
 
 ### Primary Review Skills
 
-**outfitter:code-review**
+`outfitter:code-review`
 - Load when: pre-commit reviews, quality gates, systematic code audits, PR reviews
 - Provides: checklist-based methodology, severity indicators, announcement protocol
 - Output: categorized findings with location, impact, and fix
 
-**outfitter:security**
+`outfitter:security`
 - Load when: security audits, auth/authz review, input validation checks, threat modeling
 - Provides: OWASP Top 10 patterns, STRIDE framework, vulnerability detection
 - Output: risk-ranked findings with CWE references and remediation
 
-**outfitter:performance**
+`outfitter:performance`
 - Load when: profiling, bottleneck analysis, optimization validation, benchmark review
 - Provides: measurement methodology, profiling patterns, optimization techniques
 - Output: evidence-based findings with metrics and targeted improvements
 
-**outfitter:architecture**
+`outfitter:architecture`
 - Load when: architecture critique, design review, technology evaluation, scalability assessment
 - Provides: design patterns, technology selection frameworks, tradeoff analysis
 - Output: recommendations with alternatives and ADR templates
 
 ### Supporting Skills
 
-**outfitter:codebase-recon**
+`outfitter:codebase-recon`
 - Load when: need to understand context before reviewing
 - Provides: systematic exploration, pattern detection
 - Use before: jumping into review without understanding structure
@@ -68,11 +68,11 @@ Follow this decision tree to select the appropriate skill(s) to load and execute
 
 User requests or mentions:
 - Specific skill → Skill tool: Load requested skill immediately
-- "quick check" / "pre-commit" / etc. → Skill tool: **outfitter:code-review** (quick pass mode)
-- "thorough review" / "audit" / "PR review" → Skill tool: **outfitter:code-review** (standard or thorough mode)
-- security / auth / vulnerabilities / OWASP → Skill tool: **outfitter:security**
-- performance / slow / optimize / bottleneck → Skill tool: **outfitter:performance**
-- architecture / design / scalability / tech choice → Skill tool: **outfitter:architecture**
+- "quick check" / "pre-commit" / etc. → Skill tool: `outfitter:code-review` (quick pass mode)
+- "thorough review" / "audit" / "PR review" → Skill tool: `outfitter:code-review` (standard or thorough mode)
+- security / auth / vulnerabilities / OWASP → Skill tool: `outfitter:security`
+- performance / slow / optimize / bottleneck → Skill tool: `outfitter:performance`
+- architecture / design / scalability / tech choice → Skill tool: `outfitter:architecture`
 - comprehensive review (multiple concerns) → Skill tool: Load primary skill first, then additional skills as needed
 
 > [!NOTE]
@@ -82,7 +82,7 @@ User requests or mentions:
 
 ## Review Process
 
-Load the **maintain-tasks** skill for stage tracking. Your task list is a living plan — expand it as you discover scope.
+Load the `maintain-tasks` skill for stage tracking. Your task list is a living plan — expand it as you discover scope.
 
 <initial_todo_list_template>
 
@@ -131,7 +131,7 @@ After detecting scope (comprehensive security + performance review of payment mo
 4. Deliver in skill's output format
 
 **Multiple skills needed**:
-1. Start with primary skill (usually **outfitter:code-review**)
+1. Start with primary skill (usually `outfitter:code-review`)
 2. Complete that review fully
 3. Load additional skills for specific concerns
 4. Synthesize findings, deduplicate overlapping issues

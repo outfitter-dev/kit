@@ -31,27 +31,27 @@ Load skills using the **Skill tool** with the skill name.
 
 ### Primary Skills
 
-**outfitter:research**
+`outfitter:research`
 - Load when: evaluating technologies, discovering documentation, troubleshooting with authoritative sources
 - Tools: context7, firecrawl (web search/scrape), WebSearch
 - Output: comparison matrices, recommendations with citations, implementation guidance
 
-**outfitter:pathfinding**
+`outfitter:pathfinding`
 - Load when: requirements ambiguous, exploring ideas, planning features
 - Pattern: adaptive questioning → confidence tracking → clear deliverable
 - Output: plans, specifications, clarified requirements
 
-**outfitter:codify**
+`outfitter:codify`
 - Load when: spotting repeated workflows, capturing successful approaches
 - Analysis: workflow, orchestration, or heuristic patterns
 - Output: pattern specifications → skill/command/agent/hook recommendations
 
-**outfitter:session-analysis**
+`outfitter:session-analysis`
 - Load when: analyzing past conversations, extracting learnings, understanding context
 - Tools: episodic-memory MCP for conversation search and retrieval
 - Output: insights from past work, recurring patterns, decisions made
 
-**outfitter:architecture**
+`outfitter:architecture`
 - Load when: understanding system structure, planning refactors, documenting architecture
 - Pattern: structure discovery → relationship mapping → insight extraction
 - Output: dependency graphs, architectural diagrams, refactoring recommendations
@@ -64,11 +64,11 @@ Follow this decision tree to select the appropriate skill(s) to load and execute
 
 User requests or mentions:
 - Specific skill → Skill tool: Load requested skill immediately
-- technology / library / "which X" / "best approach" → Skill tool: **outfitter:research**
-- unclear / vague / "not sure" / "what if" → Skill tool: **outfitter:pathfinding**
-- "worked well" / "capture this" / "reusable" → Skill tool: **outfitter:codify**
-- "we discussed" / "last time" / "previous decision" → Skill tool: **outfitter:session-analysis**
-- "system structure" / "dependencies" / "how is X organized" → Skill tool: **outfitter:architecture**
+- technology / library / "which X" / "best approach" → Skill tool: `outfitter:research`
+- unclear / vague / "not sure" / "what if" → Skill tool: `outfitter:pathfinding`
+- "worked well" / "capture this" / "reusable" → Skill tool: `outfitter:codify`
+- "we discussed" / "last time" / "previous decision" → Skill tool: `outfitter:session-analysis`
+- "system structure" / "dependencies" / "how is X organized" → Skill tool: `outfitter:architecture`
 - multiple angles needed → Load primary skill first, then additional skills as gaps discovered
 
 > [!NOTE]
@@ -78,7 +78,7 @@ User requests or mentions:
 
 ## Investigation Process
 
-Load the **maintain-tasks** skill for stage tracking. Your task list is a living plan — expand it as you discover scope.
+Load the `maintain-tasks` skill for stage tracking. Your task list is a living plan — expand it as you discover scope.
 
 <initial_todo_list_template>
 
@@ -126,7 +126,7 @@ After detecting scope (research comparison of auth libraries with security consi
 4. Deliver in skill's output format
 
 **Multiple angles needed**:
-1. Start with primary skill (usually **outfitter:research**)
+1. Start with primary skill (usually `outfitter:research`)
 2. Complete that investigation fully
 3. Load additional skills for specific concerns
 4. Synthesize findings, deduplicate overlapping insights

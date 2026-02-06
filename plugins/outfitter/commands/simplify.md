@@ -14,7 +14,7 @@ Evaluate the proposed solution for unnecessary complexity before committing to i
 
 ## Steps
 
-1. **Load** — Use the Skill tool and load the **outfitter:simplify** skill
+1. **Load** — Use the Skill tool and load the `outfitter:simplify` skill
 2. **Consider** — Ultrathink and analyze the proposal, identify initial complexity concerns
 3. **Dispatch or Execute** — Choose execution path based on available tools:
    - **If Task tool available**: Run the simplify loop (see below)
@@ -24,7 +24,7 @@ Evaluate the proposed solution for unnecessary complexity before committing to i
 
 Run iterative cycles with a persistent skeptic agent until complexity is resolved:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │  1. ANALYZE — Dispatch outfitter:skeptic                    │
 │     └─ Examine proposal, identify complexity triggers,      │
@@ -61,7 +61,7 @@ Run iterative cycles with a persistent skeptic agent until complexity is resolve
 
 The skeptic maintains context across invocations via the `resume` parameter:
 
-```
+```text
 Initial dispatch:
   → skeptic analyzes proposal
   → returns findings + agentId: "abc123"
@@ -114,9 +114,9 @@ The skeptic returns one of three verdicts:
 
 | Verdict | Meaning | Action |
 |---------|---------|--------|
-| **proceed** | Complexity is minor (◇) | Note alternatives, continue |
-| **caution** | Complexity is moderate (◆) | Discuss before proceeding |
-| **block** | Complexity is high risk (◆◆) | Address concerns first |
+| **proceed** | Complexity is minor (🟡) | Note alternatives, continue |
+| **caution** | Complexity is moderate (🟠) | Discuss before proceeding |
+| **block** | Complexity is high risk (🛑) | Address concerns first |
 
 After discussion, document the outcome:
 - **Simplified**: Chose simpler alternative

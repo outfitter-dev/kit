@@ -10,6 +10,7 @@ import { describe, expect, it } from "bun:test";
 import {
   getIndicator,
   getProgressIndicator,
+  getSeverityIndicator,
   INDICATORS,
   type IndicatorCategory,
   isUnicodeSupported,
@@ -126,6 +127,7 @@ describe("indicator categories", () => {
     const markerIndicators = INDICATORS.marker;
     expect(markerIndicators).toHaveProperty("lozenge");
     expect(markerIndicators).toHaveProperty("lozengeOutline");
+    expect(markerIndicators).toHaveProperty("lozengeDot");
   });
 
   it("marker category has lines and pointers", () => {
@@ -198,6 +200,7 @@ describe("indicator categories", () => {
     expect(getIndicator("marker", "circleOutline", true)).toBe("○");
     expect(getIndicator("marker", "circleDot", true)).toBe("◉");
     expect(getIndicator("marker", "lozenge", true)).toBe("◆");
+    expect(getIndicator("marker", "lozengeDot", true)).toBe("◈");
   });
 
   it("special category has all expected indicators", () => {
@@ -270,5 +273,23 @@ describe("getProgressIndicator()", () => {
 
   it("handles edge case of max=0", () => {
     expect(getProgressIndicator("circle", 50, 0, true)).toBe("○"); // treat as 0%
+  });
+});
+
+// ============================================================================
+// getSeverityIndicator Function Tests
+// ============================================================================
+
+describe("getSeverityIndicator()", () => {
+  it("returns correct unicode indicators for each level", () => {
+    expect(getSeverityIndicator("minor", true)).toBe("◇");
+    expect(getSeverityIndicator("moderate", true)).toBe("◆");
+    expect(getSeverityIndicator("severe", true)).toBe("◈");
+  });
+
+  it("returns fallback indicators when unicode not supported", () => {
+    expect(getSeverityIndicator("minor", false)).toBe("◊");
+    expect(getSeverityIndicator("moderate", false)).toBe("♦");
+    expect(getSeverityIndicator("severe", false)).toBe("♦♦");
   });
 });

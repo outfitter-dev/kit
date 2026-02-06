@@ -1,10 +1,6 @@
 ---
 name: agent-docs
-description: >-
-  Documentation for AI agents — AGENTS.md, CLAUDE.md, and agent-readable content patterns.
-  Use when creating agent entry points, structuring .claude/ directories, or when
-  "CLAUDE.md", "AGENTS.md", "agent documentation", "machine-readable", or "writing for agents"
-  are mentioned. Covers both configuration and content patterns for agent consumption.
+description: "Documentation patterns for AI agents — AGENTS.md, CLAUDE.md, and agent-readable content. Use when creating agent entry points or structuring .claude/ directories."
 metadata:
   version: "1.1.0"
   author: outfitter
@@ -15,7 +11,7 @@ metadata:
 
 Structure and patterns for documentation that AI agents consume — the files and directories that help Claude, Codex, and other agents understand and work with your project.
 
-For human-facing documentation (READMEs, guides, API docs), load the `internal:docs-write` skill.
+For human-facing documentation (READMEs, guides, API docs), load the `team:docs-write` skill.
 
 ## File Architecture
 
@@ -50,49 +46,7 @@ The canonical source of agent instructions. Tool-agnostic — works for Claude, 
 
 ### Structure Template
 
-```markdown
-# AGENTS.md
-
-Guidelines for AI agents and developers working in this repository.
-
-## Project Overview
-
-Brief description of what this project does and its current status.
-
-## Project Structure
-
-- `src/` — Source code
-- `tests/` — Test files
-- `docs/` — Documentation
-
-## Commands
-
-\`\`\`bash
-bun test              # Run tests
-bun run build         # Build project
-bun run lint          # Lint and format
-\`\`\`
-
-## Architecture
-
-Key architectural decisions and patterns used in this codebase.
-
-## Development Principles
-
-Core principles: TDD, error handling patterns, dependency policies.
-
-## Code Style
-
-Language-specific conventions, formatting rules, naming patterns.
-
-## Testing
-
-Test runner, file locations, coverage expectations.
-
-## Git Workflow
-
-Branch naming, commit conventions, PR process.
-```
+See [templates/AGENTS.md](templates/AGENTS.md) for the full template.
 
 ### What Belongs in AGENTS.md
 
@@ -122,16 +76,7 @@ Minimal entry point that @-mentions other files. Claude Code reads this first.
 
 ### Recommended Pattern
 
-```markdown
-# CLAUDE.md
-
-This file provides AI agents with project-specific context and conventions.
-
-@.claude/CLAUDE.md
-@AGENTS.md
-```
-
-That's it. Keep the root CLAUDE.md minimal.
+See [templates/CLAUDE-ROOT.md](templates/CLAUDE-ROOT.md) for the template. Keep the root CLAUDE.md minimal.
 
 ### Why @-mentions Over Symlinks?
 
@@ -155,32 +100,7 @@ Claude-specific instructions that don't apply to other tools.
 
 ### Example Content
 
-```markdown
-# Claude-Specific Guidance
-
-## Task Management
-
-Use the task tools to track work across context windows.
-
-### Creating Tasks
-
-Use `TaskCreate` for multi-step work:
-- `subject`: Imperative form ("Run tests")
-- `activeForm`: Present continuous ("Running tests")
-- `description`: Detailed requirements
-
-### Best Practices
-
-- Create tasks immediately when receiving multi-step instructions
-- Keep exactly one task `in_progress` at a time
-- Never mark completed if tests fail
-
-## Preferred Tools
-
-- Use `gt` for version control, not raw `git`
-- Prefer `Grep` tool over bash grep
-- Use `Read` tool instead of `cat`
-```
+See [templates/CLAUDE-DOTCLAUDE.md](templates/CLAUDE-DOTCLAUDE.md) for an example.
 
 ### What Belongs in .claude/CLAUDE.md
 
@@ -336,7 +256,7 @@ Sacrifice grammar for concision. Agents parse tokens, not prose. "Use strict mod
 
 When this skill is activated, assess the current state and present options to the user using `AskUserQuestion`:
 
-```
+```text
 1. Scan for existing AGENTS.md, CLAUDE.md, .claude/ structure
 2. Compare against recommended patterns
 3. Present options via AskUserQuestion tool:
@@ -365,4 +285,5 @@ When creating or reviewing agent-facing documentation:
 
 ## References
 
+- [templates/](templates/) — AGENTS.md, CLAUDE.md root, and .claude/CLAUDE.md templates
 - [MIGRATION.md](references/MIGRATION.md) — Migrate existing setups to the recommended pattern

@@ -1,12 +1,12 @@
 ---
 name: skills-discovery
-description: Find and evaluate community skills, plugins, and marketplaces. Use when searching for existing skills, evaluating safety, or when "find skill", "discover plugin", "community skills", or "marketplace" are mentioned.
+description: "Find and evaluate community skills, plugins, and marketplaces. Use when searching for existing skills, evaluating safety, or when find skill, discover plugin, community skills, or marketplace are mentioned."
 metadata:
   version: "1.0.0"
   related-skills:
     - skills-dev
     - claude-plugins
-allowed-tools: Read WebFetch WebSearch Bash(gh:*)
+allowed-tools: Read, WebFetch, WebSearch, Bash(gh:*)
 ---
 
 # Skills Discovery

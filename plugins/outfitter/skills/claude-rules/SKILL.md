@@ -1,12 +1,12 @@
 ---
 name: claude-rules
-description: This skill should be used when creating rule files, organizing conventions, or when ".claude/rules/", "FORMATTING.md", "create rule", or "project conventions" are mentioned.
+description: "This skill should be used when creating rule files, organizing conventions, or when .claude/rules/, FORMATTING.md, create rule, or project conventions are mentioned."
 metadata:
   version: "1.0.0"
   related-skills:
     - claude-config
     - claude-plugins
-allowed-tools: Read Write Edit Grep Glob
+allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 
 # Claude Rules Authoring
@@ -122,7 +122,7 @@ my-plugin/
 
 **Important limitation**: Shared rules only work WITHIN a single plugin. When plugins are installed, Claude Code copies them to a cache directory. Paths that traverse outside the plugin root (like `../other-plugin/rules/`) won't work after installation.
 
-**For cross-plugin patterns**: Use skill invocation instead of file references. Reference related skills by name (e.g., "load the **outfitter:formatting** skill") rather than file paths.
+**For cross-plugin patterns**: Use skill invocation instead of file references. Reference related skills by name (e.g., "load the `outfitter:formatting` skill") rather than file paths.
 
 ## Quick Start
 
@@ -157,5 +157,5 @@ my-plugin/
 
 ## Related Skills
 
-- **claude-code-configuration** - CLAUDE.md and settings.json
-- **claude-plugin-development** - Plugin structure including rules/
+- `claude-code-configuration` - CLAUDE.md and settings.json
+- `claude-plugin-development` - Plugin structure including rules/

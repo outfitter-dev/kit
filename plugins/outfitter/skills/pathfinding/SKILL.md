@@ -1,6 +1,6 @@
 ---
 name: pathfinding
-description: This skill should be used when requirements are unclear, brainstorming ideas, or when "pathfind", "brainstorm", "figure out", "clarify requirements", or "work through" are mentioned.
+description: "This skill should be used when requirements are unclear, brainstorming ideas, or when pathfind, brainstorm, figure out, clarify requirements, or work through are mentioned."
 metadata:
   version: "2.0.0"
 ---
@@ -41,7 +41,7 @@ Below level 5: include `△ Caveats` section.
 
 <stages>
 
-Load the **maintain-tasks** skill for stage tracking. Stages advance only, never regress.
+Load the `maintain-tasks` skill for stage tracking. Stages advance only, never regress.
 
 | Stage | Trigger | activeForm |
 |-------|---------|------------|
@@ -60,7 +60,7 @@ Task format — each stage gets context-specific title:
 ```
 
 Situational (insert before Deliver when triggered):
-- Resolve Conflicts → `◆ Caution` or `◆◆ Hazard` pushback
+- Resolve Conflicts → `◆ Caution` or `◈ Hazard` pushback
 - Validate Assumptions → high-risk assumptions before delivery
 
 Workflow:
@@ -83,7 +83,7 @@ If gaps remain, explore focus areas (pick what's relevant):
 
 When multiple approaches exist:
 - Propose 2–3 options with trade-offs
-- Lead with recommendation ★ and reasoning
+- Lead with recommendation ⭐ and reasoning
 - Let user pick, combine, or redirect
 
 Principles:
@@ -98,7 +98,7 @@ Principles:
 Use `EnterPlanMode` for each question — enables keyboard navigation of options.
 
 Structure:
-- Prose above tool: context, reasoning, ★ recommendation if clear lean
+- Prose above tool: context, reasoning, ⭐ recommendation if clear lean
 - Inside tool: options only (concise, scannable)
 
 At level 0 — start with session intent:
@@ -108,7 +108,7 @@ At level 0 — start with session intent:
 
 Levels 1–4 — focus on substance:
 - 2–4 options per question + "5. Something else"
-- Inline `[★]` on recommended option + *italicized rationale*
+- Inline `⭐` on recommended option + *italicized rationale*
 - User replies: number, modifications, or combos
 
 </questions>
@@ -151,7 +151,7 @@ Escalate when choice conflicts with goals/constraints/best practices:
 
 - `◇ Alternative`: Minor misalignment. Present option + reasoning.
 - `◆ Caution`: Clear conflict. Recommend alternative, explain risks, ask to proceed. Triggers Resolve Conflicts.
-- `◆◆ Hazard`: High failure risk. Require mitigation or explicit override. Triggers Resolve Conflicts.
+- `◈ Hazard`: High failure risk. Require mitigation or explicit override. Triggers Resolve Conflicts.
 
 Override: Accept "Proceed anyway: {REASON}" → log in next reflection → mark Resolve Conflicts complete.
 
@@ -168,14 +168,14 @@ Integrate skeptic agent for complexity sanity checks:
 ```text
 Before finalizing — you have {N} caveats. Want to run skeptic for a sanity check?
 [AskUserQuestion]
-1. Yes, quick check [★] — I'll challenge complexity interactively
+1. Yes, quick check ⭐ — I'll challenge complexity interactively
 2. Yes, deep analysis — launch skeptic agent in background
 3. No, proceed — deliver as-is
 ```
 
 **Auto-invoke** (no choice):
 - Level 4+ with 3+ unknowns persisting across 2+ question cycles
-- ◆◆ Hazard escalation triggered during session
+- ◈ Hazard escalation triggered during session
 
 When auto-invoking:
 
@@ -204,7 +204,7 @@ After delivering, ask where to persist (if applicable):
 
 ```text
 [EnterPlanMode]
-1. { discovered path } [★] — { source: `CLAUDE.md` preference | existing directory | convention }
+1. { discovered path } ⭐ — { source: `CLAUDE.md` preference | existing directory | convention }
 2. Create issue — { Linear/GitHub/Beads based on project context }
 3. ADR — { if architectural decision }
 4. Don't persist — keep in conversation only
@@ -234,7 +234,7 @@ Below 5: Append `△ Caveats`:
 ALWAYS:
 - Task stage matching initial confidence at start
 - `EnterPlanMode` for each question (keyboard nav)
-- Prose above tool for context + ★ recommendation
+- Prose above tool for context + ⭐ recommendation
 - One question at a time, wait for response
 - Restate + update confidence before next move
 - Update todos at level 4, level 5 thresholds

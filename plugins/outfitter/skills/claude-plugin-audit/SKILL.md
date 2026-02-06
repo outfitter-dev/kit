@@ -1,6 +1,6 @@
 ---
 name: claude-plugin-audit
-description: Audits Claude Code plugins for structure, quality, and best practices. Use when validating plugins, checking plugin health, or before publishing.
+description: "Audits Claude Code plugins for structure, quality, and best practices. Use when validating plugins, checking plugin health, or before publishing."
 metadata:
   version: "1.0.0"
   related-skills:
@@ -8,7 +8,7 @@ metadata:
 context: fork
 agent: quartermaster
 argument-hint: [plugin path]
-allowed-tools: Read Grep Glob Bash(find *) Bash(jq *)
+allowed-tools: Read, Grep, Glob, Bash(find *), Bash(jq *)
 ---
 
 # Claude Plugin Audit
@@ -36,7 +36,7 @@ Validates plugin structure, components, and quality against best practices.
 
 | Level | Indicator | Meaning |
 |-------|-----------|---------|
-| Critical | `◆◆` | Blocks functionality, must fix |
+| Critical | `◈` | Blocks functionality, must fix |
 | Warning | `◆` | Best practice violation, should fix |
 | Info | `◇` | Suggestion, optional improvement |
 
@@ -51,7 +51,7 @@ Validates plugin structure, components, and quality against best practices.
 
 ## Critical Issues
 
-- `◆◆` {component}: {issue}
+- `◈` {component}: {issue}
   - **Fix**: {specific remediation}
 
 ## Warnings

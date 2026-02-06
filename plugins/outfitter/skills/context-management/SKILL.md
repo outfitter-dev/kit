@@ -1,6 +1,6 @@
 ---
 name: context-management
-description: Manage context window, survive compaction, persist state. Use when planning long tasks, coordinating agents, approaching context limits, or when "context", "compaction", "tasks", or "persist state" are mentioned.
+description: "Manage context window, survive compaction, persist state. Use when planning long tasks, coordinating agents, approaching context limits, or when context, compaction, tasks, or persist state are mentioned."
 user-invocable: false
 metadata:
   version: "1.0.0"

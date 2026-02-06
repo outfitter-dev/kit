@@ -1,6 +1,6 @@
 ---
 name: scenarios
-description: This skill should be used when validating features end-to-end without mocks, testing integrations, or when "scenario test", "e2e test", or "no mocks" are mentioned.
+description: "This skill should be used when validating features end-to-end without mocks, testing integrations, or when scenario test, e2e test, or no mocks are mentioned."
 metadata:
   version: "1.0.0"
 ---

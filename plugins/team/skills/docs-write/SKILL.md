@@ -1,10 +1,6 @@
 ---
 name: docs-write
-description: >-
-  Project documentation structure and templates — READMEs, API docs, guides, and CLI references.
-  Use when creating documentation, structuring a docs/ directory, writing READMEs, or when
-  "documentation", "README", "API docs", "docs structure", or "guides" are mentioned.
-  Pair with styleguide for writing craft; apply voice as a review pass.
+description: "Documentation structure and templates for READMEs, API docs, guides, and CLI references. Use when creating docs, writing READMEs, or structuring a docs/ directory."
 metadata:
   version: "2.0.0"
   author: outfitter
@@ -16,10 +12,10 @@ metadata:
 Structure and templates for project documentation — the human-facing docs that help developers understand and use your project.
 
 This skill covers *what* to include and *where* it goes. For *how* to write it:
-- Load the `internal:styleguide` skill for sentence rhythm, metaphors, structural moves
-- Load the `internal:voice` skill for philosophical foundation (apply as review pass)
+- Load the `team:styleguide` skill for sentence rhythm, metaphors, structural moves
+- Load the `team:voice` skill for philosophical foundation (apply as review pass)
 
-For agent-specific documentation (CLAUDE.md, AGENTS.md), load the `internal:agent-docs` skill.
+For agent-specific documentation (CLAUDE.md, AGENTS.md), load the `team:agent-docs` skill.
 
 ## Documentation Hierarchy
 
@@ -81,48 +77,7 @@ READMEs are the entry point for new contributors. Keep them focused and scannabl
 
 ### Structure Template
 
-```markdown
-# Project Name
-
-One-line description of what this does.
-
-## Why [Project Name]?
-
-Brief explanation of the problem this solves (2-3 sentences).
-
-## Quick Start
-
-Minimal steps to get running:
-
-\`\`\`bash
-# Installation
-bun add project-name
-
-# Basic usage
-bun run project-name
-\`\`\`
-
-## Features
-
-- Feature 1 — brief description
-- Feature 2 — brief description
-- Feature 3 — brief description
-
-## Documentation
-
-- [Getting Started](./docs/guides/getting-started.md)
-- [API Reference](./docs/api/)
-- [CLI Reference](./docs/cli/)
-- [Architecture](./docs/architecture/)
-
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
-
-## License
-
-MIT
-```
+See [templates/README.md](templates/README.md) for the full template.
 
 ### Length Guidelines
 
@@ -182,14 +137,14 @@ Avoid metaphorical labels (Cold/Warm/Hot, etc.) — literal labels require no in
    Showing error output proves your error handling works.
 
 3. **End with a memorable closer.** After the output block, add a confident one-liner:
-   ```markdown
+   ````markdown
    **Output:**
-   \`\`\`
+   ```
    Found: [ "result-1", "result-2" ]
-   \`\`\`
+   ```
 
    Done. You're building type-safe infrastructure.
-   ```
+   ````
 
 4. **Use domain-relevant examples.** Avoid generic "Hello, World!" — use examples that demonstrate actual value.
 
@@ -199,83 +154,11 @@ For projects with CLIs, document commands in `docs/cli/`.
 
 ### Command Reference Template
 
-```markdown
-# command-name
-
-Brief description of what this command does.
-
-## Synopsis
-
-\`\`\`
-my-tool command [options] <required-arg> [optional-arg]
-\`\`\`
-
-## Arguments
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `<required-arg>` | Yes | What this argument controls |
-| `[optional-arg]` | No | What this optional argument does |
-
-## Options
-
-| Option | Short | Default | Description |
-|--------|-------|---------|-------------|
-| `--verbose` | `-v` | `false` | Enable verbose output |
-| `--output` | `-o` | `stdout` | Output destination |
-
-## Examples
-
-\`\`\`bash
-# Basic usage
-my-tool command input.txt
-
-# With options
-my-tool command -v --output result.json input.txt
-\`\`\`
-
-## Exit Codes
-
-| Code | Meaning |
-|------|---------|
-| `0` | Success |
-| `1` | General error |
-| `2` | Invalid arguments |
-```
+See [templates/COMMAND-REFERENCE.md](templates/COMMAND-REFERENCE.md) for the full template.
 
 ## Document Structure
 
-Every technical document should include:
-
-```markdown
-# [Feature/Component Name]
-
-Brief description of what this covers and why it matters.
-
-## Overview
-
-High-level explanation of the concept or component.
-
-## Usage
-
-How to use this in practice, with examples.
-
-## API Reference (if applicable)
-
-Detailed parameter and return value documentation.
-
-## Examples
-
-Complete, working code examples.
-
-## Common Patterns
-
-Typical use cases and recommended approaches.
-
-## Troubleshooting (if applicable)
-
-Common issues and their solutions.
-```
+Every technical document should follow the structure in [templates/DOCUMENT.md](templates/DOCUMENT.md).
 
 ### Heading Hierarchy
 

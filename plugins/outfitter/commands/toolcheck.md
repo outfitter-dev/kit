@@ -27,7 +27,7 @@ $ARGUMENTS
 
 ---
 
-Load the **which-tool** skill and:
+Load the `which-tool` skill and:
 
 1. Run the tool detection script (with category filter if provided)
 2. Report which tools are available vs missing

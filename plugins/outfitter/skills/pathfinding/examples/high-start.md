@@ -38,7 +38,7 @@ Decisions:
 
 Can deliver now, or one quick question: where does the toggle live? (header, settings page, floating button)
 
-[★] If you just want the implementation and will place it yourself, I can skip that question.
+⭐ If you just want the implementation and will place it yourself, I can skip that question.
 
 ```text
 [EnterPlanMode]

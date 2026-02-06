@@ -65,10 +65,10 @@ Works across all platforms (CLI, Web, iOS):
 
 ```yaml
 # Good: clear trigger conditions
-description: Extracts text and tables from PDFs. Use when working with PDF files or document extraction.
+description: "Extracts text and tables from PDFs. Use when working with PDF files or document extraction."
 
 # Bad: vague, hard to match
-description: Helps with files
+description: "Helps with files"
 ```
 
 ## AGENTS.md vs Skills
@@ -112,7 +112,7 @@ $skill-installer notion-spec-to-implementation
 The `allowed-tools` field is experimental in Codex:
 
 ```yaml
-allowed-tools: Bash(git:*) Bash(jq:*) Read
+allowed-tools: Bash(git:*), Bash(jq:*), Read
 ```
 
 **Status:**

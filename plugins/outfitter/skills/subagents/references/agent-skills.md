@@ -16,9 +16,9 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 | ai-sdk | AI features, streaming, tools |
 
 **Typical combos**:
-- **software-craft** + **tdd** (standard feature)
-- **software-craft** + **react-dev** (frontend work)
-- **software-craft** + **hono-dev** + **ai-sdk** (AI API endpoint)
+- `software-craft` + `tdd` (standard feature)
+- `software-craft` + `react-dev` (frontend work)
+- `software-craft` + `hono-dev` + `ai-sdk` (AI API endpoint)
 
 ## reviewer (reviewing role)
 
@@ -32,10 +32,10 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 | security | Security audits, auth review |
 
 **Typical combos**:
-- **code-review** (standard PR review)
-- **code-review** + **architecture** (significant refactor)
-- **code-review** + **performance** (performance-critical code)
-- **code-review** + **security** (auth or sensitive code)
+- `code-review` (standard PR review)
+- `code-review` + `architecture` (significant refactor)
+- `code-review` + `performance` (performance-critical code)
+- `code-review` + `security` (auth or sensitive code)
 
 ## analyst (research role)
 
@@ -53,11 +53,11 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 | session-analysis | Mining conversation for patterns |
 
 **Typical combos**:
-- **codebase-recon** + **report-findings** (codebase exploration)
-- **research** (technology comparison)
-- **pathfinding** (requirements clarification)
-- **codify** + **session-analysis** (capture workflow from session)
-- **patterns** (analyze codebase patterns)
+- `codebase-recon` + `report-findings` (codebase exploration)
+- `research` (technology comparison)
+- `pathfinding` (requirements clarification)
+- `codify` + `session-analysis` (capture workflow from session)
+- `patterns` (analyze codebase patterns)
 
 ## debugger (debugging role)
 
@@ -69,8 +69,8 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 | codebase-recon | Understanding surrounding code |
 
 **Typical combos**:
-- **debugging** (standard debugging)
-- **debugging** + **codebase-recon** (unfamiliar codebase)
+- `debugging` (standard debugging)
+- `debugging` + `codebase-recon` (unfamiliar codebase)
 
 ## tester (testing role)
 
@@ -82,8 +82,8 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 | tdd | TDD workflow, test-first approach |
 
 **Typical combos**:
-- **scenarios** (feature validation)
-- **tdd** (TDD implementation)
+- `scenarios` (feature validation)
+- `tdd` (TDD implementation)
 
 ## skeptic (challenging role)
 
@@ -94,7 +94,7 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 | simplify | Always (core methodology) |
 
 **Typical combos**:
-- **simplify** (challenge proposals)
+- `simplify` (challenge proposals)
 
 ## specialist (specialist role)
 

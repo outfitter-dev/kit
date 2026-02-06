@@ -1,6 +1,6 @@
 ---
 name: claude-plugins
-description: This skill should be used when creating plugins, publishing to marketplaces, or when "plugin.json", "marketplace", "create plugin", or "distribute plugin" are mentioned.
+description: "This skill should be used when creating plugins, publishing to marketplaces, or when plugin.json, marketplace, create plugin, or distribute plugin are mentioned."
 metadata:
   version: "1.0.0"
   related-skills:
@@ -414,7 +414,7 @@ NEVER:
 
 ## Related Skills
 
-- **claude-commands** - Slash command development
-- **claude-agents** - Custom agent design
-- **claude-hooks** - Event hook implementation
-- **skills-dev** - Skill creation patterns
+- `claude-commands` - Slash command development
+- `claude-agents` - Custom agent design
+- `claude-hooks` - Event hook implementation
+- `skills-dev` - Skill creation patterns

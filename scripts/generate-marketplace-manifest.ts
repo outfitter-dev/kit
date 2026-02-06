@@ -49,20 +49,28 @@ async function main() {
     .filter((p) => p.name !== marketplace.name)
     .map((p) => p.name);
 
-  const manifest = {
-    _generated: { source: ".claude-plugin/marketplace.json" },
-    marketplace: {
-      name: marketplace.name,
-      repo,
-      source: "github",
-    },
-    plugins: {
-      required,
-      optional,
-    },
-  };
+  // Build JSON manually to match Biome formatting (inline short arrays).
+  const q = (s: string) => `"${s}"`;
+  const arr = (items: string[]) => `[${items.map(q).join(", ")}]`;
+  const json = [
+    "{",
+    `  "_generated": {`,
+    `    "source": ".claude-plugin/marketplace.json"`,
+    "  },",
+    `  "marketplace": {`,
+    `    "name": ${q(marketplace.name)},`,
+    `    "repo": ${q(repo)},`,
+    `    "source": "github"`,
+    "  },",
+    `  "plugins": {`,
+    `    "required": ${arr(required)},`,
+    `    "optional": ${arr(optional)}`,
+    "  }",
+    "}",
+    "",
+  ].join("\n");
 
-  await Bun.write(DEST, `${JSON.stringify(manifest, null, "\t")}\n`);
+  await Bun.write(DEST, json);
   console.log(`[generate-marketplace-manifest] Wrote ${DEST}`);
 }
 

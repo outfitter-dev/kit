@@ -1,13 +1,13 @@
 ---
 name: claude-commands
-description: This skill should be used when creating slash commands, writing command files, or when "/command", ".claude/commands", "$ARGUMENTS", or "create command" are mentioned.
+description: "This skill should be used when creating slash commands, writing command files, or when /command, .claude/commands, $ARGUMENTS, or create command are mentioned."
 metadata:
   version: "2.0.0"
   related-skills:
     - claude-hooks
     - claude-plugins
     - skills-dev
-allowed-tools: Read Write Edit Grep Glob Bash TaskCreate TaskUpdate TaskList TaskGet
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
 # Claude Command Authoring
@@ -406,6 +406,6 @@ See `scripts/` for scaffolding and validation utilities.
 
 ## Related Skills
 
-- **claude-hook-authoring**: Add automation triggers to command workflows
-- **claude-plugin-development**: Bundle commands into distributable plugins
-- **claude-code-configuration**: Configure Claude Code settings globally
+- `claude-hook-authoring`: Add automation triggers to command workflows
+- `claude-plugin-development`: Bundle commands into distributable plugins
+- `claude-code-configuration`: Configure Claude Code settings globally

@@ -1,6 +1,6 @@
 ---
 name: report-findings
-description: This skill should be used when synthesizing multi-source research, presenting findings with attribution, or when "report", "findings", or "synthesis" are mentioned.
+description: "This skill should be used when synthesizing multi-source research, presenting findings with attribution, or when report, findings, or synthesis are mentioned."
 metadata:
   version: "1.1.0"
   related-skills:

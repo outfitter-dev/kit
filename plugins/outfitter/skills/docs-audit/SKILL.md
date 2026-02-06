@@ -1,19 +1,9 @@
 ---
 name: docs-audit
-description: |
-  Comprehensive documentation audit against current code state. Checks markdown files for accuracy, link validity, code example correctness, and docstring coverage. Uses efficient discovery to minimize context usage while providing thorough analysis.
+description: "Comprehensive documentation audit against current code state. Checks markdown files for accuracy, link validity, code example correctness, and docstring coverage. Uses efficient discovery to minimize context usage while providing thorough analysis."
 context: fork
 agent: editor
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-  - Glob
-  - Grep
-  - TaskCreate
-  - TaskUpdate
-  - TaskList
-  - TaskGet
+allowed-tools: Bash, Read, Write, Glob, Grep, TaskCreate, TaskUpdate, TaskList, TaskGet
 metadata:
   arg-schema:
     path:

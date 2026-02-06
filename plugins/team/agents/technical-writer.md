@@ -4,13 +4,7 @@ description: Creates technical documentation for Outfitter — READMEs, API docs
 skills:
   - styleguide
   - docs-write
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
+tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 ---
 
 # Technical Writer

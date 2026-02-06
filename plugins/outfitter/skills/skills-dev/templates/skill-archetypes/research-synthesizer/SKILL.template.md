@@ -1,6 +1,6 @@
 ---
 name: {{TOPIC}}-research
-description: Research and synthesize information about {{TOPIC}}. Use when {{TRIGGER_CONTEXTS}}. Produces {{OUTPUT_FORMAT}} with citations.
+description: "Researches and synthesizes information about {{TOPIC}}. Use when {{TRIGGER_CONTEXTS}}."
 ---
 
 # {{TOPIC}} Research

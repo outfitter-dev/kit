@@ -1,6 +1,6 @@
 ---
 name: claude-hooks
-description: This skill should be used when creating hooks, automating workflows, or when "PreToolUse", "PostToolUse", "hooks.json", "event handler", or "create hook" are mentioned.
+description: "This skill should be used when creating hooks, automating workflows, or when PreToolUse, PostToolUse, hooks.json, event handler, or create hook are mentioned."
 metadata:
   version: "2.0.0"
   related-skills:

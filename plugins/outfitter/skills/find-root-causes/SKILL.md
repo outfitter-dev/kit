@@ -1,6 +1,6 @@
 ---
 name: find-root-causes
-description: This skill should be used when diagnosing failures, investigating incidents, finding root causes, or when "root cause", "diagnosis", "investigate", or "--rca" are mentioned.
+description: "This skill should be used when diagnosing failures, investigating incidents, finding root causes, or when root cause, diagnosis, investigate, or --rca are mentioned."
 agent: debugger
 context: fork
 metadata:

@@ -1,8 +1,9 @@
 ---
 name: use-bun
-description: Bun-first development patterns for TypeScript projects. Use when auditing Node.js projects for migration opportunities, starting new projects, evaluating npm dependencies, or reducing package.json bloat. Triggers on mentions of npm, yarn, pnpm, Node.js migration, dependency audit, or package optimization.
+description: "Bun-first development patterns for TypeScript projects. Use when auditing Node.js projects for migration, starting new projects, or evaluating npm dependencies."
 metadata:
-  version: 1.1.0
+  version: "1.1.0"
+  author: outfitter
   category: development
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: cli-development
-description: This skill should be used when designing, implementing, or reviewing CLI tools, or when flags, subcommands, help text, exit codes, or CLI patterns are mentioned.
+description: "This skill should be used when designing, implementing, or reviewing CLI tools, or when flags, subcommands, help text, exit codes, or CLI patterns are mentioned."
 license: CC-BY-SA-4.0 (docs, adapted from clig.dev); MIT (scripts)
 compatibility: Scripts use Python 3.10+ (scripts/cli_audit.py).
 metadata:

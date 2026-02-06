@@ -1,6 +1,6 @@
 ---
 name: {{API_NAME}}-api
-description: Interact with the {{API_NAME}} API. Use when {{TRIGGER_CONTEXTS}}. Supports {{CAPABILITIES}}.
+description: "Interacts with the {{API_NAME}} API. Use when {{TRIGGER_CONTEXTS}}."
 ---
 
 # {{API_NAME}} API

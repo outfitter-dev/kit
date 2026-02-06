@@ -24,7 +24,7 @@ YAML frontmatter that helps agents find the right skill without loading full con
 ```yaml
 ---
 name: pdf-processing
-description: Extracts text and tables from PDF files, fills forms, and merges documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
+description: "Extracts text and tables from PDF files, fills forms, and merges documents. Use when working with PDF files or document extraction."
 ---
 ```
 
@@ -100,7 +100,7 @@ skill-name/
 ```markdown
 ## Error Investigation
 
-Load the **outfitter:debugging** skill using the Skill tool to investigate
+Load the `outfitter:debugging` skill using the Skill tool to investigate
 this authentication failure systematically.
 
 Pass these parameters to the debugging workflow:
@@ -147,9 +147,7 @@ This separation enables reuse across similar domains.
 Think about what users actually say:
 
 ```yaml
-description: Creates weekly team status reports with wins, challenges, and priorities.
-  Use when the user asks for a team update, standup report, weekly summary, or status
-  email. Keywords: standup, weekly update, team report, status.
+description: "Creates weekly team status reports with wins, challenges, and priorities. Use when asked for a team update, standup report, or weekly summary."
 ```
 
 ### Be Specific About Scope
@@ -596,7 +594,7 @@ company-skills/
 ```markdown
 ---
 name: deployment-production
-description: Deploys to production with safety checks
+description: "Deploys to production with safety checks."
 ---
 
 # Production Deployment
@@ -621,25 +619,25 @@ ALWAYS wait for health check before considering deploy complete.
 ```markdown
 ---
 name: feature-development
-description: End-to-end feature development workflow
+description: "End-to-end feature development workflow."
 ---
 
 # Feature Development Workflow
 
 ## Stage 1: Planning
-Load **pathfinding** skill to clarify requirements and architecture.
+Load `pathfinding` skill to clarify requirements and architecture.
 
 ## Stage 2: Implementation
-Load **tdd** skill to implement with tests.
+Load `tdd` skill to implement with tests.
 
 ## Stage 3: Documentation
-Load **api-documentation** skill to generate API docs.
+Load `api-documentation` skill to generate API docs.
 
 ## Stage 4: Review
-Load **code-review** skill to validate implementation.
+Load `code-review` skill to validate implementation.
 
 ## Stage 5: Deployment
-Load **deployment-staging** skill to deploy for testing.
+Load `deployment-staging` skill to deploy for testing.
 
 Each stage must complete successfully before proceeding to next.
 ```
@@ -652,7 +650,7 @@ Each stage must complete successfully before proceeding to next.
 ## Error Recovery
 
 If tests fail in Stage 2:
-  Load **debugging** skill to investigate
+  Load `debugging` skill to investigate
   Return to Stage 2 after fixes
 
 If code review finds issues in Stage 4:
@@ -750,7 +748,7 @@ Track what skills do in production:
 ```markdown
 ---
 name: internal-deploy
-description: Company deployment process with all safety checks
+description: "Company deployment process with all safety checks."
 ---
 
 # Internal Deployment Workflow
@@ -837,14 +835,14 @@ version: 2.1.0
 ---
 name: api-client
 version: 1.5.0
-description: Make API calls with provided credentials
+description: "Make API calls with provided credentials."
 ---
 
 # Version 2.x: Uses MCP server for authentication (breaking)
 ---
 name: api-client
 version: 2.0.0
-description: Make API calls using Linear MCP server
+description: "Make API calls using Linear MCP server."
 ---
 ```
 

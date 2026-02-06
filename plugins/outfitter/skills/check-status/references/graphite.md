@@ -169,7 +169,7 @@ Stack: {stack_name}
 └─ PR #121: [feature/update-middleware] Update auth middleware
    CI: ✗ 1/3 failing | Reviews: ⏸ No reviews
    Updated: 1 day ago
-   └─ Blocker: CI failing ◆◆
+   └─ Blocker: CI failing ◈
 ```
 
 ### Attention Indicators
@@ -178,7 +178,7 @@ Highlight stack-specific issues:
 
 ```
 ⚠️  STACK ATTENTION NEEDED
-◆◆ PR #121: Blocking entire stack (failing CI)
+◈ PR #121: Blocking entire stack (failing CI)
 ◆  Branch feature/add-jwt: Needs restack (parent updated)
 ◇  Branch feature/auth-refactor: Needs submit (local changes)
 ```

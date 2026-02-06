@@ -1,6 +1,6 @@
 ---
 name: patterns
-description: This skill should be used when recognizing recurring themes, identifying patterns in work or data, or when "pattern", "recurring", or "repeated" are mentioned. For implementation, see codify skill.
+description: "This skill should be used when recognizing recurring themes, identifying patterns in work or data, or when pattern, recurring, or repeated are mentioned. For implementation, see codify skill."
 metadata:
   version: "1.1.0"
   related-skills:

@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: This skill should be used when reviewing code before commit, conducting quality gates, or when "review", "fresh eyes", "pre-commit review", or "quality gate" are mentioned.
+description: "This skill should be used when reviewing code before commit, conducting quality gates, or when review, fresh eyes, pre-commit review, or quality gate are mentioned."
 metadata:
   version: "1.0.0"
 ---
@@ -41,7 +41,7 @@ Emit findings as discovered:
 **Review Complete**
 
 **Findings Summary:**
-- ◆◆ Severe: {COUNT} — blocking issues
+- ◈ Severe: {COUNT} — blocking issues
 - ◆ Moderate: {COUNT} — should fix before merge
 - ◇ Minor: {COUNT} — consider addressing
 
@@ -169,7 +169,7 @@ Emit completion protocol:
 - Detailed findings list
 - Optional: patterns noticed, suggestions for future
 
-Load the **maintain-tasks** skill for tracking review stages.
+Load the `maintain-tasks` skill for tracking review stages.
 
 </stages>
 
@@ -189,7 +189,7 @@ Load the **maintain-tasks** skill for tracking review stages.
 
 Example:
 
-**◆◆** `src/auth/login.ts:45-52`
+**◈** `src/auth/login.ts:45-52`
 
 **Issue:** Password compared using `==` instead of constant-time comparison
 
@@ -205,7 +205,7 @@ Example:
 
 <severity_guidance>
 
-**◆◆ Severe (blocking):**
+**◈ Severe (blocking):**
 - Security vulnerabilities
 - Data loss risks
 - Runtime crashes in common paths

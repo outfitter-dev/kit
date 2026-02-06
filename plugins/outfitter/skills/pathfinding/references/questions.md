@@ -8,14 +8,14 @@
 3. **Why it matters**: One sentence explaining impact
 4. **Options**: 2–4 meaningful choices
 5. **Nuance**: Brief context for each option
-6. **★ Recommendation** (optional): Your lean with reasoning
+6. **⭐ Recommendation** (optional): Your lean with reasoning
 
 ## Delivery via EnterPlanMode
 
 Use `EnterPlanMode` for each question — enables keyboard navigation.
 
 **Structure**:
-- **Prose above tool**: context, reasoning, ★ recommendation
+- **Prose above tool**: context, reasoning, ⭐ recommendation
 - **Inside tool**: options only (concise, scannable)
 
 Don't bury recommendations inside the tool — keep them visible in prose.
@@ -83,7 +83,7 @@ Each option should include helpful context:
 - Generic statements: "Good option"
 - No information: Just the option name with no context
 
-## Recommendations (★)
+## Recommendations (⭐)
 
 Use recommendations when:
 - You have genuine expertise or insight
@@ -95,11 +95,11 @@ Use recommendations when:
 - Not enough context yet
 - All options equally valid
 
-**Good**: `1. React [★] — mature ecosystem *best starting point for most teams*`
+**Good**: `1. React ⭐ — mature ecosystem *best starting point for most teams*`
 
 **Weak**:
-- ★ I like this one
-- ★ Most popular
+- ⭐ I like this one
+- ⭐ Most popular
 - Recommendation buried in prose above options
 
 ## User Replies
@@ -117,8 +117,8 @@ All valid.
 **Baseline** (~80% of questions):
 - Clear question + one-sentence "why"
 - 2–4 options with brief nuance
-- Inline `[★]` on recommended option
-- Optional: `[★] { expanded reasoning }` in prose above if helpful
+- Inline `⭐` on recommended option
+- Optional: `⭐ { expanded reasoning }` in prose above if helpful
 
 **Expand when**:
 - High ambiguity or risk

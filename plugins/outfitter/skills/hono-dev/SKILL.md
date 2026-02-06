@@ -1,6 +1,6 @@
 ---
 name: hono-dev
-description: This skill should be used when building APIs with Hono, using hc client, implementing OpenAPI, or when "Hono", "RPC", or "type-safe API" are mentioned.
+description: "This skill should be used when building APIs with Hono, using hc client, implementing OpenAPI, or when Hono, RPC, or type-safe API are mentioned."
 metadata:
   version: "1.0.0"
 ---

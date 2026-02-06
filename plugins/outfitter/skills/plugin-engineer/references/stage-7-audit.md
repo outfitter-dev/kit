@@ -28,7 +28,7 @@ Validate plugin before distribution.
 
 | Level | Indicator | Meaning |
 |-------|-----------|---------|
-| Critical | `◆◆` | Blocks functionality, must fix |
+| Critical | `◈` | Blocks functionality, must fix |
 | Warning | `◆` | Best practice violation, should fix |
 | Info | `◇` | Suggestion, optional |
 

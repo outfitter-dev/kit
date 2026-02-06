@@ -1,6 +1,6 @@
 ---
 name: maintain-tasks
-description: Task management for session continuity. Use when coordinating multi-step work, managing subagent assignments, or preserving intent across compaction. Triggers on "track tasks", "manage work", "coordinate agents", or when complex work requires sequencing.
+description: "Task management for session continuity. Use when coordinating multi-step work, managing subagent assignments, or preserving intent across compaction. Triggers on track tasks, manage work, coordinate agents, or when complex work requires sequencing."
 user-invocable: false
 ---
 

@@ -3,13 +3,7 @@ name: editor
 description: Reviews and refines Outfitter content for voice, style, and structure. The final pass before publishing — ensures everything aligns with Outfitter standards.
 skills:
   - docs-review
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Skills
+tools: Read, Write, Edit, Glob, Grep, Skill
 ---
 
 # Editor

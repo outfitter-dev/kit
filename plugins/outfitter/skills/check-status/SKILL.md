@@ -1,6 +1,6 @@
 ---
 name: check-status
-description: This skill should be used when checking project status, starting sessions, reviewing activity, or when "sitrep", "status report", or "what's changed" are mentioned.
+description: "This skill should be used when checking project status, starting sessions, reviewing activity, or when sitrep, status report, or what's changed are mentioned."
 metadata:
   version: "1.0.1"
 ---
@@ -136,7 +136,7 @@ Tool-specific: [graphite.md](references/graphite.md), [github.md](references/git
 **Visual Indicators**:
 - `✓` success | `✗` failure | `⏳` pending | `⏸` draft | `🔴` blocker
 - `▓▓▓░░` progress (3/5)
-- `◇` minor | `◆` moderate | `◆◆` severe
+- `◇` minor | `◆` moderate | `◈` severe
 
 **Output Structure**:
 

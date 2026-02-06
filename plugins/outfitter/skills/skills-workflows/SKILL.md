@@ -1,13 +1,13 @@
 ---
 name: skills-workflows
-description: Design multi-skill workflow systems with artifact-based state handoff. Use when building skill pipelines, sequenced workflows, or when "workflow system", "skill pipeline", "state handoff", or "artifacts" are mentioned.
+description: "Design multi-skill workflow systems with artifact-based state handoff. Use when building skill pipelines, sequenced workflows, or when workflow system, skill pipeline, state handoff, or artifacts are mentioned."
 metadata:
   version: "1.0.0"
   related-skills:
     - skills-dev
     - claude-skills
     - codify
-allowed-tools: Read Write Edit Grep Glob Bash TaskCreate TaskUpdate TaskList TaskGet AskUserQuestion
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion
 ---
 
 # Skills Workflows

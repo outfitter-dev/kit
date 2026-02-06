@@ -98,7 +98,7 @@ Concerns:
 
 ```text
 [EnterPlanMode]
-1. Small (< 1k users) [★] — single server, simple WebSockets *start here, scale later*
+1. Small (< 1k users) ⭐ — single server, simple WebSockets *start here, scale later*
 2. Medium (1k-50k users) — needs Redis pub/sub for multi-server
 3. Large (50k+ users) — dedicated service (Pusher, Ably, or self-hosted)
 5. Something else — different constraints
@@ -171,7 +171,7 @@ Concerns:
 ```text
 [EnterPlanMode]
 1. No persistence — real-time only, notifications disappear on refresh
-2. Basic persistence [★] — store in DB, show unread count *better UX, moderate effort*
+2. Basic persistence ⭐ — store in DB, show unread count *better UX, moderate effort*
 3. Full history — notification center, mark as read, pagination
 5. Something else — different approach
 ```

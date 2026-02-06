@@ -1,6 +1,6 @@
 ---
 name: subagents
-description: This skill should be used when coordinating agents, delegating tasks to specialists, or when "dispatch agents", "which agent", or "multi-agent" are mentioned.
+description: "This skill should be used when coordinating agents, delegating tasks to specialists, or when dispatch agents, which agent, or multi-agent are mentioned."
 metadata:
   version: "2.2.0"
   related-skills:
@@ -41,7 +41,7 @@ Complex task arrives
 
 ## Context Management
 
-For long-running orchestration, load the **context-management** skill. It teaches:
+For long-running orchestration, load the `context-management` skill. It teaches:
 - Using Tasks as survivable state (persists across compaction)
 - Delegating to subagents to preserve main context
 - Pre-compaction checklists to capture progress
@@ -314,7 +314,7 @@ Progress format:
 >
 > Only the **orchestrator** handles git state. Subagents write code to the filesystem and report completion.
 
-For detailed workflows and recovery procedures, see the **source-control** plugin:
+For detailed workflows and recovery procedures, see the `source-control` plugin:
 
 - `source-control:multi-agent-vcs` — Full orchestrator-only workflow patterns
 - `source-control:graphite-stacks` — Graphite-specific commands and recovery

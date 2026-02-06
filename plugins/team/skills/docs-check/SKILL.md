@@ -1,10 +1,12 @@
 ---
 name: docs-check
-description: Rigorous quality gate for documentation before merge or publish. Verifies code examples run, links resolve, APIs match implementation, and all sections are complete. Use when auditing docs, reviewing documentation PRs, or when "verify", "quality gate", "docs audit", or "check examples" is mentioned.
+description: "Quality gate for documentation before merge or publish — verifies code examples, links, and API accuracy. Use when auditing docs or reviewing documentation PRs."
 context: fork
 agent: editor
 metadata:
   version: "1.0.0"
+  author: outfitter
+  category: documentation
 ---
 
 # Documentation Check
@@ -84,32 +86,7 @@ Work through each dimension. For each item, document: PASS/FAIL + evidence.
 
 ## Output Format
 
-```markdown
-# Documentation Check: {doc-name}
-
-**Verdict**: PASS | NEEDS WORK | BLOCKED
-**Blocking issues**: {count}
-**Suggestions**: {count}
-
-## Blocking Issues (must fix)
-
-1. **{Check name}**: {Issue description}
-   - Location: {file:line or section}
-   - Evidence: {error message, mismatch, etc.}
-   - Fix: {specific action to resolve}
-
-## Suggestions (nice to have)
-
-1. {Improvement with rationale}
-
-## Passed Checks
-
-- {List of checks that passed}
-
-## Summary
-
-{One sentence: ready to publish or what must be addressed first}
-```
+Use the report structure in [TEMPLATE.md](TEMPLATE.md).
 
 ## When to Use
 
@@ -120,7 +97,7 @@ Work through each dimension. For each item, document: PASS/FAIL + evidence.
 
 ## Relationship with docs-review
 
-For combined voice/style and technical verification, load both this skill and the `internal:docs-review` skill.
+For combined voice/style and technical verification, load both this skill and the `team:docs-review` skill.
 
 | Dimension | docs-review | docs-check |
 |-----------|-------------|------------|

@@ -16,12 +16,12 @@ User proposes building a custom authentication system from scratch instead of us
 - Custom auth requires ongoing security maintenance
 - High risk of subtle vulnerabilities
 
-**Escalation Level**: ◆◆ Hazard
+**Escalation Level**: ◈ Hazard
 
 ### ALTERNATIVE: Propose Simpler Solutions
 
 **Response**:
-> ◆◆ **Hazard**: Building custom authentication is high-risk. Auth has numerous security considerations: timing attacks, token expiry edge cases, secure password reset flows, account enumeration prevention, brute force protection, and more. Professional auth services employ security teams to handle these. Custom implementations frequently have vulnerabilities.
+> ◈ **Hazard**: Building custom authentication is high-risk. Auth has numerous security considerations: timing attacks, token expiry edge cases, secure password reset flows, account enumeration prevention, brute force protection, and more. Professional auth services employ security teams to handle these. Custom implementations frequently have vulnerabilities.
 >
 > I strongly recommend using a proven auth solution. Here are options by use case:
 
@@ -258,7 +258,7 @@ export const auth = betterAuth({
 
 ## Red Flags That Triggered Escalation
 
-- Security-critical system (◆◆ Hazard level)
+- Security-critical system (◈ Hazard level)
 - Many edge cases requiring expertise
 - Proven alternatives exist
 - High ongoing maintenance burden

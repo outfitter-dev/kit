@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: This skill should be used when implementing features with TDD, writing tests first, or refactoring with test coverage. Applies disciplined Red-Green-Refactor cycles with TypeScript/Bun and Rust tooling.
+description: "This skill should be used when implementing features with TDD, writing tests first, or refactoring with test coverage. Applies disciplined Red-Green-Refactor cycles with TypeScript/Bun and Rust tooling."
 metadata:
   version: "2.1.0"
 ---
@@ -24,7 +24,7 @@ NOT for: exploratory coding, UI prototypes, static config, trivial glue code
 
 <stages>
 
-Load the **maintain-tasks** skill for stage tracking. Advance through RED-GREEN-REFACTOR cycle.
+Load the `maintain-tasks` skill for stage tracking. Advance through RED-GREEN-REFACTOR cycle.
 
 | Stage | Trigger | activeForm |
 |-------|---------|------------|
@@ -307,7 +307,7 @@ function divide(a: number, b: number): Result {
 <rules>
 
 ALWAYS:
-- Track progress with Tasks (load **maintain-tasks** skill)
+- Track progress with Tasks (load `maintain-tasks` skill)
 - Write tests before implementation (RED first)
 - Run tests after each stage
 - Verify tests fail for right reason in RED

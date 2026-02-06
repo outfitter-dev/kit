@@ -30,7 +30,7 @@ Generated: {timestamp}
 **Severity** (use `◇◆`):
 - `◇` minor, informational
 - `◆` moderate, needs attention
-- `◆◆` severe, blocking
+- `◈` severe, blocking
 
 ## Section Templates
 
@@ -92,7 +92,7 @@ Highlight action-needed items at top:
 
 ```
 ⚠️  ATTENTION NEEDED
-◆◆ PR #123: CI failing for 2 days (blocks deployment)
+◈ PR #123: CI failing for 2 days (blocks deployment)
 ◆  Issue BLZ-45: High priority, unassigned
 ◇  Branch feature/old: No activity for 14 days
 ```

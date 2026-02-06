@@ -1,6 +1,6 @@
 ---
 name: codify
-description: This skill should be used when implementing patterns as Claude Code components (skills, commands, hooks, agents), or when "codify", "capture workflow", "turn into a skill", or "make reusable" are mentioned. For pattern identification, see patterns skill.
+description: "This skill should be used when implementing patterns as Claude Code components (skills, commands, hooks, agents), or when codify, capture workflow, turn into a skill, or make reusable are mentioned. For pattern identification, see patterns skill."
 agent: analyst
 context: fork
 metadata:

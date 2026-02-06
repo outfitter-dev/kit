@@ -1,10 +1,6 @@
 ---
 name: voice
-description: >-
-  Outfitter's philosophical voice and values. Covers opinionated stance, agent-first design,
-  goal-serving content, and earned confidence. Use when writing Outfitter content, reviewing
-  drafts, establishing tone, or when "voice", "tone", "messaging", "brand", or "how we write"
-  are mentioned.
+description: "Outfitter's philosophical voice and values — opinionated stance, agent-first design, earned confidence. Use when writing content, reviewing drafts, or establishing tone."
 metadata:
   version: "1.0.0"
   author: outfitter
@@ -100,11 +96,11 @@ We're not hedging. We're not "just a simple tool." We're building something with
 This skill is the philosophical foundation — the *why* and *how we think*.
 
 It's not:
-- Sentence-level style guidance (load the `internal:styleguide` skill)
-- Documentation structure templates (load the `internal:docs-write` skill)
+- Sentence-level style guidance (load the `team:styleguide` skill)
+- Documentation structure templates (load the `team:docs-write` skill)
 - Code style or formatting rules
 
-Load this skill to ground your writing in Outfitter's values. Load `internal:styleguide` for craft, `internal:docs-write` for structure.
+Load this skill to ground your writing in Outfitter's values. Load `team:styleguide` for craft, `team:docs-write` for structure.
 
 ## Review Checklist
 

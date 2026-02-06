@@ -71,6 +71,7 @@ export const INDICATORS: Record<
     // Lozenges
     lozenge: { unicode: "◆", fallback: "♦" },
     lozengeOutline: { unicode: "◇", fallback: "◊" },
+    lozengeDot: { unicode: "◈", fallback: "♦♦" },
     // Lines
     dash: { unicode: "–", fallback: "-" },
     // Pointers
@@ -323,4 +324,42 @@ export function getProgressIndicator(
   }
 
   return getIndicator("progress", name, forceUnicode);
+}
+
+/**
+ * Severity levels for escalating indicators.
+ *
+ * Uses the diamond family: ◇ (minor) → ◆ (moderate) → ◈ (severe)
+ */
+export type SeverityLevel = "minor" | "moderate" | "severe";
+
+/**
+ * Mapping from severity level to marker indicator name.
+ */
+const SEVERITY_MARKERS: Record<SeverityLevel, string> = {
+  minor: "lozengeOutline",
+  moderate: "lozenge",
+  severe: "lozengeDot",
+};
+
+/**
+ * Gets a severity indicator for the given level.
+ *
+ * @param level - The severity level
+ * @param forceUnicode - Override unicode detection
+ * @returns The appropriate severity indicator character
+ *
+ * @example
+ * ```typescript
+ * getSeverityIndicator("minor");    // "◇"
+ * getSeverityIndicator("moderate"); // "◆"
+ * getSeverityIndicator("severe");   // "◈"
+ * ```
+ */
+export function getSeverityIndicator(
+  level: SeverityLevel,
+  forceUnicode?: boolean
+): string {
+  const name = SEVERITY_MARKERS[level];
+  return getIndicator("marker", name, forceUnicode);
 }

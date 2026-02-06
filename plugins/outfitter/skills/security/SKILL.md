@@ -1,6 +1,6 @@
 ---
 name: security
-description: This skill should be used when auditing code for security issues, reviewing authentication/authorization, evaluating input validation, analyzing cryptographic usage, or reviewing dependency security. Provides OWASP patterns, CWE analysis, and threat modeling guidance.
+description: "This skill should be used when auditing code for security issues, reviewing authentication/authorization, evaluating input validation, analyzing cryptographic usage, or reviewing dependency security. Provides OWASP patterns, CWE analysis, and threat modeling guidance."
 metadata:
   version: "1.0.0"
 ---
@@ -24,7 +24,7 @@ NOT for: performance optimization, general code review, feature implementation
 
 <stages>
 
-Load the **maintain-tasks** skill for stage tracking. Each stage feeds the next.
+Load the `maintain-tasks` skill for stage tracking. Each stage feeds the next.
 
 | Stage | Trigger | activeForm |
 |-------|---------|------------|

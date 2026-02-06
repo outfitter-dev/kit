@@ -1,6 +1,6 @@
 ---
 name: typescript-dev
-description: This skill should be used when writing TypeScript, eliminating any types, implementing Zod validation, or when strict type safety is needed. Covers modern TS 5.5+ features and runtime validation patterns.
+description: "This skill should be used when writing TypeScript, eliminating any types, implementing Zod validation, or when strict type safety is needed. Covers modern TS 5.5+ features and runtime validation patterns."
 metadata:
   version: "1.0.0"
 ---

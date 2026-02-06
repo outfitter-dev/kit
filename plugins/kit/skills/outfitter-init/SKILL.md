@@ -4,7 +4,7 @@ version: 0.2.0
 description: "Initialize Outfitter Stack projects. Scaffolds new projects from templates or migrates existing codebases. Detects context from CLAUDE.md/SPEC.md/PLAN.md to suggest appropriate setup."
 context: fork
 agent: stacker
-allowed-tools: Read Grep Glob Bash(rg *) Bash(bun *) Bash(outfitter *) Bash(ls *) AskUserQuestion TaskCreate TaskUpdate TaskList TaskGet
+allowed-tools: Read, Grep, Glob, Bash(rg *), Bash(bun *), Bash(outfitter *), Bash(ls *), AskUserQuestion, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
 # Outfitter Init

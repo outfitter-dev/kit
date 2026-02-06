@@ -1,6 +1,6 @@
 ---
 name: claude-agents
-description: This skill should be used when creating agents, writing agent frontmatter, configuring subagents, or when "create agent", "agent.md", "subagent", or "Task tool" are mentioned.
+description: "This skill should be used when creating agents, writing agent frontmatter, configuring subagents, or when create agent, agent.md, subagent, or Task tool are mentioned."
 metadata:
   version: "1.0.0"
   related-skills:
@@ -391,5 +391,5 @@ See `templates/` for starter templates.
 
 ## Related Skills
 
-- **skills-development**: Create Skills (different from agents)
-- **claude-plugin-development**: Bundle agents into plugins
+- `skills-development`: Create Skills (different from agents)
+- `claude-plugin-development`: Bundle agents into plugins

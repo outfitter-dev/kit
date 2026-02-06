@@ -1,0 +1,6 @@
+- **Status**: Ready | Needs Work
+- **Summary**: One sentence overall assessment.
+- **Issues** (if any):
+  - [Location] Issue description and suggested fix
+- **Strengths**:
+  - What works well

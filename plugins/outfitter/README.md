@@ -20,66 +20,66 @@ Core development methodology and Claude Code extensibility. Provides disciplined
 
 | Skill | Purpose |
 |-------|---------|
-| **ai-sdk** | Vercel AI SDK patterns for streaming, structured outputs, and agents |
-| **bun-dev** | Bun runtime APIs and patterns |
-| **cli-dev** | Redirect to cli-dev plugin |
-| **code-review** | Pre-commit quality gate checklist |
-| **codebase-recon** | Evidence-based codebase investigation methodology |
-| **simplify** | Pushback against over-engineering |
-| **session-analysis** | Signal extraction from chat history |
-| **debugging** | Systematic root cause investigation (no fixes without understanding) |
-| **hono-dev** | Type-safe Hono API development |
-| **multi-agent-vcs** | Tool-agnostic multi-agent git coordination |
-| **pathfinding** | Collaborative Q&A for unclear requirements |
-| **patterns** | Identify and extract reusable patterns |
-| **codify** | Extract reusable patterns from conversations |
-| **performance** | Profiling and optimization |
-| **react-dev** | React 18-19 TypeScript patterns |
-| **report-findings** | Structure and present research findings |
-| **research** | Multi-source technical research with citations |
-| **find-root-causes** | Systematic problem investigation methodology |
-| **scenarios** | End-to-end testing without mocks |
-| **security** | Security auditing and vulnerability detection |
-| **architecture** | System design with technology selection frameworks |
-| **software-craft** | Engineering judgment and decision principles |
-| **check-status** | Comprehensive status reports across VCS, PRs, issues, CI/CD |
-| **subagents** | Orchestrate outfitter subagents for complex tasks |
-| **tdd** | Test-driven development with Red-Green-Refactor cycles |
-| **typescript-dev** | TypeScript patterns and strict typing |
-| **which-tool** | Detect and select optimal CLI tools for tasks |
+| `ai-sdk` | Vercel AI SDK patterns for streaming, structured outputs, and agents |
+| `bun-dev` | Bun runtime APIs and patterns |
+| `cli-dev` | Redirect to cli-dev plugin |
+| `code-review` | Pre-commit quality gate checklist |
+| `codebase-recon` | Evidence-based codebase investigation methodology |
+| `simplify` | Pushback against over-engineering |
+| `session-analysis` | Signal extraction from chat history |
+| `debugging` | Systematic root cause investigation (no fixes without understanding) |
+| `hono-dev` | Type-safe Hono API development |
+| `multi-agent-vcs` | Tool-agnostic multi-agent git coordination |
+| `pathfinding` | Collaborative Q&A for unclear requirements |
+| `patterns` | Identify and extract reusable patterns |
+| `codify` | Extract reusable patterns from conversations |
+| `performance` | Profiling and optimization |
+| `react-dev` | React 18-19 TypeScript patterns |
+| `report-findings` | Structure and present research findings |
+| `research` | Multi-source technical research with citations |
+| `find-root-causes` | Systematic problem investigation methodology |
+| `scenarios` | End-to-end testing without mocks |
+| `security` | Security auditing and vulnerability detection |
+| `architecture` | System design with technology selection frameworks |
+| `software-craft` | Engineering judgment and decision principles |
+| `check-status` | Comprehensive status reports across VCS, PRs, issues, CI/CD |
+| `subagents` | Orchestrate outfitter subagents for complex tasks |
+| `tdd` | Test-driven development with Red-Green-Refactor cycles |
+| `typescript-dev` | TypeScript patterns and strict typing |
+| `which-tool` | Detect and select optimal CLI tools for tasks |
 
 #### Claude Code Extensibility
 
 | Skill | Purpose |
 |-------|---------|
-| **skills-dev** | Agent Skills authoring (cross-platform spec + Claude extensions via `references/claude-code.md`) |
-| **claude-plugins** | Full plugin lifecycle, marketplace distribution |
-| **claude-agents** | Subagent creation and validation |
-| **claude-commands** | Slash command authoring |
-| **claude-hooks** | Event hook creation and automation |
-| **claude-rules** | Project rules in .claude/rules/ |
-| **claude-config** | Claude Code/Desktop configuration |
+| `skills-dev` | Agent Skills authoring (cross-platform spec + Claude extensions via `references/claude-code.md`) |
+| `claude-plugins` | Full plugin lifecycle, marketplace distribution |
+| `claude-agents` | Subagent creation and validation |
+| `claude-commands` | Slash command authoring |
+| `claude-hooks` | Event hook creation and automation |
+| `claude-rules` | Project rules in .claude/rules/ |
+| `claude-config` | Claude Code/Desktop configuration |
 
 #### Platform Configuration
 
 | Skill | Purpose |
 |-------|---------|
-| **codex-config** | OpenAI Codex CLI configuration |
+| `codex-config` | OpenAI Codex CLI configuration |
 
 ### Agents (10)
 
 | Agent | Role |
 |-------|------|
-| **quartermaster** | Equips and provisions Claude Code extensions (plugins, agents, skills, hooks) |
-| **analyst** | Investigate, research, explore, identify patterns |
-| **debugger** | Debug, diagnose, troubleshoot, trace |
-| **librarian** | Find documentation, API references |
-| **reviewer** | Review, critique, check, audit |
-| **scout** | Status reports, project health, what's changed |
-| **engineer** | Build, fix, implement, refactor |
-| **skeptic** | Challenge assumptions and complexity |
-| **specialist** | Domain-specific tasks (CI/CD, deploy) |
-| **tester** | Test, validate, verify |
+| `quartermaster` | Equips and provisions Claude Code extensions (plugins, agents, skills, hooks) |
+| `analyst` | Investigate, research, explore, identify patterns |
+| `debugger` | Debug, diagnose, troubleshoot, trace |
+| `librarian` | Find documentation, API references |
+| `reviewer` | Review, critique, check, audit |
+| `scout` | Status reports, project health, what's changed |
+| `engineer` | Build, fix, implement, refactor |
+| `skeptic` | Challenge assumptions and complexity |
+| `specialist` | Domain-specific tasks (CI/CD, deploy) |
+| `tester` | Test, validate, verify |
 
 ## Usage
 

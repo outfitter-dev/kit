@@ -4,14 +4,7 @@ description: Creates compelling copy for Outfitter — blog posts, announcements
 skills:
   - voice
   - styleguide
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - WebSearch
-  - WebFetch
+tools: Read, Write, Edit, Glob, Grep, Skill, WebSearch, WebFetch
 ---
 
 # Comms

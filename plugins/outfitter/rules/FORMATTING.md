@@ -68,7 +68,7 @@ Ensure pipes are properly aligned with spaces surrounding text or hyphens, at le
 
 ## Indicators
 
-Prefer ASCII/Unicode over emoji for terminal output (Claude Code, CLI, interactive sessions). Emoji acceptable in docs or user-facing content where rendering is reliable.
+Prefer ASCII/Unicode over emoji for indicators. Emoji acceptable sparingly — but default to Unicode symbols for consistency across terminals.
 
 ### Progress
 
@@ -83,7 +83,7 @@ Escalating:
 
 - `◇` — minor/informational
 - `◆` — moderate/warning
-- `◆◆` — severe/blocking
+- `◈` — severe/blocking
 - Use for pushback, risk, alerts, uncertainty levels
 
 ### Caveats
@@ -102,14 +102,14 @@ Escalating:
   Decisions Made:
   ✓ /simplify offers two modes: quick (skill) vs deep (agent)
   ✓ Agent returns: complexity identified + alternatives + escalation level
-  ✓ Uses ◇/◆/◆◆ indicators from simplify skill
+  ✓ Uses ◇/◆/◈ indicators from simplify skill
   ```
 
 ### Emphasis
 
 Append to text:
 
-- `★` — recommended/preferred
+- `⭐` — recommended/preferred
 
 ## Interactive Questions
 
@@ -122,17 +122,17 @@ For multi-option questions in skills:
 
 ### Inline Recommendations
 
-Mark recommended option inline with `[★]` + emphasized rationale:
+Mark recommended option inline with `⭐` + emphasized rationale:
 
 ```text
-1. Google only [★] — simplest, highest coverage *good starting point, expand later*
+1. Google only ⭐ — simplest, highest coverage *good starting point, expand later*
 2. Google + GitHub — covers consumer and developer users
 3. Google + GitHub + Microsoft — comprehensive, more maintenance
 ```
 
-Pattern: `N. Option name [★] — brief description *why recommended*`
+Pattern: `N. Option name ⭐ — brief description *why recommended*`
 
-- `[★]` visually distinguishes the recommendation
+- `⭐` visually distinguishes the recommendation
 - `*italicized rationale*` provides quick reasoning
 - Everything scannable in one place
 
@@ -199,7 +199,7 @@ Use a `## Steps` section for composable skill workflows. Place immediately after
 **Pattern rules**:
 
 - Numbered list (order matters)
-- Skill references use: `Load the \`plugin:skill-name\` skill`
+- Skill references use: "Load the `plugin:skill-name` skill"
 - Conditional steps: `If { condition }, load...` or `If { condition }, { action }`
 - Action descriptions: brief, imperative, no articles
 - Keep to 3-6 steps; split into stages if longer

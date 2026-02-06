@@ -91,8 +91,8 @@ function createMinimalSkill(skillName: string, outputDir: string): InitResult {
 
   const titleName = toTitleCase(skillName);
   const skillMd = `---
-name: ${titleName}
-description: TODO - Describe what this skill does and when to use it. Include trigger keywords users might mention.
+name: ${skillName}
+description: "TODO - Describe what this skill does and when to use it."
 ---
 
 # ${titleName}

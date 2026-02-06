@@ -1,6 +1,6 @@
 ---
 name: claude-skills
-description: This skill should be used when creating Claude Code skills with Claude-specific features like allowed-tools, context modes (fork/inherit), argument-hint, or model overrides. Triggers on "Claude skill", "allowed-tools", "context fork", "skill arguments".
+description: "This skill should be used when creating Claude Code skills with Claude-specific features like allowed-tools, context modes (fork/inherit), argument-hint, or model overrides. Triggers on Claude skill, allowed-tools, context fork, skill arguments."
 metadata:
   version: "1.0.0"
   related-skills:
@@ -8,7 +8,7 @@ metadata:
     - claude-plugins
     - claude-commands
     - claude-hooks
-allowed-tools: Read Write Edit Grep Glob Bash TaskCreate TaskUpdate TaskList TaskGet
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
 # Claude Code Skills

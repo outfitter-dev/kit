@@ -1,6 +1,6 @@
 ---
 name: multi-agent-vcs
-description: This skill should be used when dispatching subagents for parallel development, coordinating multi-branch implementations, or when "parallel agents", "orchestrator commits", "subagent filesystem only", "multi-agent git", or "prevent stack corruption" are mentioned. Prevents stack corruption through orchestrator-only git policy.
+description: "This skill should be used when dispatching subagents for parallel development, coordinating multi-branch implementations, or when parallel agents, orchestrator commits, subagent filesystem only, multi-agent git, or prevent stack corruption are mentioned. Prevents stack corruption through orchestrator-only git policy."
 metadata:
   version: "1.0.0"
   author: outfitter

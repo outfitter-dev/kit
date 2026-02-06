@@ -1,6 +1,6 @@
 ---
 name: plugin-engineer
-description: Transforms external repositories (CLIs, libraries, MCP servers) into Claude Code plugins with skills. Use when "build plugin for", "create skills for CLI", "package as plugin", "repo to plugin", or "turn into plugin" are mentioned.
+description: "Transforms external repositories (CLIs, libraries, MCP servers) into Claude Code plugins with skills. Use when build plugin for, create skills for CLI, package as plugin, repo to plugin, or turn into plugin are mentioned."
 metadata:
   version: "1.0.0"
   related-skills:
@@ -12,7 +12,7 @@ metadata:
     - claude-skills
     - claude-plugins
     - claude-plugin-audit
-allowed-tools: Read Write Edit Grep Glob Bash TaskCreate TaskUpdate TaskList TaskGet AskUserQuestion Skill
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion, Skill
 ---
 
 # Plugin Engineer
@@ -75,7 +75,7 @@ Trigger: User says "quick", repo has < 5 main commands, or clear single purpose.
 
 ## Stages
 
-Load the **maintain-tasks** skill for stage tracking. Stages advance only.
+Load the `maintain-tasks` skill for stage tracking. Stages advance only.
 
 | Stage | Skill | activeForm |
 |-------|-------|------------|

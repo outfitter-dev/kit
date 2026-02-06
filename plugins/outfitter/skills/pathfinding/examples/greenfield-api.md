@@ -35,7 +35,7 @@ Unknowns:
 
 ```text
 [EnterPlanMode]
-1. Quick pulse check [★] — nail down key decisions, move fast *good for exploring direction*
+1. Quick pulse check ⭐ — nail down key decisions, move fast *good for exploring direction*
 2. Deep dive — thorough exploration, comprehensive plan
 3. Specific problem — I know what I want, need help with one aspect
 5. Something else — describe what you're after
@@ -113,7 +113,7 @@ Decisions:
 
 ```text
 [EnterPlanMode]
-1. Log workouts manually [★] — exercises, sets, reps, weights *simplest starting point*
+1. Log workouts manually ⭐ — exercises, sets, reps, weights *simplest starting point*
 2. Track metrics — weight, body measurements, progress photos
 3. Follow programs — structured plans, scheduled workouts
 4. Social/compete — friends, challenges, leaderboards
@@ -170,7 +170,7 @@ Concerns:
 
 ```text
 [EnterPlanMode]
-1. Email/password [★] — simple, universal *good starting point*
+1. Email/password ⭐ — simple, universal *good starting point*
 2. Social login (Google/Apple) — better UX, less friction
 3. Both — maximum flexibility
 4. Magic link — passwordless, email-based

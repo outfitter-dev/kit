@@ -21,7 +21,7 @@ skill-name/
 ```markdown
 ---
 name: kebab-case-name
-description: What it does AND when to use it. Trigger terms: keywords, phrases.
+description: "What it does AND when to use it. Trigger terms: keywords, phrases."
 version: 1.0.0
 ---
 
@@ -102,15 +102,15 @@ Clear criteria for when this applies
 ### Reference Other Skills
 
 ```markdown
-Load the **outfitter:debugging** skill using the Skill tool to investigate.
+Load the `outfitter:debugging` skill using the Skill tool to investigate.
 ```
 
 ### Skill Chaining
 
 ```markdown
-1. Load **pathfinding** skill for planning
-2. Load **tdd** skill for implementation
-3. Load **code-review** skill for validation
+1. Load `pathfinding` skill for planning
+2. Load `tdd` skill for implementation
+3. Load `code-review` skill for validation
 ```
 
 ### Skills + MCP

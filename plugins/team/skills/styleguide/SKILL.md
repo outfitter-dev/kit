@@ -1,15 +1,17 @@
 ---
 name: styleguide
-description: Writing craft and style patterns for Outfitter content—sentence rhythm, metaphor usage, enthusiasm calibration, structural moves. Use when drafting blog posts, documentation, announcements, or READMEs, or when "styleguide", "writing style", "voice", or "tone" are mentioned. Pair with voice for philosophical foundation, docs-write for structure templates.
+description: "Writing craft and style patterns for Outfitter content — sentence rhythm, metaphors, enthusiasm calibration. Use when drafting or reviewing blog posts, docs, announcements, or READMEs."
 metadata:
   version: "2.1.0"
+  author: outfitter
+  category: content
 ---
 
 # Outfitter Styleguide
 
 Craft-level guidance for Outfitter writing. This covers *how* to write — rhythm, metaphors, structural patterns.
 
-For the philosophical foundation (*why* we write this way), load the `internal:voice` skill.
+For the philosophical foundation (*why* we write this way), load the `team:voice` skill.
 
 Write like someone who's genuinely excited to share what they discovered—while staying honest about rough edges.
 

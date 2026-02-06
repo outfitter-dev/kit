@@ -1,6 +1,6 @@
 ---
 name: performance
-description: This skill should be used when profiling code, optimizing bottlenecks, benchmarking, or when "performance", "profiling", "optimization", or "--perf" are mentioned.
+description: "This skill should be used when profiling code, optimizing bottlenecks, benchmarking, or when performance, profiling, optimization, or --perf are mentioned."
 metadata:
   version: "1.0.0"
 ---
@@ -40,7 +40,7 @@ Optimizing unmeasured code wastes time and introduces bugs.
 
 <stages>
 
-Load the **maintain-tasks** skill for stage tracking:
+Load the `maintain-tasks` skill for stage tracking:
 
 **Stage 1: Establishing baseline**
 - content: "Establish performance baseline with realistic workload"

@@ -29,7 +29,7 @@ grep -r "authentication" .
 **Trigger evaluation:**
 
 ```
-Performance: ◆◆ CRITICAL
+Performance: ◈ CRITICAL
 - 30s for recursive text search is very slow
 - Blocking workflow
 - Repeated operation (common in development)

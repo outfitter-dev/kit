@@ -36,14 +36,14 @@ Load only the skills necessary for the task. When uncertain which skill applies,
 ## Available Skills to Load
 
 Use the Skill tool to load relevant methodology:
-- **pathfinding**: When exploring unfamiliar domains or unclear requirements
-- **research**: When gathering information before implementation
-- **tdd**: When the task involves creating testable configurations
+- `pathfinding`: When exploring unfamiliar domains or unclear requirements
+- `research`: When gathering information before implementation
+- `tdd`: When the task involves creating testable configurations
 - Domain-specific skills as available in the project
 
 ## Task Management
 
-Load the **maintain-tasks** skill for stage tracking. Your task list is a living plan — expand it as you discover scope.
+Load the `maintain-tasks` skill for stage tracking. Your task list is a living plan — expand it as you discover scope.
 
 <initial_todo_list_template>
 

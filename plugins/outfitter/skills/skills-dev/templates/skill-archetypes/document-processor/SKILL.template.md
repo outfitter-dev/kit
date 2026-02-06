@@ -1,6 +1,6 @@
 ---
 name: {{FORMAT}}-processor
-description: Process and analyze {{FORMAT}} files. Use when {{TRIGGER_CONTEXTS}}. Supports {{CAPABILITIES}}.
+description: "Processes and analyzes {{FORMAT}} files. Use when {{TRIGGER_CONTEXTS}}."
 ---
 
 # {{FORMAT}} Processor

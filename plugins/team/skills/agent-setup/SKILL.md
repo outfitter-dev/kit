@@ -1,6 +1,10 @@
 ---
 name: agent-setup
-description: Check and configure outfitter marketplaces and plugins. Use when setting up a new project, checking plugin configuration, or when "setup outfitter", "configure plugins", or "marketplace" are mentioned.
+description: "Checks and configures Outfitter marketplaces and plugins. Use when setting up projects or checking plugin configuration."
+metadata:
+  version: "1.0.0"
+  author: outfitter
+  category: setup
 ---
 
 # Agent Setup

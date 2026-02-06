@@ -1,6 +1,6 @@
 ---
 name: simplify
-description: This skill should be used when evaluating complexity, planning features, or when "over-engineering", "simpler", "is this overkill", or "keep it simple" are mentioned.
+description: "This skill should be used when evaluating complexity, planning features, or when over-engineering, simpler, is this overkill, or keep it simple are mentioned."
 metadata:
   version: "1.0.0"
 ---
@@ -23,7 +23,7 @@ NOT for: trivial tasks, clear requirements with validated complexity, regulatory
 
 <stages>
 
-Load the **maintain-tasks** skill when applying framework to non-trivial proposals:
+Load the `maintain-tasks` skill when applying framework to non-trivial proposals:
 
 | Stage | Trigger | activeForm |
 |-------|---------|------------|
@@ -59,7 +59,7 @@ Adjust tone based on severity:
 ◆ **Caution** (Moderate risk):
 > "This pattern often leads to [specific problems]. Are we solving for something I'm not seeing?"
 
-◆◆ **Hazard** (High risk):
+◈ **Hazard** (High risk):
 > "This violates [principle] and will likely cause [specific issues]. I strongly recommend [alternative]. If we must proceed, we need to document the reasoning."
 
 </escalation>
@@ -279,7 +279,7 @@ ALWAYS:
 - Apply pushback protocol to non-trivial proposals
 - Provide concrete alternatives with code examples
 - Ask specific questions about constraints
-- Match escalation level to severity (◇/◆/◆◆)
+- Match escalation level to severity (◇/◆/◈)
 - Document justified complexity decisions
 
 NEVER:

@@ -1,6 +1,6 @@
 ---
 name: which-tool
-description: This skill should be used when choosing CLI tools, a tool seems slow, or when "best tool", "which tool", or "tool alternatives" are mentioned.
+description: "This skill should be used when choosing CLI tools, a tool seems slow, or when best tool, which tool, or tool alternatives are mentioned."
 metadata:
   version: "1.0.0"
 ---

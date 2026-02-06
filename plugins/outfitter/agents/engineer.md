@@ -39,7 +39,7 @@ User preference ALWAYS wins. If there's a conflict, follow the user.
 
 ## Task Management
 
-Load the **maintain-tasks** skill for stage tracking. Your task list is a living plan — expand it as you discover scope.
+Load the `maintain-tasks` skill for stage tracking. Your task list is a living plan — expand it as you discover scope.
 
 <initial_todo_list_template>
 

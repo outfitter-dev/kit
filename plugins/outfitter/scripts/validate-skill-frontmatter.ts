@@ -19,10 +19,14 @@
 import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
 import { parse as parseYaml } from "yaml";
+import {
+  extractFrontmatter,
+  isAllowedToolsCommaSeparated,
+  isDescriptionQuoted,
+  NAME_PATTERN,
+  RESERVED_WORDS,
+} from "./_shared.ts";
 
-// Import context detection (if available)
-const RESERVED_WORDS = ["anthropic", "claude"];
-const NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 const MAX_LINES = 500;
 const MAX_DESCRIPTION_LENGTH = 1024;
 const MIN_DESCRIPTION_LENGTH = 10;
@@ -84,37 +88,7 @@ const CLAUDE_FIELDS = new Set([
   "argument-hint",
 ]);
 
-/**
- * Extracts YAML frontmatter from markdown content.
- * @param content - Full markdown file content
- * @returns Object with extracted YAML string and total line count
- */
-function extractFrontmatter(content: string): {
-  yaml: string | null;
-  lineCount: number;
-} {
-  const lines = content.split("\n");
-  const lineCount = lines.length;
-
-  if (!lines[0]?.trim().startsWith("---")) {
-    return { yaml: null, lineCount };
-  }
-
-  let endIndex = -1;
-  for (let i = 1; i < lines.length; i++) {
-    if (lines[i].trim() === "---") {
-      endIndex = i;
-      break;
-    }
-  }
-
-  if (endIndex === -1) {
-    return { yaml: null, lineCount };
-  }
-
-  const yaml = lines.slice(1, endIndex).join("\n");
-  return { yaml, lineCount };
-}
+// isDescriptionQuoted, isAllowedToolsCommaSeparated, extractFrontmatter imported from _shared.ts
 
 /**
  * Checks if a file path indicates Claude Code context.
@@ -271,6 +245,21 @@ function validate(content: string, filePath: string): ValidationResult {
         "Description should include WHEN to use it (e.g., 'Use when working with...')"
       );
     }
+
+    // Check that description is wrapped in double quotes in raw YAML
+    if (!isDescriptionQuoted(yaml)) {
+      result.warnings.push(
+        "Description should be wrapped in double quotes for cross-platform compatibility (Codex requires quoted strings)"
+      );
+    }
+  }
+
+  // Check allowed-tools uses comma separation
+  const allowedToolsCheck = isAllowedToolsCommaSeparated(yaml);
+  if (allowedToolsCheck.present && !allowedToolsCheck.valid) {
+    result.warnings.push(
+      "allowed-tools should use comma separation (e.g., 'Read, Write, Edit'). Space-separated lists are not supported by all platforms (Codex requires commas)."
+    );
   }
 
   // Check for custom fields at top level (should be under metadata)

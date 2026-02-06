@@ -9,7 +9,7 @@ Extended details, examples, and severity guidance for each checklist category.
 **No `any` types without justification:**
 
 ```typescript
-// ◆◆ Severe
+// ◈ Severe
 function process(data: any) { ... }
 
 // ✓ Good - with justification
@@ -87,7 +87,7 @@ export function calculate(x: number, y: number): number {
 
 ### Severity Guidance
 
-- **◆◆** `any` escaping to public API, type assertions that can crash
+- **◈** `any` escaping to public API, type assertions that can crash
 - **◆** Missing null checks, missing return types on public functions
 - **◇** Overly broad types that work but reduce safety
 
@@ -100,7 +100,7 @@ export function calculate(x: number, y: number): number {
 **All error paths handled:**
 
 ```typescript
-// ◆◆ Severe - silent failure
+// ◈ Severe - silent failure
 async function saveUser(user: User) {
   await db.insert(user); // Might throw, not handled
 }
@@ -132,7 +132,7 @@ if (!user) {
 **Promise rejection handling:**
 
 ```typescript
-// ◆◆ Severe
+// ◈ Severe
 fetchData().then(process); // Unhandled rejection
 
 // ✓ Good
@@ -172,7 +172,7 @@ try {
 
 ### Severity Guidance
 
-- **◆◆** Silent failures, unhandled rejections, resource leaks
+- **◈** Silent failures, unhandled rejections, resource leaks
 - **◆** Poor error messages, missing try/catch, errors swallowed
 - **◇** Error messages could be more helpful, missing context
 
@@ -185,7 +185,7 @@ try {
 **Input validation:**
 
 ```typescript
-// ◆◆ Severe
+// ◈ Severe
 app.get('/user/:id', (req, res) => {
   const user = db.query(`SELECT * FROM users WHERE id = ${req.params.id}`);
   res.json(user);
@@ -205,7 +205,7 @@ app.get('/user/:id', (req, res) => {
 **No hardcoded secrets:**
 
 ```typescript
-// ◆◆ Severe
+// ◈ Severe
 const API_KEY = 'sk_live_abc123xyz789';
 
 // ✓ Good
@@ -216,7 +216,7 @@ if (!API_KEY) throw new Error('API_KEY not configured');
 **Authentication checks:**
 
 ```typescript
-// ◆◆ Severe
+// ◈ Severe
 app.delete('/admin/users/:id', (req, res) => {
   db.deleteUser(req.params.id);
   res.json({ success: true });
@@ -232,7 +232,7 @@ app.delete('/admin/users/:id', requireAuth, requireAdmin, (req, res) => {
 **XSS prevention:**
 
 ```typescript
-// ◆◆ Severe
+// ◈ Severe
 function displayMessage(msg: string) {
   element.innerHTML = msg; // User content directly in HTML
 }
@@ -250,7 +250,7 @@ element.innerHTML = DOMPurify.sanitize(msg);
 **Password handling:**
 
 ```typescript
-// ◆◆ Severe
+// ◈ Severe
 if (user.password === inputPassword) { ... }
 
 // ✓ Good
@@ -260,7 +260,7 @@ if (await bcrypt.compare(inputPassword, user.passwordHash)) { ... }
 
 ### Severity Guidance
 
-- **◆◆** SQL injection, XSS, auth bypass, exposed secrets, timing attacks
+- **◈** SQL injection, XSS, auth bypass, exposed secrets, timing attacks
 - **◆** Missing input validation, weak password checks, missing CSRF
 - **◇** Could use stronger encryption, missing rate limits
 
@@ -373,7 +373,7 @@ test('fetchUser handles network errors', async () => {
 
 ### Severity Guidance
 
-- **◆◆** Critical paths untested, failing tests committed
+- **◈** Critical paths untested, failing tests committed
 - **◆** New functionality without tests, missing error scenarios, test pollution
 - **◇** Could add more edge cases, test names unclear
 
@@ -519,7 +519,7 @@ function calculate(x: number): number {
 
 ### Severity Guidance
 
-- **◆◆** Functions >200 lines, cyclomatic complexity >15
+- **◈** Functions >200 lines, cyclomatic complexity >15
 - **◆** Functions >50 lines, DRY violations, deep nesting (>3)
 - **◇** Unclear names, magic numbers, minor complexity
 
@@ -641,7 +641,7 @@ export function getUsers(): Promise<User[]> {
 
 ### Severity Guidance
 
-- **◆◆** Breaking changes undocumented
+- **◈** Breaking changes undocumented
 - **◆** Public APIs missing docs, complex algorithms unexplained
 - **◇** TODOs without context, minor doc improvements
 
@@ -739,7 +739,7 @@ async function loadData() {
 
 ### Severity Guidance
 
-- **◆◆** Performance bugs (infinite loops, memory leaks)
+- **◈** Performance bugs (infinite loops, memory leaks)
 - **◆** Obvious N+1, blocking operations in hot path
 - **◇** Minor optimizations, better data structures possible
 
@@ -752,7 +752,7 @@ async function loadData() {
 **Result over panic:**
 
 ```rust
-// ◆◆ Severe
+// ◈ Severe
 pub fn divide(a: i32, b: i32) -> i32 {
     a / b  // Panics on division by zero
 }
@@ -809,7 +809,7 @@ fn process_data(data: &[u8]) -> Vec<u8> {
 **Unsafe justification:**
 
 ```rust
-// ◆◆ Severe - unjustified unsafe
+// ◈ Severe - unjustified unsafe
 pub fn get_value(ptr: *const u8) -> u8 {
     unsafe { *ptr }
 }
@@ -834,7 +834,7 @@ pub fn get_value(slice: &[u8], index: usize) -> Option<u8> {
 
 ### Severity Guidance
 
-- **◆◆** Unjustified unsafe, panics in library code, Send/Sync violations
+- **◈** Unjustified unsafe, panics in library code, Send/Sync violations
 - **◆** unwrap/expect in production code, unnecessary clones
 - **◇** Could use iterators, minor allocation improvements
 
@@ -842,7 +842,7 @@ pub fn get_value(slice: &[u8], index: usize) -> Option<u8> {
 
 ## Severity Summary
 
-### ◆◆ Severe (blocking)
+### ◈ Severe (blocking)
 
 Ship with these → security incidents, runtime failures, data loss.
 

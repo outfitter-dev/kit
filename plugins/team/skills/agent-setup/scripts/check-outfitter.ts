@@ -30,13 +30,13 @@ interface MarketplaceConfig {
 const MARKETPLACES: MarketplaceConfig[] = [
   {
     alias: "outfitter",
-    repo: "outfitter-dev/agents",
+    repo: "outfitter-dev/outfitter",
     requiredPlugin: "outfitter@outfitter",
     label: "outfitter (core)",
   },
   {
     alias: "outfitter-internal",
-    repo: "outfitter-dev/agents-internal",
+    repo: "outfitter-dev/outfitter-internal",
     requiredPlugin: "outfitter-dev@outfitter-internal",
     label: "outfitter-dev (internal)",
   },
@@ -142,10 +142,10 @@ function printRecommendation() {
   console.log(`{
   "extraKnownMarketplaces": {
     "outfitter": {
-      "source": { "source": "github", "repo": "outfitter-dev/agents" }
+      "source": { "source": "github", "repo": "outfitter-dev/outfitter" }
     },
     "outfitter-internal": {
-      "source": { "source": "github", "repo": "outfitter-dev/agents-internal" }
+      "source": { "source": "github", "repo": "outfitter-dev/outfitter-internal" }
     }
   },
   "enabledPlugins": {

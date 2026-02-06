@@ -27,8 +27,8 @@
   },
   "enabledPlugins": {
     "outfitter@outfitter": true,
-    "outfitter-team@outfitter": true,
-    "outfitter-kit@outfitter": true
+    "team@outfitter": true,
+    "kit@outfitter": true
   },
   "extraKnownMarketplaces": {
     "outfitter": {

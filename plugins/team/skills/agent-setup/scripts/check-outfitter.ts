@@ -34,12 +34,6 @@ const MARKETPLACES: MarketplaceConfig[] = [
     requiredPlugin: "outfitter@outfitter",
     label: "outfitter (core)",
   },
-  {
-    alias: "outfitter-internal",
-    repo: "outfitter-dev/outfitter-internal",
-    requiredPlugin: "outfitter-dev@outfitter-internal",
-    label: "outfitter-dev (internal)",
-  },
 ];
 
 const OPTIONAL_PLUGINS = ["gt@outfitter", "but@outfitter", "cli-dev@outfitter"];
@@ -143,14 +137,10 @@ function printRecommendation() {
   "extraKnownMarketplaces": {
     "outfitter": {
       "source": { "source": "github", "repo": "outfitter-dev/outfitter" }
-    },
-    "outfitter-internal": {
-      "source": { "source": "github", "repo": "outfitter-dev/outfitter-internal" }
     }
   },
   "enabledPlugins": {
-    "outfitter@outfitter": true,
-    "outfitter-dev@outfitter-internal": true
+    "outfitter@outfitter": true
   }
 }`);
   console.log("");

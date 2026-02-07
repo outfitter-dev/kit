@@ -112,6 +112,11 @@ export const THEME_METHOD_META: Record<keyof Theme, ThemeMethodMeta> = {
     description: "Dim styling",
     defaultExample: "De-emphasized",
   },
+  inverse: {
+    category: "utility",
+    description: "Inverse styling (swap fg/bg)",
+    defaultExample: "Inverted text",
+  },
 };
 
 /**

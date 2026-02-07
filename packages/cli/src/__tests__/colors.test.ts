@@ -185,7 +185,7 @@ describe("Color Tokens", () => {
   // ============================================================================
 
   describe("utility methods", () => {
-    it("has utility methods (bold, italic, underline, dim)", () => {
+    it("has utility methods (bold, italic, underline, dim, inverse)", () => {
       const theme = createTheme();
 
       // Utility methods
@@ -193,17 +193,20 @@ describe("Color Tokens", () => {
       expect(theme.italic).toBeDefined();
       expect(theme.underline).toBeDefined();
       expect(theme.dim).toBeDefined();
+      expect(theme.inverse).toBeDefined();
 
       // Each should return a string with text preserved
       const boldText = theme.bold("strong");
       const italicText = theme.italic("emphasis");
       const underlineText = theme.underline("underlined");
       const dimText = theme.dim("faded");
+      const inverseText = theme.inverse("inverted");
 
       expect(boldText).toContain("strong");
       expect(italicText).toContain("emphasis");
       expect(underlineText).toContain("underlined");
       expect(dimText).toContain("faded");
+      expect(inverseText).toContain("inverted");
     });
 
     it("utility methods compose with semantic colors", () => {
@@ -250,6 +253,7 @@ describe("Color Tokens", () => {
       expect(tokens.italic).toBe("");
       expect(tokens.underline).toBe("");
       expect(tokens.dim).toBe("");
+      expect(tokens.inverse).toBe("");
     });
   });
 
@@ -266,6 +270,7 @@ describe("Color Tokens", () => {
       expect(ANSI.brightYellow).toBe("\x1b[93m");
       expect(ANSI.brightGreen).toBe("\x1b[92m");
       expect(ANSI.brightBlue).toBe("\x1b[94m");
+      expect(ANSI.inverse).toBe("\x1b[7m");
     });
   });
 });

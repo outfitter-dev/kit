@@ -274,25 +274,30 @@ const nested = Result.ok(Result.ok(42));
 const flat = Result.flatten(nested); // Ok(42)
 ```
 
-## Serialization
+## Error Serialization
 
-For RPC boundaries and server actions.
+For RPC boundaries and MCP transport. These are standalone functions from `@outfitter/contracts`, not methods on `Result`.
 
-### Result.serialize
+### serializeError
 
-Convert a Result to a plain object `{ status: "ok", value } | { status: "error", error }`.
+Convert an `OutfitterError` to a JSON-safe `SerializedError` object.
 
 ```typescript
-const serialized = Result.serialize(Result.ok(42));
-// { status: "ok", value: 42 }
+import { serializeError } from "@outfitter/contracts";
+
+const serialized = serializeError(new NotFoundError("note", "abc123"));
+// { _tag: "NotFoundError", category: "not_found", message: "...", context: { resourceType: "note", resourceId: "abc123" } }
 ```
 
-### Result.deserialize
+### deserializeError
 
-Rehydrate a serialized Result back into Ok/Err instances. Returns `Err<ResultDeserializationError>` for invalid input.
+Rehydrate a `SerializedError` back into a typed `OutfitterError` instance. Falls back to `InternalError` for unknown tags.
 
 ```typescript
-const result = Result.deserialize<User, AppError>(rpcPayload);
+import { deserializeError } from "@outfitter/contracts";
+
+const error = deserializeError(serializedPayload);
+// Reconstructed NotFoundError with original tag, category, and context
 ```
 
 ## Outfitter Extensions

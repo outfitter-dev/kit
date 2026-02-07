@@ -4,7 +4,7 @@ Validate plugin before distribution.
 
 **Goal**: Ensure plugin quality and completeness.
 
-**Skill**: Use `outfitter:claude-plugins` audit checklists (see `references/audit.md`)
+**Skill**: Use `outfitter:claude-plugins` audit checklists (see [audit reference](../../claude-plugins/references/audit.md))
 
 ## Audit Checklist
 

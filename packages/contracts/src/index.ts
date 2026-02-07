@@ -148,7 +148,13 @@ export {
   withTimeout,
 } from "./resilience.js";
 // Result utilities (extensions to better-result)
-export { combine2, combine3, orElse, unwrapOrElse } from "./result/index.js";
+export {
+  combine2,
+  combine3,
+  expect,
+  orElse,
+  unwrapOrElse,
+} from "./result/index.js";
 // Serialization utilities
 export {
   deserializeError,

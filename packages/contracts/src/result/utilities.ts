@@ -124,3 +124,26 @@ export const combine3 = <T1, T2, T3, E>(
   if (r3.isErr()) return r3 as unknown as Result<[T1, T2, T3], E>;
   return Result.ok([r1.value, r2.value, r3.value]);
 };
+
+/**
+ * Extract value from Ok, or throw with a contextual error message.
+ *
+ * Like `unwrap()` but with a caller-provided message for better
+ * debugging context. Use at system boundaries (CLI adapters, MCP
+ * handlers) where you need the value and want a clear error.
+ *
+ * @param result - The Result to unwrap
+ * @param message - Context message prepended to the error
+ * @returns The success value
+ * @throws Error with contextual message if Result is Err
+ *
+ * @example
+ * ```typescript
+ * const config = expect(loadConfig(), "Failed to load config");
+ * // On Err, throws: "Failed to load config: <error details>"
+ * ```
+ */
+export const expect = <T, E>(result: Result<T, E>, message: string): T => {
+  if (result.isOk()) return result.value;
+  throw new Error(`${message}: ${String(result.error)}`);
+};

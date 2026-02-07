@@ -3,7 +3,13 @@
  */
 import { describe, expect, it, vi } from "bun:test";
 import { Result } from "better-result";
-import { combine2, combine3, orElse, unwrapOrElse } from "./utilities.js";
+import {
+  combine2,
+  combine3,
+  expect as expectResult,
+  orElse,
+  unwrapOrElse,
+} from "./utilities.js";
 
 describe("unwrapOrElse", () => {
   it("returns value on Ok", () => {
@@ -166,5 +172,30 @@ describe("combine3", () => {
     if (result.isErr()) {
       expect(result.error).toBe("first error");
     }
+  });
+});
+
+describe("expect", () => {
+  it("returns value on Ok", () => {
+    const result = Result.ok(42);
+    const value = expectResult(result, "should not fail");
+
+    expect(value).toBe(42);
+  });
+
+  it("throws with contextual message on Err", () => {
+    const result = Result.err("connection refused");
+
+    expect(() => expectResult(result, "Failed to connect")).toThrow(
+      "Failed to connect: connection refused"
+    );
+  });
+
+  it("includes stringified error in thrown message", () => {
+    const result = Result.err({ code: 404 });
+
+    expect(() => expectResult(result, "Lookup failed")).toThrow(
+      "Lookup failed: [object Object]"
+    );
   });
 });

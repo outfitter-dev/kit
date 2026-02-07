@@ -167,10 +167,12 @@ const ValidationErrorBase: TaggedErrorClass<
   {
     message: string;
     field?: string;
+    context?: Record<string, unknown>;
   }
 > = TaggedError("ValidationError")<{
   message: string;
   field?: string;
+  context?: Record<string, unknown>;
 }>();
 
 const AssertionErrorBase: TaggedErrorClass<
@@ -188,11 +190,13 @@ const NotFoundErrorBase: TaggedErrorClass<
     message: string;
     resourceType: string;
     resourceId: string;
+    context?: Record<string, unknown>;
   }
 > = TaggedError("NotFoundError")<{
   message: string;
   resourceType: string;
   resourceId: string;
+  context?: Record<string, unknown>;
 }>();
 
 const ConflictErrorBase: TaggedErrorClass<
@@ -289,6 +293,11 @@ const CancelledErrorBase: TaggedErrorClass<
  * @example
  * ```typescript
  * new ValidationError({ message: "Email format invalid", field: "email" });
+ * new ValidationError({
+ *   message: "Value out of range",
+ *   field: "age",
+ *   context: { min: 0, max: 150, received: -1 },
+ * });
  * ```
  */
 export class ValidationError extends ValidationErrorBase {
@@ -346,6 +355,12 @@ export class AssertionError extends AssertionErrorBase {
  * @example
  * ```typescript
  * new NotFoundError({ message: "note not found: abc123", resourceType: "note", resourceId: "abc123" });
+ * new NotFoundError({
+ *   message: "Heading not found",
+ *   resourceType: "heading",
+ *   resourceId: "h:Intro",
+ *   context: { availableHeadings: ["Introduction", "Getting Started"] },
+ * });
  * ```
  */
 export class NotFoundError extends NotFoundErrorBase {

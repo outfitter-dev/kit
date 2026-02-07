@@ -160,6 +160,20 @@ describe("ValidationError", () => {
     expect(error.field).toBe("email");
   });
 
+  it("exposes optional context property", () => {
+    const error = new ValidationError({
+      message: "Value out of range",
+      field: "age",
+      context: { min: 0, max: 150, received: -1 },
+    });
+    expect(error.context).toEqual({ min: 0, max: 150, received: -1 });
+  });
+
+  it("context defaults to undefined when not provided", () => {
+    const error = new ValidationError({ message: "Invalid input" });
+    expect(error.context).toBeUndefined();
+  });
+
   it("exitCode() returns correct value", () => {
     const error = new ValidationError({ message: "Invalid input" });
     expect(error.exitCode()).toBe(exitCodeMap.validation);
@@ -245,6 +259,27 @@ describe("NotFoundError", () => {
     });
     expect(error.resourceType).toBe("note");
     expect(error.resourceId).toBe("abc123");
+  });
+
+  it("exposes optional context property", () => {
+    const error = new NotFoundError({
+      message: "Heading not found",
+      resourceType: "heading",
+      resourceId: "h:Intro",
+      context: { availableHeadings: ["Introduction", "Getting Started"] },
+    });
+    expect(error.context).toEqual({
+      availableHeadings: ["Introduction", "Getting Started"],
+    });
+  });
+
+  it("context defaults to undefined when not provided", () => {
+    const error = new NotFoundError({
+      message: "note not found",
+      resourceType: "note",
+      resourceId: "abc123",
+    });
+    expect(error.context).toBeUndefined();
   });
 
   it("exitCode() returns correct value", () => {

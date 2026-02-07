@@ -21,6 +21,7 @@ export const ANSI = {
   dim: "\x1b[2m",
   italic: "\x1b[3m",
   underline: "\x1b[4m",
+  inverse: "\x1b[7m",
   // Foreground colors
   green: "\x1b[32m",
   yellow: "\x1b[33m",
@@ -94,6 +95,8 @@ export interface Theme {
   underline: (text: string) => string;
   /** Applies dim styling (alias for muted style) */
   dim: (text: string) => string;
+  /** Applies inverse styling (swaps foreground/background) */
+  inverse: (text: string) => string;
 }
 
 /**
@@ -174,6 +177,8 @@ export interface Tokens {
   underline: string;
   /** Dim styling */
   dim: string;
+  /** Inverse styling (swaps foreground/background) */
+  inverse: string;
 }
 
 /**
@@ -270,6 +275,7 @@ export function createTheme(): Theme {
     italic: colorFn(ANSI.italic),
     underline: colorFn(ANSI.underline),
     dim: colorFn(ANSI.dim),
+    inverse: colorFn(ANSI.inverse),
   };
 }
 
@@ -350,6 +356,7 @@ export function createTokens(options?: TokenOptions): Tokens {
       italic: "",
       underline: "",
       dim: "",
+      inverse: "",
     };
   }
 
@@ -374,6 +381,7 @@ export function createTokens(options?: TokenOptions): Tokens {
     italic: ANSI.italic,
     underline: ANSI.underline,
     dim: ANSI.dim,
+    inverse: ANSI.inverse,
   };
 }
 

@@ -19,7 +19,7 @@ This reference previously contained the full Claude Code extension documentation
 
 ```yaml
 # Claude Code-specific frontmatter fields
-allowed-tools: Read Grep Glob Bash(git *)   # Tool permissions
+allowed-tools: Read, Grep, Glob, Bash(git *)   # Tool permissions (comma-separated)
 user-invocable: true                         # Allow /skill-name invocation
 context: fork                                # Isolated execution
 agent: outfitter:analyst                     # Agent for forked context

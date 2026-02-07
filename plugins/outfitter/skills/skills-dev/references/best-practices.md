@@ -118,7 +118,7 @@ Pass these parameters to the debugging workflow:
 
 ### Subagent Architecture
 
-For orchestrating specialized work with context isolation, see [claude-code.md](./claude-code.md#master-clone-architecture) for Claude Code-specific patterns.
+For orchestrating specialized work with context isolation, load the `outfitter:claude-code` skill (see the `context: fork` mode and agent delegation patterns).
 
 ### Skill + External Service Integration
 
@@ -466,7 +466,7 @@ const tddSkillEvals: SkillEval[] = [
 
 ### Hook-Based Validation
 
-For platform-specific hook implementation patterns, see [claude-code.md](./claude-code.md#hook-based-validation).
+For platform-specific hook implementation patterns, load the `outfitter:claude-code` skill (see the Hooks section).
 
 **General principle**: Use hooks to enforce constraints at decision points—prevent destructive operations, enforce testing requirements, validate configuration before deployment.
 

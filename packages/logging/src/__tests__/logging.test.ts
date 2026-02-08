@@ -881,6 +881,51 @@ describe("Sinks", () => {
     await Bun.write(tempPath, "");
   });
 
+  it("File sink truncates existing file when append is false", async () => {
+    const { createFileSink } = require("../index.js");
+    const tempPath = `/tmp/test-log-${Date.now()}-truncate.log`;
+
+    await Bun.write(tempPath, "old log entry\n");
+
+    const fileSink = createFileSink({ path: tempPath, append: false });
+    const logger = createLogger({
+      name: "test",
+      sinks: [fileSink],
+    });
+
+    logger.info("new log entry");
+    await flush();
+
+    const content = await Bun.file(tempPath).text();
+    expect(content).toContain("new log entry");
+    expect(content).not.toContain("old log entry");
+
+    await Bun.write(tempPath, "");
+  });
+
+  it("File sink preserves subsequent writes in the same run when append is false", async () => {
+    const { createFileSink } = require("../index.js");
+    const tempPath = `/tmp/test-log-${Date.now()}-append-false.log`;
+
+    const fileSink = createFileSink({ path: tempPath, append: false });
+    const logger = createLogger({
+      name: "test",
+      sinks: [fileSink],
+    });
+
+    logger.info("first log entry");
+    await flush();
+
+    logger.info("second log entry");
+    await flush();
+
+    const content = await Bun.file(tempPath).text();
+    expect(content).toContain("first log entry");
+    expect(content).toContain("second log entry");
+
+    await Bun.write(tempPath, "");
+  });
+
   it("Multiple sinks can be configured", () => {
     const sink1Records: LogRecord[] = [];
     const sink2Records: LogRecord[] = [];

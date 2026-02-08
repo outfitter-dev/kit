@@ -7,8 +7,6 @@
  * @packageDocumentation
  */
 
-import { writeFileSync } from "node:fs";
-
 // ============================================================================
 // Type Definitions
 // ============================================================================
@@ -408,7 +406,7 @@ export interface FileSinkOptions {
   path: string;
 
   /**
-   * Append to existing file or truncate on start.
+   * Append to existing file or truncate before the first write.
    * @defaultValue true
    */
   append?: boolean;
@@ -1039,11 +1037,7 @@ export function createFileSink(options: FileSinkOptions): Sink {
   const { path } = options;
   // append defaults to true
   const append = options.append ?? true;
-
-  // Clear file synchronously if not appending to prevent race with flush()
-  if (!append) {
-    writeFileSync(path, "");
-  }
+  let cachedContent = append ? null : "";
 
   const sink: Sink = {
     formatter,
@@ -1057,10 +1051,15 @@ export function createFileSink(options: FileSinkOptions): Sink {
         const content = buffer.join("");
         buffer.length = 0;
 
-        // Append to file
-        const file = Bun.file(path);
-        const existing = (await file.exists()) ? await file.text() : "";
-        await Bun.write(path, existing + content);
+        if (append) {
+          const file = Bun.file(path);
+          const existing = (await file.exists()) ? await file.text() : "";
+          await Bun.write(path, existing + content);
+          return;
+        }
+
+        cachedContent = (cachedContent ?? "") + content;
+        await Bun.write(path, cachedContent);
       }
     },
   };

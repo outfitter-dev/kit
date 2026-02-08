@@ -72,7 +72,7 @@
     }
   },
   "scripts": {
-    "build": "bunup --filter @outfitter/kit",
+    "build": "bun run sync:migrations && bunup --filter @outfitter/kit",
     "typecheck": "tsc --noEmit",
     "sync:migrations": "bun run ../../scripts/sync-migrations.ts",
     "prepack": "bun run sync:migrations"

@@ -66,6 +66,7 @@
     "sync:exports": "bun run scripts/sync-exports.ts",
     "prebuild": "bun run build:registry && bun run sync:exports",
     "build": "bunup --filter @outfitter/tooling",
+    "prepack": "bun run sync:exports",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
     "test": "bun test",

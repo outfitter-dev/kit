@@ -2,7 +2,7 @@
 /**
  * Generates config-file exports in package.json from the `files` array.
  *
- * Any file in `files` with a config extension (.json, .jsonc, .yml, .yaml)
+ * Any file in `files` with a config extension (.json, .jsonc, .yml, .yaml, .toml)
  * gets two exports: the full filename and an extensionless short alias.
  *
  * Short alias rules:
@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const CONFIG_EXTENSIONS = /\.(json|jsonc|yml|yaml)$/;
+const CONFIG_EXTENSIONS = /\.(json|jsonc|yml|yaml|toml)$/;
 
 export function shortAlias(filename: string): string {
 	// Strip extension

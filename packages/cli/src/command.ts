@@ -5,11 +5,15 @@
  */
 
 import { Command } from "commander";
-import type { CommandAction, CommandBuilder, CommandFlags } from "./types.js";
+import { createCLI as createCLIImpl } from "./cli.js";
+import type {
+  CLI,
+  CLIConfig,
+  CommandAction,
+  CommandBuilder,
+  CommandFlags,
+} from "./types.js";
 
-// Re-export createCLI from cli.ts for convenience
-// biome-ignore lint/performance/noBarrelFile: Intentional re-export for public API
-export { createCLI } from "./cli.js";
 export type {
   CLI,
   CLIConfig,
@@ -19,23 +23,40 @@ export type {
   CommandFlags,
 } from "./types.js";
 
-function splitCommandSpec(spec: string): { name: string; args: string[] } {
-  const parts = spec.trim().split(/\s+/).filter(Boolean);
-  const [commandName, ...args] = parts;
-  if (!commandName) {
-    throw new Error("Command name is required");
+function parseCommandSignature(signature: string): {
+  name: string;
+  argumentsSpec?: string;
+} {
+  const trimmed = signature.trim();
+  const firstWhitespace = trimmed.search(/\s/);
+
+  if (firstWhitespace === -1) {
+    return { name: trimmed };
   }
-  return { name: commandName, args };
+
+  const name = trimmed.slice(0, firstWhitespace);
+  const argumentsSpec = trimmed.slice(firstWhitespace).trim();
+  return {
+    name,
+    ...(argumentsSpec ? { argumentsSpec } : {}),
+  };
+}
+
+/**
+ * Create a CLI instance with a portable return type from this module.
+ */
+export function createCLI(config: CLIConfig): CLI {
+  return createCLIImpl(config);
 }
 
 class CommandBuilderImpl implements CommandBuilder {
   private readonly command: Command;
 
-  constructor(name: string) {
-    const { name: commandName, args } = splitCommandSpec(name);
-    this.command = new Command(commandName);
-    for (const arg of args) {
-      this.command.argument(arg);
+  constructor(signature: string) {
+    const { name, argumentsSpec } = parseCommandSignature(signature);
+    this.command = new Command(name);
+    if (argumentsSpec) {
+      this.command.arguments(argumentsSpec);
     }
   }
 

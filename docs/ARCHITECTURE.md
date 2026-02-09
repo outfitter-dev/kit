@@ -248,6 +248,28 @@ Each surface (CLI, MCP, API) has different concerns:
 
 Adapters translate between surface-specific formats and the unified handler contract. The handler never knows which surface invoked it.
 
+### Why Barrel Imports in Workspace Code?
+
+Packages like `@outfitter/config` expose subpath exports (`./environment`, `./env`) so published consumers can import narrow slices without pulling in transitive dependencies like `node:fs`:
+
+```typescript
+// Published consumer — uses subpath export, no node:fs in bundle
+import { getEnvironment } from "@outfitter/config/environment";
+```
+
+In workspace source code, we use barrel imports instead:
+
+```typescript
+// Workspace source — barrel import
+import { getEnvironment } from "@outfitter/config";
+```
+
+**Why?** Bun's runtime module resolver doesn't support subpath exports for workspace-linked packages (symlinks). TypeScript resolves them fine (`moduleResolution: "bundler"`), but `bun test` and direct execution fail. This is a Bun limitation, not a design choice.
+
+**Why it's fine:** All packages set `"sideEffects": false` and bunup produces code-split entry points. When an end user bundles an app using `@outfitter/logging`, their bundler tree-shakes the barrel down to only the functions actually used — the `node:fs` code never ships.
+
+**When to revisit:** Once Bun supports workspace subpath resolution, narrow the imports to subpath exports for faster dev-time module loading.
+
 ## Error Taxonomy
 
 Ten error categories cover all failure modes:

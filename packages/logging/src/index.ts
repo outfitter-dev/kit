@@ -8,9 +8,22 @@
  */
 
 import {
+  configureSync,
+  getConfig,
+  getLogger,
+  type Logger as LogtapeLogger,
+  type LogRecord as LogtapeLogRecord,
+} from "@logtape/logtape";
+import {
   getEnvironment as _getEnvironment,
   getEnvironmentDefaults as _getEnvironmentDefaults,
 } from "@outfitter/config";
+import {
+  type LoggerAdapter as ContractLoggerAdapter,
+  type LoggerFactory as ContractLoggerFactory,
+  type LoggerFactoryConfig as ContractLoggerFactoryConfig,
+  createLoggerFactory as createContractLoggerFactory,
+} from "@outfitter/contracts";
 
 // ============================================================================
 // Type Definitions
@@ -226,6 +239,35 @@ export interface LoggerConfig {
 
   /** Redaction configuration for sensitive data scrubbing */
   redaction?: RedactionConfig;
+}
+
+/**
+ * Backend options accepted by the Outfitter logger factory.
+ *
+ * These options are passed via `LoggerFactoryConfig.backend`.
+ */
+export interface OutfitterLoggerBackendOptions {
+  /** Sinks for this specific logger instance */
+  sinks?: Sink[];
+  /** Redaction overrides for this specific logger instance */
+  redaction?: RedactionConfig;
+}
+
+/**
+ * Default options applied by the Outfitter logger factory.
+ */
+export interface OutfitterLoggerDefaults {
+  /** Default sinks used when a logger does not provide backend sinks */
+  sinks?: Sink[];
+  /** Default redaction policy merged with logger-specific redaction */
+  redaction?: RedactionConfig;
+}
+
+/**
+ * Options for creating the Outfitter logger factory.
+ */
+export interface OutfitterLoggerFactoryOptions {
+  defaults?: OutfitterLoggerDefaults;
 }
 
 /**
@@ -513,6 +555,27 @@ const globalRedactionConfig: GlobalRedactionConfig = {
 /** Global registry of all sinks for flush() */
 const registeredSinks = new Set<Sink>();
 
+/**
+ * Internal marker property used to route logtape records to logger instances.
+ * Removed from user-visible metadata before sinks are invoked.
+ */
+const LOGGER_ID_PROPERTY = "__outfitter_internal_logger_id";
+
+/** Track configured logger sinks by internal logger id. */
+const loggerSinkRegistry = new Map<string, Set<Sink>>();
+
+/** Whether the shared logtape backend bridge has been configured. */
+let logtapeBackendConfigured = false;
+/** Whether log emission should route through logtape bridge or local sinks. */
+let logtapeBridgeEnabled = true;
+
+/** Counter-based logger ids to keep routing deterministic and cheap. */
+let loggerIdCounter = 0;
+
+/** Reserved logtape sink/category names for the internal bridge. */
+const LOGTAPE_BRIDGE_SINK = "__outfitter_bridge_sink";
+const LOGTAPE_BRIDGE_CATEGORY = "__outfitter_bridge";
+
 // ============================================================================
 // Internal Helper Functions
 // ============================================================================
@@ -701,6 +764,230 @@ function processNestedForErrors(obj: object): unknown {
   return result;
 }
 
+/**
+ * Merge redaction configurations with additive keys/patterns and last-wins
+ * scalar fields.
+ */
+function mergeRedactionConfig(
+  base: RedactionConfig | undefined,
+  override: RedactionConfig | undefined
+): RedactionConfig | undefined {
+  if (!(base || override)) {
+    return undefined;
+  }
+
+  const merged: RedactionConfig = {};
+  const keys = [...(base?.keys ?? []), ...(override?.keys ?? [])];
+  const patterns = [...(base?.patterns ?? []), ...(override?.patterns ?? [])];
+
+  if (keys.length > 0) {
+    merged.keys = keys;
+  }
+
+  if (patterns.length > 0) {
+    merged.patterns = patterns;
+  }
+
+  if (base?.enabled !== undefined) {
+    merged.enabled = base.enabled;
+  }
+  if (override?.enabled !== undefined) {
+    merged.enabled = override.enabled;
+  }
+
+  if (base?.replacement !== undefined) {
+    merged.replacement = base.replacement;
+  }
+  if (override?.replacement !== undefined) {
+    merged.replacement = override.replacement;
+  }
+
+  return merged;
+}
+
+/**
+ * Convert logtape message parts to a single output string.
+ */
+function stringifyLogtapeMessage(parts: readonly unknown[]): string {
+  return parts.map((part) => String(part)).join("");
+}
+
+/**
+ * Map logtape levels to the public @outfitter/logging levels.
+ */
+function fromLogtapeLevel(
+  level: LogtapeLogRecord["level"]
+): LogRecord["level"] {
+  if (level === "warning") {
+    return "warn";
+  }
+  return level;
+}
+
+/**
+ * Register a sink for a logger id in the bridge registry.
+ */
+function registerLoggerSink(loggerId: string, sink: Sink): void {
+  const sinks = loggerSinkRegistry.get(loggerId);
+  if (sinks) {
+    sinks.add(sink);
+    return;
+  }
+
+  loggerSinkRegistry.set(loggerId, new Set([sink]));
+}
+
+/**
+ * Dispatch a normalized log record to sinks with per-sink isolation.
+ */
+function dispatchRecordToSinks(sinks: Iterable<Sink>, record: LogRecord): void {
+  for (const sink of sinks) {
+    try {
+      let formatted: string | undefined;
+      if (sink.formatter) {
+        formatted = sink.formatter.format(record);
+      }
+      sink.write(record, formatted);
+    } catch {
+      // Sink errors should not crash the logger.
+    }
+  }
+}
+
+function isLogtapeBridgeConfigured(
+  config: ReturnType<typeof getConfig>
+): boolean {
+  if (!config) {
+    return false;
+  }
+
+  if (!(LOGTAPE_BRIDGE_SINK in config.sinks)) {
+    return false;
+  }
+
+  return config.loggers.some((logger) => {
+    const categoryParts = Array.isArray(logger.category)
+      ? logger.category
+      : [logger.category];
+    if (
+      categoryParts.length !== 1 ||
+      categoryParts[0] !== LOGTAPE_BRIDGE_CATEGORY
+    ) {
+      return false;
+    }
+
+    return (logger.sinks ?? []).includes(LOGTAPE_BRIDGE_SINK);
+  });
+}
+
+/**
+ * Emit a normalized log record through logtape.
+ */
+function emitViaLogtape(
+  logger: LogtapeLogger,
+  level: Exclude<LogLevel, "silent">,
+  message: string,
+  metadata: Record<string, unknown>
+): void {
+  const loggerWithMetadata = logger.with(metadata);
+
+  switch (level) {
+    case "trace":
+      loggerWithMetadata.trace`${message}`;
+      return;
+    case "debug":
+      loggerWithMetadata.debug`${message}`;
+      return;
+    case "info":
+      loggerWithMetadata.info`${message}`;
+      return;
+    case "warn":
+      loggerWithMetadata.warn`${message}`;
+      return;
+    case "error":
+      loggerWithMetadata.error`${message}`;
+      return;
+    case "fatal":
+      loggerWithMetadata.fatal`${message}`;
+      return;
+    default:
+      return;
+  }
+}
+
+/**
+ * Configure the shared logtape bridge once.
+ */
+function ensureLogtapeBackendConfigured(): void {
+  const currentConfig = getConfig();
+
+  if (logtapeBackendConfigured) {
+    logtapeBridgeEnabled = isLogtapeBridgeConfigured(currentConfig);
+    return;
+  }
+
+  // If the host process configured logtape already, avoid resetting global
+  // config and fall back to direct sink dispatch for this logger.
+  if (currentConfig !== null) {
+    logtapeBridgeEnabled = isLogtapeBridgeConfigured(currentConfig);
+    logtapeBackendConfigured = true;
+    return;
+  }
+
+  try {
+    configureSync({
+      sinks: {
+        [LOGTAPE_BRIDGE_SINK](record) {
+          const loggerId = record.properties[LOGGER_ID_PROPERTY];
+          if (typeof loggerId !== "string") {
+            return;
+          }
+
+          const sinks = loggerSinkRegistry.get(loggerId);
+          if (!sinks || sinks.size === 0) {
+            return;
+          }
+
+          const metadata = { ...record.properties };
+          delete metadata[LOGGER_ID_PROPERTY];
+
+          const categoryParts =
+            record.category[0] === LOGTAPE_BRIDGE_CATEGORY
+              ? record.category.slice(1)
+              : record.category;
+
+          const converted: LogRecord = {
+            timestamp: record.timestamp,
+            level: fromLogtapeLevel(record.level),
+            category: categoryParts.join("."),
+            message: stringifyLogtapeMessage(record.message),
+            ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
+          };
+
+          dispatchRecordToSinks(sinks, converted);
+        },
+      },
+      loggers: [
+        {
+          category: [LOGTAPE_BRIDGE_CATEGORY],
+          sinks: [LOGTAPE_BRIDGE_SINK],
+          lowestLevel: "trace",
+        },
+        {
+          category: ["logtape", "meta"],
+          lowestLevel: "error",
+        },
+      ],
+    });
+  } catch {
+    // If logtape is configured elsewhere, preserve logger functionality by
+    // bypassing the bridge and writing directly to local sinks.
+    logtapeBridgeEnabled = false;
+  }
+
+  logtapeBackendConfigured = true;
+}
+
 // ============================================================================
 // Logger Implementation
 // ============================================================================
@@ -709,6 +996,8 @@ function processNestedForErrors(obj: object): unknown {
  * Internal logger implementation.
  */
 interface InternalLoggerState {
+  loggerId: string;
+  backendLogger: LogtapeLogger;
   name: string;
   level: LogLevel;
   context: Record<string, unknown>;
@@ -751,28 +1040,22 @@ function createLoggerFromState(state: InternalLoggerState): LoggerInstance {
       }
     }
 
-    const record: LogRecord = {
+    if (logtapeBridgeEnabled) {
+      emitViaLogtape(state.backendLogger, level, processedMessage, {
+        ...(processedMetadata ?? {}),
+        [LOGGER_ID_PROPERTY]: state.loggerId,
+      });
+      return;
+    }
+
+    const directRecord: LogRecord = {
       timestamp: Date.now(),
       level,
       category: state.name,
       message: processedMessage,
-      ...(processedMetadata !== undefined
-        ? { metadata: processedMetadata }
-        : {}),
+      ...(processedMetadata ? { metadata: processedMetadata } : {}),
     };
-
-    // Write to all sinks
-    for (const sink of state.sinks) {
-      try {
-        let formatted: string | undefined;
-        if (sink.formatter) {
-          formatted = sink.formatter.format(record);
-        }
-        sink.write(record, formatted);
-      } catch {
-        // Sink errors should not crash the logger
-      }
-    }
+    dispatchRecordToSinks(state.sinks, directRecord);
   };
 
   return {
@@ -795,10 +1078,13 @@ function createLoggerFromState(state: InternalLoggerState): LoggerInstance {
     addSink: (sink) => {
       state.sinks.push(sink);
       registeredSinks.add(sink);
+      registerLoggerSink(state.loggerId, sink);
     },
     child: (context) => {
       // Create child logger with merged context (child takes precedence)
       const childState: InternalLoggerState = {
+        loggerId: state.loggerId,
+        backendLogger: state.backendLogger,
         name: state.name,
         level: state.level,
         context: { ...state.context, ...context },
@@ -832,7 +1118,12 @@ function createLoggerFromState(state: InternalLoggerState): LoggerInstance {
  * ```
  */
 export function createLogger(config: LoggerConfig): LoggerInstance {
+  ensureLogtapeBackendConfigured();
+
+  const loggerId = `logger-${++loggerIdCounter}`;
   const state: InternalLoggerState = {
+    loggerId,
+    backendLogger: getLogger([LOGTAPE_BRIDGE_CATEGORY, config.name]),
     name: config.name,
     level: config.level ?? "info",
     context: config.context ?? {},
@@ -843,6 +1134,7 @@ export function createLogger(config: LoggerConfig): LoggerInstance {
   // Register sinks globally for flush()
   for (const sink of state.sinks) {
     registeredSinks.add(sink);
+    registerLoggerSink(loggerId, sink);
   }
 
   return createLoggerFromState(state);
@@ -1141,6 +1433,22 @@ export function configureRedaction(config: GlobalRedactionConfig): void {
   }
 }
 
+async function flushSinks(sinks: Iterable<Sink>): Promise<void> {
+  const flushPromises: Promise<void>[] = [];
+
+  for (const sink of sinks) {
+    if (sink.flush) {
+      flushPromises.push(
+        sink.flush().catch(() => {
+          // Flush is best-effort; one sink failure should not block others.
+        })
+      );
+    }
+  }
+
+  await Promise.all(flushPromises);
+}
+
 /**
  * Flush all pending log writes across all sinks.
  * Call this before process exit to ensure all logs are written.
@@ -1155,15 +1463,7 @@ export function configureRedaction(config: GlobalRedactionConfig): void {
  * ```
  */
 export async function flush(): Promise<void> {
-  const flushPromises: Promise<void>[] = [];
-
-  for (const sink of registeredSinks) {
-    if (sink.flush) {
-      flushPromises.push(sink.flush());
-    }
-  }
-
-  await Promise.all(flushPromises);
+  await flushSinks(registeredSinks);
 }
 
 // ============================================================================
@@ -1245,4 +1545,119 @@ export function resolveLogLevel(level?: LogLevel): LogLevel {
 
   // 4. Default
   return "info";
+}
+
+/**
+ * Resolve log level using Outfitter runtime defaults.
+ *
+ * Precedence (highest wins):
+ * 1. `OUTFITTER_LOG_LEVEL` environment variable
+ * 2. Explicit `level` parameter
+ * 3. `OUTFITTER_ENV` profile defaults
+ * 4. `"silent"` (when profile default is null)
+ */
+export function resolveOutfitterLogLevel(level?: LogLevel): LogLevel {
+  // 1. OUTFITTER_LOG_LEVEL env var (highest precedence)
+  const envLogLevel = process.env["OUTFITTER_LOG_LEVEL"];
+  if (envLogLevel !== undefined) {
+    const mapped = ENV_LEVEL_MAP[envLogLevel];
+    if (mapped !== undefined) {
+      return mapped;
+    }
+  }
+
+  // 2. Explicit level parameter
+  if (level !== undefined) {
+    return level;
+  }
+
+  // 3. Environment profile
+  const env = _getEnvironment();
+  const defaults = _getEnvironmentDefaults(env);
+  if (defaults.logLevel !== null) {
+    const mapped = ENV_LEVEL_MAP[defaults.logLevel];
+    if (mapped !== undefined) {
+      return mapped;
+    }
+  }
+
+  // 4. Default: profile disabled logging
+  return "silent";
+}
+
+/**
+ * Outfitter logger adapter contract type.
+ */
+export type OutfitterLoggerAdapter =
+  ContractLoggerAdapter<OutfitterLoggerBackendOptions>;
+
+/**
+ * Outfitter logger factory contract type.
+ */
+export type OutfitterLoggerFactory =
+  ContractLoggerFactory<OutfitterLoggerBackendOptions>;
+
+/**
+ * Create an Outfitter logger adapter with environment defaults and redaction.
+ *
+ * Defaults:
+ * - log level resolution via `resolveOutfitterLogLevel()`
+ * - redaction enabled by default (`enabled: true`)
+ * - console sink when no explicit sinks are provided
+ */
+export function createOutfitterLoggerAdapter(
+  options?: OutfitterLoggerFactoryOptions
+): OutfitterLoggerAdapter {
+  const factorySinks = new Set<Sink>();
+
+  return {
+    createLogger(
+      config: ContractLoggerFactoryConfig<OutfitterLoggerBackendOptions>
+    ) {
+      const backend = config.backend;
+      const sinks = backend?.sinks ??
+        options?.defaults?.sinks ?? [createConsoleSink()];
+      const defaultRedaction = mergeRedactionConfig(
+        { enabled: true },
+        options?.defaults?.redaction
+      );
+      const redaction = mergeRedactionConfig(
+        defaultRedaction,
+        backend?.redaction
+      );
+
+      const loggerConfig: LoggerConfig = {
+        name: config.name,
+        level: resolveOutfitterLogLevel(config.level),
+        sinks,
+        ...(config.context !== undefined ? { context: config.context } : {}),
+        ...(redaction !== undefined ? { redaction } : {}),
+      };
+
+      for (const sink of sinks) {
+        factorySinks.add(sink);
+      }
+
+      const logger = createLogger(loggerConfig);
+      const originalAddSink = logger.addSink.bind(logger);
+      logger.addSink = (sink) => {
+        factorySinks.add(sink);
+        originalAddSink(sink);
+      };
+
+      return logger;
+    },
+    async flush() {
+      await flushSinks(factorySinks);
+    },
+  };
+}
+
+/**
+ * Create an Outfitter logger factory over the contracts logger abstraction.
+ */
+export function createOutfitterLoggerFactory(
+  options?: OutfitterLoggerFactoryOptions
+): OutfitterLoggerFactory {
+  return createContractLoggerFactory(createOutfitterLoggerAdapter(options));
 }

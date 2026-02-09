@@ -32,6 +32,10 @@ import { printDemoResults, runDemo } from "./commands/demo.js";
 import { printDoctorResults, runDoctor } from "./commands/doctor.js";
 import type { InitOptions } from "./commands/init.js";
 import { printInitResults, runInit } from "./commands/init.js";
+import {
+  printMigrateKitResults,
+  runMigrateKit,
+} from "./commands/migrate-kit.js";
 import { printUpdateResults, runUpdate } from "./commands/update.js";
 
 interface InitFlags {
@@ -55,6 +59,11 @@ interface CreateFlags {
   readonly with?: unknown;
   readonly noTooling?: unknown;
   readonly yes?: unknown;
+}
+
+interface MigrateFlags {
+  readonly dryRun?: unknown;
+  readonly json?: unknown;
 }
 
 interface InitActionInput extends InitOptions {
@@ -89,6 +98,18 @@ const createInputSchema = z.object({
   yes: z.boolean().optional(),
   outputMode: outputModeSchema,
 }) as z.ZodType<CreateActionInput>;
+
+interface MigrateKitActionInput {
+  targetDir: string;
+  dryRun: boolean;
+  outputMode?: OutputMode;
+}
+
+const migrateKitInputSchema = z.object({
+  targetDir: z.string(),
+  dryRun: z.boolean(),
+  outputMode: outputModeSchema,
+}) as z.ZodType<MigrateKitActionInput>;
 
 interface DoctorActionInput {
   cwd: string;
@@ -174,6 +195,19 @@ function resolveCreateOptions(
     with: resolveStringFlag(flags.with),
     noTooling: Boolean(flags.noTooling),
     yes: Boolean(flags.yes),
+    ...(outputMode ? { outputMode } : {}),
+  };
+}
+
+function resolveMigrateKitOptions(
+  context: ActionCliInputContext
+): MigrateKitActionInput {
+  const flags = context.flags as MigrateFlags;
+  const outputMode = resolveOutputMode(context.flags);
+
+  return {
+    targetDir: context.args[0] ?? process.cwd(),
+    dryRun: Boolean(flags.dryRun || context.flags["dry-run"]),
     ...(outputMode ? { outputMode } : {}),
   };
 }
@@ -579,6 +613,44 @@ const updateAction = defineAction({
   },
 });
 
+const migrateKitAction = defineAction({
+  id: "migrate.kit",
+  description: "Migrate foundation imports and dependencies to @outfitter/kit",
+  surfaces: ["cli"],
+  input: migrateKitInputSchema,
+  cli: {
+    group: "migrate",
+    command: "kit [directory]",
+    description:
+      "Migrate foundation imports and dependencies to @outfitter/kit",
+    options: [
+      {
+        flags: "--dry-run",
+        description: "Preview changes without writing files",
+        defaultValue: false,
+      },
+    ],
+    mapInput: resolveMigrateKitOptions,
+  },
+  handler: async (input) => {
+    const { outputMode, ...migrateInput } = input;
+    const outputOptions = outputMode ? { mode: outputMode } : undefined;
+    const result = await runMigrateKit(migrateInput);
+
+    if (result.isErr()) {
+      return Result.err(
+        new InternalError({
+          message: result.error.message,
+          context: { action: "migrate.kit" },
+        })
+      );
+    }
+
+    await printMigrateKitResults(result.value, outputOptions);
+    return Result.ok(result.value);
+  },
+});
+
 export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(createAction)
   .add(
@@ -617,4 +689,5 @@ export const outfitterActions: ActionRegistry = createActionRegistry()
   .add(doctorAction)
   .add(addAction)
   .add(listBlocksAction)
+  .add(migrateKitAction)
   .add(updateAction);

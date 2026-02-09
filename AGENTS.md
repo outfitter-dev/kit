@@ -54,6 +54,7 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 ```
 
 **Bun Version:** Pinned in `.bun-version`. CI reads from this file to ensure consistency. When upgrading:
+
 1. Run `bunx @outfitter/tooling upgrade-bun <version>`
 2. Command updates `.bun-version`, `engines.bun`, `@types/bun`, installs locally, and updates `bun.lock`
 3. Commit all files together
@@ -63,10 +64,12 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 ### Package Tiers (dependency flow: Foundation → Runtime → Tooling)
 
 **Foundation (Stable)** — Rarely change:
+
 - `@outfitter/contracts` — Result/Error patterns, error taxonomy (10 categories → exit/HTTP codes)
 - `@outfitter/types` — Branded types, type utilities
 
 **Runtime (Active)** — Evolving based on usage:
+
 - `@outfitter/cli` — Typed Commander wrapper with output contract, terminal rendering, colors
 - `@outfitter/mcp` — MCP server framework with typed tools and action registry
 - `@outfitter/config` — XDG-compliant config loading with Zod validation
@@ -78,6 +81,7 @@ bunx @outfitter/tooling upgrade-bun        # Upgrade to latest
 - `@outfitter/testing` — Test harnesses for MCP and CLI
 
 **Tooling (Early)** — APIs will change:
+
 - `outfitter` — Umbrella CLI for scaffolding
 
 ### Handler Contract
@@ -110,6 +114,45 @@ CLI and MCP are thin adapters over shared handlers. Handlers know nothing about 
 | auth | 9 | 401 |
 | cancelled | 130 | 499 |
 
+## Environment Configuration
+
+### Profiles
+
+Set `OUTFITTER_ENV` to configure default behavior across all packages. Defaults to `"production"` when unset or invalid.
+
+| Setting | `development` | `production` | `test` |
+|---------|--------------|-------------|--------|
+| logLevel | `"debug"` | `null` | `null` |
+| verbose | `true` | `false` | `false` |
+| errorDetail | `"full"` | `"message"` | `"full"` |
+
+- `logLevel: null` means no logging by default (MCP won't forward, logging falls through to `"info"`)
+- `errorDetail: "full"` includes stack traces; `"message"` shows only the error message
+
+### Environment Variables
+
+| Variable | Purpose | Values |
+|----------|---------|--------|
+| `OUTFITTER_ENV` | Environment profile | `development`, `production`, `test` |
+| `OUTFITTER_LOG_LEVEL` | Override log level (all packages) | `debug`, `info`, `warning`, `error`, `silent` |
+| `OUTFITTER_VERBOSE` | Override CLI verbosity | `0`, `1` |
+| `OUTFITTER_JSON` | Force JSON output | `0`, `1` |
+| `OUTFITTER_JSONL` | Force JSONL output | `0`, `1` |
+
+### Precedence
+
+Each package resolves settings with the same precedence chain (highest wins):
+
+```
+OUTFITTER_LOG_LEVEL / OUTFITTER_VERBOSE    ← env var override
+          ↓
+    explicit option                         ← function parameter / CLI flag
+          ↓
+    environment profile                     ← OUTFITTER_ENV defaults
+          ↓
+    package default                         ← "info" / false / null
+```
+
 ## Development Principles
 
 ### Non-Negotiable
@@ -125,6 +168,7 @@ CLI and MCP are thin adapters over shared handlers. Handlers know nothing about 
 ### Strong Preferences
 
 **Bun-First** — Use Bun-native APIs before npm packages:
+
 - `Bun.hash()`, `Bun.Glob`, `Bun.semver`, `Bun.$`
 - `Bun.color()`, `Bun.stringWidth()`, `Bun.stripANSI()`
 - `bun:sqlite` for SQLite with FTS5
@@ -146,6 +190,7 @@ CLI and MCP are thin adapters over shared handlers. Handlers know nothing about 
 ### TypeScript
 
 Strict mode with additional safety flags:
+
 - `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`
 - `noPropertyAccessFromIndexSignature`, `verbatimModuleSyntax`
 
@@ -172,6 +217,7 @@ Short and descriptive: `feature/<area>/<slug>` or `fix/<area>/<slug>`
 ### Commits
 
 Conventional Commits with scopes:
+
 ```
 feat(outfitter): add action registry
 fix(cli): handle missing config gracefully
@@ -194,6 +240,7 @@ fix(cli): handle missing config gracefully
 ### Changesets
 
 For package-impacting changes:
+
 1. Add changeset: `bun run changeset`
 2. Version: `bun run version-packages`
 3. Publish: `bun run release`

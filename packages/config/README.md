@@ -227,6 +227,61 @@ class ParseError {
 
 ---
 
+## Environment Profiles
+
+Unified environment detection for consistent defaults across all Outfitter packages.
+
+### `getEnvironment()`
+
+Reads `OUTFITTER_ENV` and returns the current profile. Falls back to `"production"` when unset or invalid.
+
+```typescript
+import { getEnvironment } from "@outfitter/config";
+
+const env = getEnvironment();
+// "development" | "production" | "test"
+```
+
+### `getEnvironmentDefaults(env)`
+
+Returns profile-specific defaults for an environment.
+
+```typescript
+import { getEnvironmentDefaults } from "@outfitter/config";
+
+const defaults = getEnvironmentDefaults("development");
+// { logLevel: "debug", verbose: true, errorDetail: "full" }
+
+const prodDefaults = getEnvironmentDefaults("production");
+// { logLevel: null, verbose: false, errorDetail: "message" }
+```
+
+| Setting | `development` | `production` | `test` |
+|---------|--------------|-------------|--------|
+| logLevel | `"debug"` | `null` | `null` |
+| verbose | `true` | `false` | `false` |
+| errorDetail | `"full"` | `"message"` | `"full"` |
+
+### Types
+
+#### `OutfitterEnv`
+
+```typescript
+type OutfitterEnv = "development" | "production" | "test";
+```
+
+#### `EnvironmentDefaults`
+
+```typescript
+interface EnvironmentDefaults {
+  logLevel: "debug" | "info" | "warn" | "error" | null;
+  verbose: boolean;
+  errorDetail: "full" | "message";
+}
+```
+
+---
+
 ## XDG Base Directory Specification
 
 This package follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) for locating configuration files.

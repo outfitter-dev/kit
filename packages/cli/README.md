@@ -367,9 +367,33 @@ if (flags.reset) {
 
 | Variable | Description | Default |
 |----------|-------------|---------|
+| `OUTFITTER_ENV` | Environment profile (`development`, `production`, `test`) | `production` |
+| `OUTFITTER_VERBOSE` | Override verbose mode (`1` or `0`) | - |
 | `OUTFITTER_JSON` | Set to `1` to force JSON output | - |
 | `OUTFITTER_JSONL` | Set to `1` to force JSONL output (takes priority over JSON) | - |
 | `XDG_STATE_HOME` | State directory for pagination | Platform-specific |
+
+### `resolveVerbose(verbose?)`
+
+Resolve verbose mode from environment configuration. Use this instead of hardcoding verbosity so your CLI responds to `OUTFITTER_ENV` and `OUTFITTER_VERBOSE` automatically.
+
+**Precedence** (highest wins):
+1. `OUTFITTER_VERBOSE` environment variable (`"1"` or `"0"`)
+2. Explicit `verbose` parameter (from `--verbose` CLI flag)
+3. `OUTFITTER_ENV` profile defaults (`true` in development)
+4. `false` (default)
+
+```typescript
+import { resolveVerbose } from "@outfitter/cli/output";
+
+const isVerbose = resolveVerbose();
+// With OUTFITTER_ENV=development → true
+// With OUTFITTER_VERBOSE=0 → false (overrides everything)
+// With nothing set → false
+
+// Pass through from CLI flag
+const isVerbose = resolveVerbose(cliFlags.verbose);
+```
 
 ### Output Mode Priority
 

@@ -54,9 +54,10 @@ Creates an MCP server instance.
 
 ```typescript
 interface McpServerOptions {
-  name: string;      // Server name for MCP handshake
-  version: string;   // Server version (semver)
-  logger?: Logger;   // Optional structured logger
+  name: string;           // Server name for MCP handshake
+  version: string;        // Server version (semver)
+  logger?: Logger;        // Optional structured logger
+  defaultLogLevel?: McpLogLevel | null; // Default log forwarding level
 }
 
 const server = createMcpServer({
@@ -65,6 +66,41 @@ const server = createMcpServer({
   logger: createLogger({ name: "mcp" }),
 });
 ```
+
+### Log Forwarding
+
+MCP servers can forward log messages to the connected client. The default log level is resolved from environment configuration:
+
+**Precedence** (highest wins):
+1. `OUTFITTER_LOG_LEVEL` environment variable
+2. `options.defaultLogLevel`
+3. `OUTFITTER_ENV` profile defaults (`"debug"` in development, `null` otherwise)
+4. `null` (no forwarding)
+
+```typescript
+const server = createMcpServer({
+  name: "my-server",
+  version: "1.0.0",
+  // Forwarding level auto-resolved from OUTFITTER_ENV
+});
+
+// With OUTFITTER_ENV=development → forwards at "debug"
+// With OUTFITTER_ENV=production → no forwarding (null)
+// With OUTFITTER_LOG_LEVEL=error → forwards at "error"
+```
+
+Set `defaultLogLevel: null` to explicitly disable forwarding regardless of environment. The MCP client can always override via `logging/setLevel`.
+
+#### `sendLogMessage(level, data, loggerName?)`
+
+Send a log message to the connected MCP client.
+
+```typescript
+server.sendLogMessage("info", "Indexing complete", "my-server");
+server.sendLogMessage("warning", { message: "Rate limited", retryAfter: 30 });
+```
+
+Only sends if the message level meets or exceeds the current client log level threshold.
 
 ### defineTool(definition)
 

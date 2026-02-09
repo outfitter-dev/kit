@@ -304,6 +304,34 @@ await flush();
 process.exit(0);
 ```
 
+## Environment-Aware Log Level
+
+### `resolveLogLevel(level?)`
+
+Resolve the log level from environment configuration. Use this instead of hardcoding levels so your app responds to `OUTFITTER_ENV` and `OUTFITTER_LOG_LEVEL` automatically.
+
+**Precedence** (highest wins):
+1. `OUTFITTER_LOG_LEVEL` environment variable
+2. Explicit `level` parameter
+3. `OUTFITTER_ENV` profile defaults (`"debug"` in development)
+4. `"info"` (default)
+
+```typescript
+import { createLogger, resolveLogLevel } from "@outfitter/logging";
+
+const logger = createLogger({
+  name: "my-app",
+  level: resolveLogLevel(),
+  sinks: [createConsoleSink()],
+});
+
+// With OUTFITTER_ENV=development → "debug"
+// With OUTFITTER_LOG_LEVEL=error → "error" (overrides everything)
+// With nothing set → "info"
+```
+
+MCP-style level names are mapped automatically: `warning` to `warn`, `emergency`/`critical`/`alert` to `fatal`, `notice` to `info`.
+
 ## API Reference
 
 ### Functions
@@ -312,6 +340,7 @@ process.exit(0);
 | ----------------------- | --------------------------------------------------- |
 | `createLogger`          | Create a configured logger instance                 |
 | `createChildLogger`     | Create a child logger with merged context           |
+| `resolveLogLevel`       | Resolve log level from env vars and profile         |
 | `configureRedaction`    | Configure global redaction patterns and keys        |
 | `flush`                 | Flush all pending log writes across all sinks       |
 | `createJsonFormatter`   | Create a JSON formatter for structured output       |

@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+
 /**
  * Outfitter CLI - Umbrella CLI for scaffolding and project management.
  *
@@ -9,6 +10,7 @@
  * @packageDocumentation
  */
 
+import { readFileSync } from "node:fs";
 import { buildCliCommands } from "@outfitter/cli/actions";
 import { createCLI } from "@outfitter/cli/command";
 import { exitWithError } from "@outfitter/cli/output";
@@ -26,6 +28,7 @@ import { outfitterActions } from "./actions.js";
  * @returns Configured Commander program
  */
 function createProgram() {
+  const cliVersion = readCliVersion();
   const logger = createLogger({ name: "outfitter" });
   const cli = createCLI({
     name: "outfitter",
@@ -56,6 +59,27 @@ function createProgram() {
   }
 
   return cli;
+}
+
+const DEFAULT_CLI_VERSION = "0.0.0";
+
+function readCliVersion(): string {
+  try {
+    const packageJson = JSON.parse(
+      readFileSync(new URL("../package.json", import.meta.url), "utf8")
+    ) as { version?: unknown };
+
+    if (
+      typeof packageJson.version === "string" &&
+      packageJson.version.length > 0
+    ) {
+      return packageJson.version;
+    }
+  } catch {
+    // Fall through to default.
+  }
+
+  return DEFAULT_CLI_VERSION;
 }
 
 // =============================================================================

@@ -46,10 +46,15 @@
       }
     },
     "./package.json": "./package.json",
+    "./biome": "./biome.json",
     "./biome.json": "./biome.json",
+    "./tsconfig": "./tsconfig.preset.json",
     "./tsconfig.preset.json": "./tsconfig.preset.json",
+    "./tsconfig-bun": "./tsconfig.preset.bun.json",
     "./tsconfig.preset.bun.json": "./tsconfig.preset.bun.json",
+    "./lefthook": "./lefthook.yml",
     "./lefthook.yml": "./lefthook.yml",
+    "./.markdownlint-cli2": "./.markdownlint-cli2.jsonc",
     "./.markdownlint-cli2.jsonc": "./.markdownlint-cli2.jsonc"
   },
   "bin": {
@@ -58,8 +63,10 @@
   "sideEffects": false,
   "scripts": {
     "build:registry": "bun run src/registry/build.ts",
-    "prebuild": "bun run build:registry",
+    "sync:exports": "bun run scripts/sync-exports.ts",
+    "prebuild": "bun run build:registry && bun run sync:exports",
     "build": "bunup --filter @outfitter/tooling",
+    "prepack": "bun run sync:exports",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
     "test": "bun test",

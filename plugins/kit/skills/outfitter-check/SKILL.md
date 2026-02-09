@@ -195,7 +195,7 @@ After the compliance scan, detect installed `@outfitter/*` versions and check fo
 bunx outfitter update --guide --cwd .
 ```
 
-For JSON output (useful for programmatic consumption):
+For JSON output (version data only, does not include migration docs):
 
 ```bash
 bunx outfitter update --json --cwd .

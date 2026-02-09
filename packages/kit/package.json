@@ -5,7 +5,8 @@
   "type": "module",
   "files": [
     "dist",
-    "VERSIONS.md"
+    "VERSIONS.md",
+    "shared/migrations"
   ],
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -71,8 +72,10 @@
     }
   },
   "scripts": {
-    "build": "bunup --filter @outfitter/kit",
-    "typecheck": "tsc --noEmit"
+    "build": "bun run sync:migrations && bunup --filter @outfitter/kit",
+    "typecheck": "tsc --noEmit",
+    "sync:migrations": "bun run ../../scripts/sync-migrations.ts",
+    "prepack": "bun run sync:migrations"
   },
   "devDependencies": {
     "@types/bun": "latest",

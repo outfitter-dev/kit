@@ -264,6 +264,21 @@ describe("Structured Logging", () => {
     expect(records[0].metadata?.email).toBe("user@example.com");
   });
 
+  it("Message placeholders are preserved literally", () => {
+    const records: LogRecord[] = [];
+    const sink: Sink = { write: (record) => records.push(record) };
+
+    const logger = createLogger({
+      name: "test",
+      sinks: [sink],
+    });
+
+    logger.info("literal {value} placeholder", { value: "metadata-value" });
+
+    expect(records).toHaveLength(1);
+    expect(records[0].message).toBe("literal {value} placeholder");
+  });
+
   it("Metadata is attached to log record", () => {
     const records: LogRecord[] = [];
     const sink: Sink = { write: (record) => records.push(record) };
@@ -1006,6 +1021,35 @@ describe("Sinks", () => {
 
     // Good sink should still receive the message
     expect(goodRecords.length).toBe(1);
+  });
+
+  it("flush ignores sink flush errors and flushes remaining sinks", async () => {
+    let failingSinkFlushed = false;
+    let healthySinkFlushed = false;
+
+    const failingSink: Sink = {
+      write: () => undefined,
+      async flush() {
+        failingSinkFlushed = true;
+        throw new Error("flush failed");
+      },
+    };
+
+    const healthySink: Sink = {
+      write: () => undefined,
+      async flush() {
+        healthySinkFlushed = true;
+      },
+    };
+
+    createLogger({
+      name: "flush-test",
+      sinks: [failingSink, healthySink],
+    });
+
+    await expect(flush()).resolves.toBeUndefined();
+    expect(failingSinkFlushed).toBe(true);
+    expect(healthySinkFlushed).toBe(true);
   });
 
   it("Sink receives formatted log record", () => {

@@ -27,6 +27,13 @@
  */
 
 // ============================================================================
+// Environment Profiles
+// ============================================================================
+
+export type { EnvironmentDefaults, OutfitterEnv } from "./environment.js";
+export { getEnvironment, getEnvironmentDefaults } from "./environment.js";
+
+// ============================================================================
 // Environment Variable Access
 // ============================================================================
 

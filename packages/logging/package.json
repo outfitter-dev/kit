@@ -27,6 +27,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@outfitter/config": "workspace:*",
     "@outfitter/contracts": "workspace:*",
     "@logtape/logtape": "^2.0.0"
   },

@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+import { getEnvironment, getEnvironmentDefaults } from "@outfitter/config";
 import type { ErrorCategory } from "@outfitter/contracts";
 import {
   safeStringify as contractsSafeStringify,
@@ -323,4 +324,52 @@ export function exitWithError(error: Error, options?: OutputOptions): never {
   }
 
   process.exit(exitCode);
+}
+
+// =============================================================================
+// Environment-Aware Verbose Resolution
+// =============================================================================
+
+/**
+ * Resolve verbose mode from environment configuration.
+ *
+ * Precedence (highest wins):
+ * 1. `OUTFITTER_VERBOSE` environment variable (`"1"` or `"0"`)
+ * 2. Explicit `verbose` parameter (from CLI flag)
+ * 3. `OUTFITTER_ENV` environment profile defaults
+ * 4. `false` (default)
+ *
+ * @param verbose - Optional explicit verbose flag (e.g. from --verbose CLI flag)
+ * @returns Whether verbose mode is enabled
+ *
+ * @example
+ * ```typescript
+ * import { resolveVerbose } from "@outfitter/cli/output";
+ *
+ * // Auto-resolve from environment
+ * const isVerbose = resolveVerbose();
+ *
+ * // With OUTFITTER_ENV=development → true
+ * // With OUTFITTER_VERBOSE=0 → false (overrides everything)
+ * // With nothing set → false
+ *
+ * // From CLI flag
+ * const isVerbose = resolveVerbose(cliFlags.verbose);
+ * ```
+ */
+export function resolveVerbose(verbose?: boolean): boolean {
+  // 1. OUTFITTER_VERBOSE env var (highest precedence)
+  const envVerbose = process.env["OUTFITTER_VERBOSE"];
+  if (envVerbose === "1") return true;
+  if (envVerbose === "0") return false;
+
+  // 2. Explicit parameter
+  if (verbose !== undefined) {
+    return verbose;
+  }
+
+  // 3. Environment profile
+  const env = getEnvironment();
+  const defaults = getEnvironmentDefaults(env);
+  return defaults.verbose;
 }

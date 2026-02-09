@@ -7,6 +7,11 @@
  * @packageDocumentation
  */
 
+import {
+  getEnvironment as _getEnvironment,
+  getEnvironmentDefaults as _getEnvironmentDefaults,
+} from "@outfitter/config";
+
 // ============================================================================
 // Type Definitions
 // ============================================================================
@@ -1159,4 +1164,85 @@ export async function flush(): Promise<void> {
   }
 
   await Promise.all(flushPromises);
+}
+
+// ============================================================================
+// Environment-Aware Log Level Resolution
+// ============================================================================
+
+/**
+ * Map from OUTFITTER_LOG_LEVEL / environment defaults values to LogLevel.
+ *
+ * MCP-style levels (warning, emergency, etc.) are mapped to the
+ * closest LogLevel equivalent.
+ */
+const ENV_LEVEL_MAP: Readonly<Record<string, LogLevel>> = {
+  trace: "trace",
+  debug: "debug",
+  info: "info",
+  notice: "info",
+  warn: "warn",
+  warning: "warn",
+  error: "error",
+  critical: "fatal",
+  alert: "fatal",
+  emergency: "fatal",
+  fatal: "fatal",
+  silent: "silent",
+};
+
+/**
+ * Resolve the log level from environment configuration.
+ *
+ * Precedence (highest wins):
+ * 1. `OUTFITTER_LOG_LEVEL` environment variable
+ * 2. Explicit `level` parameter
+ * 3. `OUTFITTER_ENV` environment profile defaults
+ * 4. `"info"` (default)
+ *
+ * @param level - Optional explicit log level (overridden by env var)
+ * @returns Resolved LogLevel
+ *
+ * @example
+ * ```typescript
+ * import { createLogger, resolveLogLevel } from "@outfitter/logging";
+ *
+ * // Auto-resolve from environment
+ * const logger = createLogger({
+ *   name: "my-app",
+ *   level: resolveLogLevel(),
+ * });
+ *
+ * // With OUTFITTER_ENV=development → "debug"
+ * // With OUTFITTER_LOG_LEVEL=error → "error" (overrides everything)
+ * // With nothing set → "info"
+ * ```
+ */
+export function resolveLogLevel(level?: LogLevel): LogLevel {
+  // 1. OUTFITTER_LOG_LEVEL env var (highest precedence)
+  const envLogLevel = process.env["OUTFITTER_LOG_LEVEL"];
+  if (envLogLevel !== undefined) {
+    const mapped = ENV_LEVEL_MAP[envLogLevel];
+    if (mapped !== undefined) {
+      return mapped;
+    }
+  }
+
+  // 2. Explicit level parameter
+  if (level !== undefined) {
+    return level;
+  }
+
+  // 3. Environment profile
+  const env = _getEnvironment();
+  const defaults = _getEnvironmentDefaults(env);
+  if (defaults.logLevel !== null) {
+    const mapped = ENV_LEVEL_MAP[defaults.logLevel];
+    if (mapped !== undefined) {
+      return mapped;
+    }
+  }
+
+  // 4. Default
+  return "info";
 }

@@ -52,10 +52,10 @@
         "default": "./dist/create/presets.js"
       }
     },
-    "./commands/init": {
+    "./create": {
       "import": {
-        "types": "./dist/commands/init.d.ts",
-        "default": "./dist/commands/init.js"
+        "types": "./dist/create/index.d.ts",
+        "default": "./dist/create/index.js"
       }
     },
     "./commands/shared-deps": {
@@ -98,12 +98,12 @@
     "@outfitter/logging": "workspace:*",
     "@outfitter/tooling": "workspace:*",
     "commander": "^14.0.2",
+    "typescript": "^5.9.3",
     "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/bun": "^1.3.7",
-    "@types/node": "^25.0.10",
-    "typescript": "^5.9.3"
+    "@types/node": "^25.0.10"
   },
   "engines": {
     "bun": ">=1.3.7"

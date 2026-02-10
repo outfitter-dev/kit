@@ -12,8 +12,10 @@ import {
   CreateError,
   InitError,
   initCommand,
+  MigrateKitError,
   planCreateProject,
   runCreate,
+  runMigrateKit,
 } from "../index.js";
 
 describe("outfitter public API", () => {
@@ -32,6 +34,13 @@ describe("outfitter public API", () => {
     const err = new CreateError("test");
     expect(err).toBeInstanceOf(Error);
     expect(err.name).toBe("CreateError");
+  });
+
+  test("exports runMigrateKit and MigrateKitError", () => {
+    expect(typeof runMigrateKit).toBe("function");
+    const err = new MigrateKitError("test");
+    expect(err).toBeInstanceOf(Error);
+    expect(err.name).toBe("MigrateKitError");
   });
 
   test("exports create presets", () => {

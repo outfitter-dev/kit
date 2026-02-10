@@ -41,6 +41,15 @@ export {
   initCommand,
   runInit,
 } from "./commands/init.js";
+// Migrate kit command
+export {
+  MigrateKitError,
+  type MigrateKitOptions,
+  type MigrateKitResult,
+  migrateKitCommand,
+  printMigrateKitResults,
+  runMigrateKit,
+} from "./commands/migrate-kit.js";
 
 // Create planner
 export {

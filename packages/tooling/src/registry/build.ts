@@ -153,13 +153,17 @@ const REGISTRY_CONFIG: RegistryBuildConfig = {
 			description: "Biome linter/formatter configuration via Ultracite",
 			files: ["packages/tooling/biome.json"],
 			remap: { "packages/tooling/biome.json": "biome.json" },
-			devDependencies: { ultracite: "^7.0.0" },
+			devDependencies: { ultracite: "^7.1.1" },
 		},
 		lefthook: {
 			description: "Git hooks via Lefthook for pre-commit and pre-push",
 			files: ["packages/tooling/lefthook.yml"],
 			remap: { "packages/tooling/lefthook.yml": ".lefthook.yml" },
-			devDependencies: { lefthook: "^2.0.0" },
+			devDependencies: {
+				"@outfitter/tooling": "^0.2.1",
+				lefthook: "^2.0.16",
+				ultracite: "^7.1.1",
+			},
 		},
 		markdownlint: {
 			description: "Markdown linting configuration via markdownlint-cli2",

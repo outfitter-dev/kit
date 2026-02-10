@@ -56,6 +56,16 @@ describe("Registry Build Output", () => {
 		expect(biome.devDependencies?.ultracite).toBeDefined();
 	});
 
+	test("lefthook block includes required devDependencies", () => {
+		const content = readFileSync(registryPath, "utf-8");
+		const registry = RegistrySchema.parse(JSON.parse(content));
+
+		const lefthook = registry.blocks.lefthook;
+		expect(lefthook.devDependencies).toBeDefined();
+		expect(lefthook.devDependencies?.lefthook).toBeDefined();
+		expect(lefthook.devDependencies?.["@outfitter/tooling"]).toBeDefined();
+	});
+
 	test("markdownlint block has correct file", () => {
 		const content = readFileSync(registryPath, "utf-8");
 		const registry = RegistrySchema.parse(JSON.parse(content));

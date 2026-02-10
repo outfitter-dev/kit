@@ -106,7 +106,7 @@ describe("init command file creation", () => {
     expect(tsconfig.compilerOptions).toBeDefined();
   });
 
-  test("creates CLI template without unpublished tooling dependency coupling", async () => {
+  test("creates CLI template with tooling dependency required for hook verification", async () => {
     const { runInit } = await import("../commands/init.js");
 
     await runInit({
@@ -119,7 +119,10 @@ describe("init command file creation", () => {
 
     const packageJsonPath = join(tempDir, "package.json");
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
-    expect(packageJson.devDependencies["@outfitter/tooling"]).toBeUndefined();
+    expect(packageJson.devDependencies["@outfitter/tooling"]).toBe("^0.2.1");
+    expect(packageJson.scripts["verify:ci"]).toBe(
+      "bun run typecheck && bun run check && bun run build && bun run test"
+    );
     expect(packageJson.dependencies["@outfitter/kit"]).toBe("^0.1.0-rc.0");
     expect(packageJson.dependencies["@outfitter/cli"]).toBe("^0.1.0-rc.0");
     expect(packageJson.dependencies["@outfitter/logging"]).toBe("^0.1.0-rc.0");

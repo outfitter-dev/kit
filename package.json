@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "prebuild": "./scripts/prebuild.sh",
+    "verify:ci": "bun run typecheck && bun run check && bun run build && bun run test",
     "build": "bunup",
     "build:local": "bunup && cd apps/outfitter && bun link",
     "build:turbo": "turbo run build",
@@ -20,6 +21,7 @@
     "typecheck": "turbo run typecheck",
     "check": "ultracite check",
     "fix": "ultracite fix",
+    "clean:artifacts": "turbo run clean && rm -rf .turbo",
     "clean": "turbo run clean && rm -rf node_modules",
     "changeset": "changeset",
     "version-packages": "changeset version && bun run sync-plugin-versions",

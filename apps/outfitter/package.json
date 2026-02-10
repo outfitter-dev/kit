@@ -10,6 +10,42 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./commands/demo": {
+      "import": {
+        "types": "./dist/commands/demo.d.ts",
+        "default": "./dist/commands/demo.js"
+      }
+    },
+    "./commands/init": {
+      "import": {
+        "types": "./dist/commands/init.d.ts",
+        "default": "./dist/commands/init.js"
+      }
+    },
+    "./commands/shared-deps": {
+      "import": {
+        "types": "./dist/commands/shared-deps.d.ts",
+        "default": "./dist/commands/shared-deps.js"
+      }
+    },
+    "./commands/migrate-kit": {
+      "import": {
+        "types": "./dist/commands/migrate-kit.d.ts",
+        "default": "./dist/commands/migrate-kit.js"
+      }
+    },
+    "./commands/create": {
+      "import": {
+        "types": "./dist/commands/create.d.ts",
+        "default": "./dist/commands/create.js"
+      }
+    },
+    "./commands/add": {
+      "import": {
+        "types": "./dist/commands/add.d.ts",
+        "default": "./dist/commands/add.js"
+      }
+    },
     "./commands/update": {
       "import": {
         "types": "./dist/commands/update.d.ts",
@@ -20,12 +56,6 @@
       "import": {
         "types": "./dist/commands/demo/errors.d.ts",
         "default": "./dist/commands/demo/errors.js"
-      }
-    },
-    "./commands/demo": {
-      "import": {
-        "types": "./dist/commands/demo.d.ts",
-        "default": "./dist/commands/demo.js"
       }
     },
     "./actions": {
@@ -40,10 +70,10 @@
         "default": "./dist/index.js"
       }
     },
-    "./commands/doctor": {
+    "./create/types": {
       "import": {
-        "types": "./dist/commands/doctor.d.ts",
-        "default": "./dist/commands/doctor.js"
+        "types": "./dist/create/types.d.ts",
+        "default": "./dist/create/types.js"
       }
     },
     "./create/presets": {
@@ -58,16 +88,16 @@
         "default": "./dist/create/index.js"
       }
     },
-    "./commands/shared-deps": {
+    "./create/planner": {
       "import": {
-        "types": "./dist/commands/shared-deps.d.ts",
-        "default": "./dist/commands/shared-deps.js"
+        "types": "./dist/create/planner.d.ts",
+        "default": "./dist/create/planner.js"
       }
     },
-    "./commands/add": {
+    "./commands/doctor": {
       "import": {
-        "types": "./dist/commands/add.d.ts",
-        "default": "./dist/commands/add.js"
+        "types": "./dist/commands/doctor.d.ts",
+        "default": "./dist/commands/doctor.js"
       }
     },
     "./package.json": "./package.json"

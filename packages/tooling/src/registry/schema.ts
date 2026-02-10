@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { z, type ZodType } from "zod";
+import { type ZodType, z } from "zod";
 
 /**
  * File entry in a block.

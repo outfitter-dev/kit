@@ -40,7 +40,7 @@ describe("lefthook.yml preset", () => {
 				cmd !== null &&
 				"run" in cmd &&
 				typeof (cmd as { run: unknown }).run === "string" &&
-				(cmd as { run: string }).run.includes("ultracite")
+				(cmd as { run: string }).run.includes("ultracite"),
 		);
 
 		expect(hasLinting).toBe(true);
@@ -58,7 +58,7 @@ describe("lefthook.yml preset", () => {
 				cmd !== null &&
 				"run" in cmd &&
 				typeof (cmd as { run: unknown }).run === "string" &&
-				(cmd as { run: string }).run.includes("typecheck")
+				(cmd as { run: string }).run.includes("typecheck"),
 		);
 
 		expect(hasTypecheck).toBe(true);
@@ -76,7 +76,7 @@ describe("lefthook.yml preset", () => {
 				cmd !== null &&
 				"run" in cmd &&
 				typeof (cmd as { run: unknown }).run === "string" &&
-				(cmd as { run: string }).run.includes("build")
+				(cmd as { run: string }).run.includes("build"),
 		);
 
 		expect(hasBuild).toBe(true);
@@ -96,7 +96,7 @@ describe("lefthook.yml preset", () => {
 				"run" in cmd &&
 				typeof (cmd as { run: unknown }).run === "string" &&
 				((cmd as { run: string }).run.includes("test") ||
-					(cmd as { run: string }).run.includes("pre-push"))
+					(cmd as { run: string }).run.includes("pre-push")),
 		);
 
 		expect(hasTest).toBe(true);

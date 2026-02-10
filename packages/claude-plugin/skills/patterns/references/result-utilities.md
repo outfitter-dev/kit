@@ -11,7 +11,7 @@ import { Result } from "@outfitter/contracts";
 const ok = Result.ok({ name: "Alice", id: "1" });
 
 // Failure
-const err = Result.err(new NotFoundError("user", "123"));
+const err = Result.err(NotFoundError.create("user", "123"));
 ```
 
 ## Checking Results
@@ -209,11 +209,13 @@ const handler: Handler<Input, Output, Error> = async (input, ctx) => {
 ```typescript
 const errors: ValidationError[] = [];
 
-if (!input.name) errors.push(new ValidationError("Name required"));
-if (!input.email) errors.push(new ValidationError("Email required"));
+if (!input.name) errors.push(ValidationError.create("name", "required"));
+if (!input.email) errors.push(ValidationError.create("email", "required"));
 
 if (errors.length > 0) {
-  return Result.err(new ValidationError("Multiple errors", { errors }));
+  return Result.err(
+    ValidationError.create("input", "multiple validation errors", { errors })
+  );
 }
 ```
 
@@ -224,7 +226,7 @@ function wrapThrowable<T>(fn: () => T): Result<T, InternalError> {
   try {
     return Result.ok(fn());
   } catch (error) {
-    return Result.err(new InternalError("Unexpected error", { cause: error }));
+    return Result.err(InternalError.create("Unexpected error", { cause: error }));
   }
 }
 
@@ -232,7 +234,7 @@ async function wrapAsync<T>(fn: () => Promise<T>): Promise<Result<T, InternalErr
   try {
     return Result.ok(await fn());
   } catch (error) {
-    return Result.err(new InternalError("Unexpected error", { cause: error }));
+    return Result.err(InternalError.create("Unexpected error", { cause: error }));
   }
 }
 ```

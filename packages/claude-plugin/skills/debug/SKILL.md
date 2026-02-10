@@ -19,7 +19,7 @@ Troubleshoot @outfitter/* package issues.
 ```typescript
 const inputResult = validateInput(rawInput);
 if (inputResult.isErr()) {
-  console.log("Validation failed:", inputResult.error.details);
+  console.log("Validation failed:", inputResult.error.context);
   return inputResult;
 }
 ```
@@ -57,7 +57,7 @@ const updateResult = await updateUser(getResult.value);
 if (result.isErr()) {
   switch (result.error._tag) {
     case "ValidationError":
-      console.log(result.error.details);
+      console.log(result.error.context);
       break;
     case "NotFoundError":
       console.log(result.error.resourceId);

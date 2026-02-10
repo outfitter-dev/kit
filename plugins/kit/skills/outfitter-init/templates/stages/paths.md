@@ -54,7 +54,9 @@ import { securePath } from "@outfitter/file-ops";
 const validatePath = (userPath: string, baseDir: string) => {
   const result = securePath(userPath, { base: baseDir });
   if (result.isErr()) {
-    return Result.err(new ValidationError("Invalid path", { path: userPath }));
+    return Result.err(
+      ValidationError.create("path", "invalid", { path: userPath })
+    );
   }
   return Result.ok(result.value);
 };

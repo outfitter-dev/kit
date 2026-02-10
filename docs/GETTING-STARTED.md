@@ -4,7 +4,7 @@ Build CLI tools, MCP servers, and daemons with Outfitter's shared infrastructure
 
 ## Prerequisites
 
-- **Bun >= 1.3.6** — Install from [bun.sh](https://bun.sh)
+- **Bun >= 1.3.7** — Install from [bun.sh](https://bun.sh)
 - **TypeScript knowledge** — Outfitter is TypeScript-first
 - **Familiarity with Result types** — See [Patterns](./PATTERNS.md) if new to this style
 
@@ -14,7 +14,7 @@ The fastest way to start is with the `outfitter` CLI:
 
 ```bash
 # Scaffold a CLI project
-bunx outfitter init cli my-cli
+bunx outfitter create my-cli --preset cli --structure single --yes
 cd my-cli
 bun install
 bun run dev
@@ -33,7 +33,7 @@ Commands:
 
 This creates a working CLI with:
 - Typed commands via Commander.js
-- Output mode detection (human/JSON)
+- Human-first output with JSON/JSONL opt-in
 - Error handling with exit codes
 - XDG-compliant config loading
 

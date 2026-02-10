@@ -5,13 +5,13 @@ Operations for working with `Result<T, E>` from `better-result`.
 ## Creating Results
 
 ```typescript
-import { Result } from "@outfitter/contracts";
+import { NotFoundError, Result } from "@outfitter/contracts";
 
 // Success
 const ok = Result.ok({ name: "Alice", id: "1" });
 
 // Failure
-const err = Result.err(new NotFoundError("user", "123"));
+const err = Result.err(NotFoundError.create("user", "123"));
 ```
 
 ## Checking Results
@@ -90,10 +90,10 @@ const nameResult = result.map((user) => user.name);
 // Result<string, Error>
 ```
 
-### MapErr (transform error)
+### MapError (transform error)
 
 ```typescript
-const mappedResult = result.mapErr((error) => new WrappedError(error));
+const mappedResult = result.mapError((error) => new WrappedError(error));
 // Result<User, WrappedError>
 ```
 
@@ -119,33 +119,6 @@ const result = combine2(userResult, orderResult);
 if (result.isOk()) {
   const [user, order] = result.value;
 }
-```
-
-### combineAll
-
-Combine an array of results:
-
-```typescript
-import { combineAll } from "@outfitter/contracts";
-
-const results = await Promise.all(ids.map((id) => getUser(id)));
-const combined = combineAll(results);
-// Result<User[], Error>
-```
-
-### combineObject
-
-Combine an object of results:
-
-```typescript
-import { combineObject } from "@outfitter/contracts";
-
-const combined = combineObject({
-  user: userResult,
-  orders: ordersResult,
-  settings: settingsResult,
-});
-// Result<{ user: User; orders: Order[]; settings: Settings }, Error>
 ```
 
 ## Error Recovery
@@ -236,11 +209,13 @@ const handler: Handler<Input, Output, Error> = async (input, ctx) => {
 ```typescript
 const errors: ValidationError[] = [];
 
-if (!input.name) errors.push(new ValidationError("Name required"));
-if (!input.email) errors.push(new ValidationError("Email required"));
+if (!input.name) errors.push(ValidationError.create("name", "required"));
+if (!input.email) errors.push(ValidationError.create("email", "required"));
 
 if (errors.length > 0) {
-  return Result.err(new ValidationError("Multiple errors", { errors }));
+  return Result.err(
+    ValidationError.create("input", "multiple validation errors", { errors })
+  );
 }
 ```
 
@@ -251,7 +226,7 @@ function wrapThrowable<T>(fn: () => T): Result<T, InternalError> {
   try {
     return Result.ok(fn());
   } catch (error) {
-    return Result.err(new InternalError("Unexpected error", { cause: error }));
+    return Result.err(InternalError.create("Unexpected error", { cause: error }));
   }
 }
 
@@ -259,7 +234,7 @@ async function wrapAsync<T>(fn: () => Promise<T>): Promise<Result<T, InternalErr
   try {
     return Result.ok(await fn());
   } catch (error) {
-    return Result.err(new InternalError("Unexpected error", { cause: error }));
+    return Result.err(InternalError.create("Unexpected error", { cause: error }));
   }
 }
 ```

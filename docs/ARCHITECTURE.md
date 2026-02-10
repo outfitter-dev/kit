@@ -213,7 +213,7 @@ switch (error._tag) {
   case "NotFoundError":
     return res.status(404).json({ error: error.message });
   case "ValidationError":
-    return res.status(400).json({ error: error.message, details: error.details });
+    return res.status(400).json({ error: error.message, context: error.context });
   // TypeScript ensures all cases are handled
 }
 ```
@@ -288,7 +288,7 @@ Ten error categories cover all failure modes:
 | `permission` | 4 | 403 | Forbidden action |
 | `timeout` | 5 | 504 | Operation took too long |
 | `rate_limit` | 6 | 429 | Too many requests |
-| `network` | 7 | 503 | Connection failures |
+| `network` | 7 | 502 | Connection failures |
 | `internal` | 8 | 500 | Unexpected errors, bugs |
 | `auth` | 9 | 401 | Authentication required |
 | `cancelled` | 130 | 499 | User interrupted (Ctrl+C) |

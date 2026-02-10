@@ -96,7 +96,7 @@ export const myHandler: Handler<unknown, Output, ValidationError | NotFoundError
 
   const resource = await fetchResource(input.id);
   if (!resource) {
-    return Result.err(new NotFoundError("resource", input.id));
+    return Result.err(NotFoundError.create("resource", input.id));
   }
 
   return Result.ok(resource);
@@ -161,16 +161,16 @@ export const handler: Handler<unknown, Output, Error1 | Error2> = async (
 
 ```typescript
 // Not found
-return Result.err(new NotFoundError("user", userId));
+return Result.err(NotFoundError.create("user", userId));
 
 // Validation
-return Result.err(new ValidationError("Invalid email", { field: "email" }));
+return Result.err(ValidationError.create("email", "invalid"));
 
 // Conflict
-return Result.err(new ConflictError("User already exists", { userId }));
+return Result.err(ConflictError.create("User already exists", { userId }));
 
 // Internal (wrap unexpected)
-return Result.err(new InternalError("Unexpected error", { cause: error }));
+return Result.err(InternalError.create("Unexpected error", { cause: error }));
 ```
 
 ### Output Pattern

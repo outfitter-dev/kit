@@ -100,13 +100,16 @@ After gathering answers, run the appropriate command:
 
 ```bash
 # Full scaffolding (default)
-outfitter init <template> . --name <name>
+outfitter init <cli|mcp|daemon> . --name <name>
+# Or: outfitter init . --template <template> --name <name>
 
 # Without tooling
-outfitter init <template> . --name <name> --no-tooling
+outfitter init <cli|mcp|daemon> . --name <name> --no-tooling
+# Or: outfitter init . --template <template> --name <name> --no-tooling
 
 # With specific blocks
-outfitter init <template> . --name <name> --with claude,biome
+outfitter init <cli|mcp|daemon> . --name <name> --with claude,biome
+# Or: outfitter init . --template <template> --name <name> --with claude,biome
 ```
 
 ### Available Templates

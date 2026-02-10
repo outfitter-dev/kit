@@ -142,7 +142,7 @@ Check context:
 
 1. **[file:line]** Throwing exception instead of Result.err
    - Found: `throw new Error("Not found")`
-   - Fix: `return Result.err(new NotFoundError("resource", id))`
+   - Fix: `return Result.err(NotFoundError.create("resource", id))`
 
 2. **[file:line]** Missing context parameter
    - Found: `async (input) => { ... }`

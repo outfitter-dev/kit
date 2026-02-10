@@ -178,12 +178,12 @@ server.registerPrompt({
 ```typescript
 handler: async (input) => {
   if (!input.query) {
-    return Result.err(new ValidationError("Query is required"));
+    return Result.err(ValidationError.create("query", "is required"));
   }
 
   const item = await findItem(input.id);
   if (!item) {
-    return Result.err(new NotFoundError("item", input.id));
+    return Result.err(NotFoundError.create("item", input.id));
   }
 
   return Result.ok(item);

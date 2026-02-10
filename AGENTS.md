@@ -109,7 +109,7 @@ CLI and MCP are thin adapters over shared handlers. Handlers know nothing about 
 | permission | 4 | 403 |
 | timeout | 5 | 504 |
 | rate_limit | 6 | 429 |
-| network | 7 | 503 |
+| network | 7 | 502 |
 | internal | 8 | 500 |
 | auth | 9 | 401 |
 | cancelled | 130 | 499 |

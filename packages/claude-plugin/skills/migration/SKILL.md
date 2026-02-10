@@ -68,7 +68,7 @@ import { Result, NotFoundError, type Handler } from "@outfitter/contracts";
 
 const getUser: Handler<{ id: string }, User, NotFoundError> = async (input, ctx) => {
   const user = await db.users.findById(input.id);
-  if (!user) return Result.err(new NotFoundError("user", input.id));
+  if (!user) return Result.err(NotFoundError.create("user", input.id));
   return Result.ok(user);
 };
 ```
@@ -126,7 +126,7 @@ import { Result, InternalError } from "@outfitter/contracts";
 function wrapLegacy<T>(fn: () => Promise<T>): Promise<Result<T, InternalError>> {
   return fn()
     .then((value) => Result.ok(value))
-    .catch((error) => Result.err(new InternalError(error.message, { cause: error })));
+    .catch((error) => Result.err(InternalError.create(error.message, { cause: error })));
 }
 ```
 

@@ -4,7 +4,7 @@ Result/Error patterns, error taxonomy, handler contracts, and shared interfaces 
 
 ## Status
 
-**Scaffold** - Types and interfaces defined, implementations pending.
+**Active** - Stable core contracts with active feature development.
 
 ## Installation
 
@@ -36,7 +36,7 @@ import {
 // Define a handler
 const getNote: Handler<{ id: string }, Note, NotFoundError> = async (input, ctx) => {
   const note = await db.notes.find(input.id);
-  if (!note) return Result.err(new NotFoundError("note", input.id));
+  if (!note) return Result.err(NotFoundError.create("note", input.id));
   return Result.ok(note);
 };
 

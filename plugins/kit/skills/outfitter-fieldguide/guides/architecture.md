@@ -82,7 +82,7 @@ Every domain error maps to one of ten categories:
 | Can't modify other users | `permission` | `PermissionError` | 4 | 403 |
 | Database query timed out | `timeout` | `TimeoutError` | 5 | 504 |
 | API rate limit hit | `rate_limit` | `RateLimitError` | 6 | 429 |
-| Can't reach external API | `network` | `NetworkError` | 7 | 503 |
+| Can't reach external API | `network` | `NetworkError` | 7 | 502 |
 | Unexpected null pointer | `internal` | `InternalError` | 8 | 500 |
 | Token expired | `auth` | `AuthError` | 9 | 401 |
 | User pressed Ctrl+C | `cancelled` | `CancelledError` | 130 | 499 |
@@ -289,7 +289,11 @@ export const createUser: Handler<
   // Check for existing user
   const existing = await ctx.db.findByEmail(validated.value.email);
   if (existing) {
-    return Result.err(new ConflictError("user", validated.value.email));
+    return Result.err(
+      ConflictError.create("User already exists", {
+        email: validated.value.email,
+      })
+    );
   }
 
   // Create user

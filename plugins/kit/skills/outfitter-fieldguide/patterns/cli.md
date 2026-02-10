@@ -49,7 +49,7 @@ export const myCommand = command("my-command")
 ```typescript
 import { output } from "@outfitter/cli";
 
-await output(data);  // Human for TTY, JSON for pipes
+await output(data);  // Human by default
 ```
 
 ### Mode Priority
@@ -58,7 +58,7 @@ await output(data);  // Human for TTY, JSON for pipes
 2. `OUTFITTER_JSONL=1` env var
 3. `OUTFITTER_JSON=1` env var
 4. `OUTFITTER_JSON=0` forces human
-5. TTY detection fallback
+5. Default fallback: human mode
 
 ### Forcing Modes
 
@@ -78,15 +78,10 @@ for await (const item of items) {
 await output(errorData, { stream: process.stderr });
 ```
 
-### Custom Formatters
+For custom formatting, transform data before calling `output()`:
 
 ```typescript
-await output(data, {
-  formatters: {
-    human: (data) => formatTable(data),
-    json: (data) => JSON.stringify(data, null, 2),
-  },
-});
+await output(formatTable(data));
 ```
 
 ## Error Handling

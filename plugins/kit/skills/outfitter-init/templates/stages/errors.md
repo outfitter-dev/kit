@@ -18,7 +18,7 @@ Replace custom error classes with Outfitter error taxonomy.
 | `permission` | `PermissionError` | 4 | 403 | Forbidden action |
 | `timeout` | `TimeoutError` | 5 | 504 | Operation took too long |
 | `rate_limit` | `RateLimitError` | 6 | 429 | Too many requests |
-| `network` | `NetworkError` | 7 | 503 | Connection failures |
+| `network` | `NetworkError` | 7 | 502 | Connection failures |
 | `internal` | `InternalError` | 8 | 500 | Unexpected errors, bugs |
 | `auth` | `AuthError` | 9 | 401 | Authentication required |
 | `cancelled` | `CancelledError` | 130 | 499 | User interrupted |

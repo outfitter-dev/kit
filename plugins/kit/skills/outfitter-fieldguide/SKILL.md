@@ -17,7 +17,7 @@ We kept solving the same problems across projects: config loading, error handlin
 The patterns assume you're building tools that **agents will consume**—structured output, typed errors, predictable behavior. Humans benefit too; agents just make the stakes clearer.
 
 When an AI agent calls your CLI or MCP tool, it needs:
-- **Structured output** it can parse (JSON when piped, human-readable otherwise)
+- **Structured output** it can parse (JSON when explicitly requested)
 - **Typed errors** with categories it can reason about (retry? abort? ask user?)
 - **Predictable exit codes** for scripting and automation
 - **Consistent behavior** across transport surfaces
@@ -29,7 +29,7 @@ The stack enforces these properties by design, not discipline.
 Traditional error handling (`throw`/`catch`) loses context, breaks type safety, and makes control flow unpredictable. We treat errors as first-class data:
 
 ```typescript
-const error = new NotFoundError("user", "user-123");
+const error = NotFoundError.create("user", "user-123");
 error._tag;        // "NotFoundError" — for pattern matching
 error.category;    // "not_found" — maps to exit code 2, HTTP 404
 error.message;     // Human-readable
@@ -182,7 +182,7 @@ Ten categories. Memorize the exit codes—you'll use them.
 | `permission` | 4 | 403 | `PermissionError` | Forbidden action |
 | `timeout` | 5 | 504 | `TimeoutError` | Took too long |
 | `rate_limit` | 6 | 429 | `RateLimitError` | Too many requests |
-| `network` | 7 | 503 | `NetworkError` | Connection failures |
+| `network` | 7 | 502 | `NetworkError` | Connection failures |
 | `internal` | 8 | 500 | `InternalError` | Bugs, unexpected errors |
 | `auth` | 9 | 401 | `AuthError` | Authentication required |
 | `cancelled` | 130 | 499 | `CancelledError` | User hit Ctrl+C |

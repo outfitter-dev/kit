@@ -190,7 +190,7 @@ const getUserTool = defineTool({
   handler: async (input, ctx) => {
     const user = await db.users.find(input.userId);
     if (!user) {
-      return Result.err(new NotFoundError("user", input.userId));
+      return Result.err(NotFoundError.create("user", input.userId));
     }
     return Result.ok(user);
   },

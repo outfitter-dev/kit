@@ -1,5 +1,11 @@
 # @outfitter/tooling
 
+## 0.2.2
+
+### Patch Changes
+
+- 4febd46: Retry publish for packages that failed due to npm OIDC configuration.
+
 ## 0.2.1
 
 ### Patch Changes

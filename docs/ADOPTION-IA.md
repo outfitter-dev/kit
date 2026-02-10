@@ -119,6 +119,13 @@ These sections are intentionally unresolved until OS-91/OS-90:
 - `TODO(OS-90)`: final `outfitter init` recommendation language.
 - `TODO(OS-90)`: final "when to choose granular adoption" thresholds.
 
+## Pilot Links
+
+- [Pilot Report: Kit-First Adoption](./PILOT-KIT-FIRST-ADOPTION.md)
+- Follow-up issues captured from pilots:
+  - OS-94: `create --no-tooling` behavior mismatch
+  - OS-95: `init`/`create` tooling flag parity
+
 ## Related Docs
 
 - [Migration Guide](./MIGRATION.md)

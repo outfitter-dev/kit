@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [4febd46]
+  - @outfitter/tooling@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes

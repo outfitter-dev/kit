@@ -88,6 +88,7 @@ let originalIsTTY: boolean | undefined;
 beforeEach(() => {
   originalEnv = { ...process.env };
   originalIsTTY = process.stdout.isTTY;
+  process.env.TERM = "xterm-256color";
 });
 
 afterEach(() => {

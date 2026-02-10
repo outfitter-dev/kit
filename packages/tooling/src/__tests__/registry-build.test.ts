@@ -10,7 +10,7 @@ import { RegistrySchema } from "../registry/schema.js";
 describe("Registry Build Output", () => {
 	const registryPath = join(
 		import.meta.dirname,
-		"../../registry/registry.json"
+		"../../registry/registry.json",
 	);
 
 	test("registry.json exists", () => {
@@ -87,13 +87,13 @@ describe("Registry Build Output", () => {
 
 		// Check format hook is marked executable
 		const formatHook = registry.blocks.claude.files?.find((f) =>
-			f.path.includes("format-code-on-stop.sh")
+			f.path.includes("format-code-on-stop.sh"),
 		);
 		expect(formatHook?.executable).toBe(true);
 
 		// Check bootstrap is marked executable
 		const bootstrap = registry.blocks.bootstrap.files?.find((f) =>
-			f.path.includes("bootstrap.sh")
+			f.path.includes("bootstrap.sh"),
 		);
 		expect(bootstrap?.executable).toBe(true);
 	});

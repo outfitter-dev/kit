@@ -49,9 +49,11 @@ program
 	.description("Upgrade Bun version across the project")
 	.argument("[version]", "Target version (defaults to latest)")
 	.option("--no-install", "Skip installing Bun and updating lockfile")
-	.action(async (version: string | undefined, options: { install: boolean }) => {
-		await runUpgradeBun(version, options);
-	});
+	.action(
+		async (version: string | undefined, options: { install: boolean }) => {
+			await runUpgradeBun(version, options);
+		},
+	);
 
 program
 	.command("pre-push")

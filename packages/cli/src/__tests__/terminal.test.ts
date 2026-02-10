@@ -24,6 +24,7 @@ let originalEnv: Record<string, string | undefined>;
 
 beforeEach(() => {
   originalEnv = { ...process.env };
+  process.env.TERM = "xterm-256color";
 });
 
 afterEach(() => {
@@ -93,6 +94,7 @@ describe("Terminal Detection", () => {
     });
 
     it("respects FORCE_COLOR env", () => {
+      delete process.env.NO_COLOR;
       process.env.FORCE_COLOR = "1";
 
       const result = supportsColor({ isTTY: false });

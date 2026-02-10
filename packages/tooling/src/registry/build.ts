@@ -199,7 +199,7 @@ function main(): void {
 
 	// Build and write registry
 	const registry = buildRegistry(REGISTRY_CONFIG, repoRoot);
-	writeFileSync(outputPath, `${JSON.stringify(registry, null, 2)}\n`);
+	writeFileSync(outputPath, `${JSON.stringify(registry, null, "\t")}\n`);
 
 	// Summary
 	const blockCount = Object.keys(registry.blocks).length;

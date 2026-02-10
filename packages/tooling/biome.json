@@ -34,7 +34,8 @@
 			"!**/node_modules",
 			"!**/dist",
 			"!**/.turbo",
-			"!**/*.gen.ts"
+			"!**/*.gen.ts",
+			"!registry/registry.json"
 		]
 	},
 	"overrides": [

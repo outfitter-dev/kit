@@ -6,18 +6,17 @@
  * @packageDocumentation
  */
 
-export {
-	FileEntrySchema,
-	BlockSchema,
-	RegistrySchema,
-} from "./schema.js";
-
 export type {
-	FileEntry,
-	Block,
-	Registry,
-	BlockDefinition,
-	RegistryBuildConfig,
-	AddBlockResult,
 	AddBlockOptions,
+	AddBlockResult,
+	Block,
+	BlockDefinition,
+	FileEntry,
+	Registry,
+	RegistryBuildConfig,
+} from "./schema.js";
+export {
+	BlockSchema,
+	FileEntrySchema,
+	RegistrySchema,
 } from "./schema.js";

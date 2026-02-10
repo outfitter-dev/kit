@@ -63,7 +63,7 @@ if (import.meta.main) {
 	}
 
 	pkg.exports = exports;
-	writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+	writeFileSync(pkgPath, `${JSON.stringify(pkg, null, "\t")}\n`);
 
 	console.log(
 		`[sync-exports] ${configFiles.length} config files → ${configPaths.size} exports`,

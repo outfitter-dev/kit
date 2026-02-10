@@ -276,7 +276,7 @@ Patterns and examples:
 
 Related skills:
 - debugging — investigation methodology (scenarios help reproduce bugs)
-- tdd — TDD workflow (scenarios validate features)
+- tdd-fieldguide — TDD workflow (scenarios validate features)
 - codebase-analysis — evidence gathering (scenarios provide empirical data)
 
 External resources:

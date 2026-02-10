@@ -64,7 +64,7 @@ description: |                 # Required: triggers + examples
 model: inherit                 # Optional: inherit(default)|haiku|sonnet|opus
 tools: Glob, Grep, Read       # Optional: comma-separated (default: inherit all)
 disallowedTools: Write, Edit   # Optional: deny specific tools
-skills: tdd, debugging         # Optional: auto-load skills (NOT inherited)
+skills: tdd-fieldguide, debugging  # Optional: auto-load skills (NOT inherited)
 maxTurns: 50                   # Optional: max agentic turns
 memory: user                   # Optional: user|project|local — persistent memory
 hooks:                         # Optional: lifecycle hooks scoped to this agent

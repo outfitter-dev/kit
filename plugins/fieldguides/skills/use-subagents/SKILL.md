@@ -156,7 +156,7 @@ research (scope) → debugging (root cause) → coding (fix) → testing (verify
 
 | Task | Skills |
 |------|--------|
-| New feature | software-craft, tdd |
+| New feature | software-craft, tdd-fieldguide |
 | Bug fix | debugging → software-craft |
 | Refactor | software-craft + sanity-check |
 | API endpoint | hono-fieldguide, software-craft |
@@ -187,7 +187,7 @@ research (scope) → debugging (root cause) → coding (fix) → testing (verify
 | Task | Skills |
 |------|--------|
 | Feature validation | prove-it-works |
-| TDD implementation | tdd |
+| TDD implementation | tdd-fieldguide |
 | Integration testing | prove-it-works |
 
 ## Advanced Execution Patterns

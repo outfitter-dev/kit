@@ -109,7 +109,7 @@ Load the `debugging` skill using the Skill tool to investigate.
 
 ```markdown
 1. Load `pathfinding` skill for planning
-2. Load `tdd` skill for implementation
+2. Load `tdd-fieldguide` skill for implementation
 3. Load `code-review` skill for validation
 ```
 

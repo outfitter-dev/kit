@@ -9,13 +9,13 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 | Skill | Load When |
 |-------|-----------|
 | software-craft | Always (core methodology) |
-| tdd | New features, bug fixes requiring tests |
+| tdd-fieldguide | New features, bug fixes requiring tests |
 | bun-fieldguide | Bun runtime, package management |
 | react-fieldguide | React components, hooks, state |
 | hono-fieldguide | API routes, middleware, server |
 
 **Typical combos**:
-- `software-craft` + `tdd` (standard feature)
+- `software-craft` + `tdd-fieldguide` (standard feature)
 - `software-craft` + `react-fieldguide` (frontend work)
 - `software-craft` + `hono-fieldguide` (API endpoint)
 
@@ -78,11 +78,11 @@ Detailed breakdown of which skills each agent can load and when. Agents are grou
 | Skill | Load When |
 |-------|-----------|
 | prove-it-works | End-to-end validation, integration tests |
-| tdd | TDD workflow, test-first approach |
+| tdd-fieldguide | TDD workflow, test-first approach |
 
 **Typical combos**:
 - `prove-it-works` (feature validation)
-- `tdd` (TDD implementation)
+- `tdd-fieldguide` (TDD implementation)
 
 ## skeptic (challenging role)
 
@@ -128,7 +128,7 @@ Load based on technology in use:
 ### Process-Oriented
 
 Load based on workflow stage:
-- tdd, code-review, prove-it-works
+- tdd-fieldguide, code-review, prove-it-works
 
 ### Analysis-Oriented
 

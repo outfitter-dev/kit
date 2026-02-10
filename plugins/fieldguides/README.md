@@ -42,7 +42,7 @@ Development methodology fieldguides for Claude Code. TDD, debugging, architectur
 | `software-craft` | Engineering judgment and decision principles |
 | `check-status` | Comprehensive status reports across VCS, PRs, issues, CI/CD |
 | `use-subagents` | Orchestrate outfitter subagents for complex tasks |
-| `tdd` | Test-driven development with Red-Green-Refactor cycles |
+| `tdd-fieldguide` | Test-driven development with Red-Green-Refactor cycles |
 | `typescript-fieldguide` | TypeScript patterns and strict typing |
 | `which-tool` | Detect and select optimal CLI tools for tasks |
 
@@ -80,7 +80,7 @@ Development methodology fieldguides for Claude Code. TDD, debugging, architectur
 Skills are loaded automatically when relevant triggers are detected. You can also invoke them explicitly:
 
 ```
-Use the tdd skill to implement this feature
+Use the tdd-fieldguide skill to implement this feature
 ```
 
 ```
@@ -93,7 +93,7 @@ Use the reviewer agent to check this code
 
 ```
 "Implement user authentication using TDD"
-→ Loads tdd skill → Red-Green-Refactor cycle
+→ Loads tdd-fieldguide skill → Red-Green-Refactor cycle
 ```
 
 **Debugging:**

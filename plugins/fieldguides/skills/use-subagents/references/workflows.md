@@ -13,7 +13,7 @@ Full cycle from requirements to delivery:
 2. challenging + sanity-check
    └─► Challenge proposed approach before building
 
-3. coding + tdd
+3. coding + tdd-fieldguide
    └─► Implement with tests first
 
 4. reviewing + code-review

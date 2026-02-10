@@ -312,7 +312,7 @@ changelog: |
 
 ✅ **Well-scoped skills**:
 - `linting-workflow`: Code quality checks and fixes
-- `tdd`: TDD methodology
+- `tdd-fieldguide`: TDD methodology
 - `api-documentation`: API reference generation
 - `deployment-automation`: Deploy and rollback workflows
 - `debugging`: Root cause investigation
@@ -628,7 +628,7 @@ description: "End-to-end feature development workflow."
 Load `pathfinding` skill to clarify requirements and architecture.
 
 ## Stage 2: Implementation
-Load `tdd` skill to implement with tests.
+Load `tdd-fieldguide` skill to implement with tests.
 
 ## Stage 3: Documentation
 Load `api-documentation` skill to generate API docs.

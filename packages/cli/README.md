@@ -36,7 +36,7 @@ if (cursor) {
 
 Output data to the console with automatic mode selection.
 
-Defaults to human-friendly output for TTY, JSON for non-TTY. Override via `mode` option or `OUTFITTER_JSON`/`OUTFITTER_JSONL` environment variables.
+Defaults to human-friendly output. Override via `mode` option or `OUTFITTER_JSON`/`OUTFITTER_JSONL` environment variables.
 
 ```typescript
 import { output } from "@outfitter/cli/output";
@@ -401,7 +401,7 @@ const isVerbose = resolveVerbose(cliFlags.verbose);
 2. `OUTFITTER_JSONL=1` environment variable (highest env priority)
 3. `OUTFITTER_JSON=1` environment variable
 4. `OUTFITTER_JSON=0` or `OUTFITTER_JSONL=0` forces human mode
-5. TTY detection: `json` for non-TTY, `human` for TTY
+5. Default fallback: `human`
 
 ## Error Handling
 

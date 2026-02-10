@@ -1,6 +1,6 @@
 # outfitter
 
-Umbrella CLI for scaffolding Outfitter projects and managing development environments.
+Umbrella CLI for scaffolding Outfitter projects and managing workspace adoption.
 
 ## Installation
 
@@ -11,186 +11,234 @@ bun add -g outfitter
 Or run directly with `bunx`:
 
 ```bash
-bunx outfitter init cli my-project
+bunx outfitter --help
 ```
 
 ## Quick Start
 
 ```bash
-# Scaffold a new CLI project
-outfitter init cli my-cli
-
-# Scaffold a new MCP server
-outfitter init mcp my-mcp
-
-# Scaffold a new daemon
-outfitter init daemon my-daemon
-
-# Check your environment
-outfitter doctor
+# Scaffold a new CLI project with defaults
+bunx outfitter create my-cli --preset cli --structure single --yes
+cd my-cli
+bun install
+bun run dev
 ```
 
-## Commands
+## CLI Overview
 
-### init
+```text
+outfitter [--json] <command>
+```
 
-Scaffolds a new Outfitter project from a template.
+Global options:
+
+- `--json` - Force JSON output for supported commands
+
+Top-level commands:
+
+- `create [directory]` - Interactive/new scaffolding flow (single package or workspace)
+- `init [directory]` - Template scaffolding with explicit flags
+- `add <block>` - Add a tooling block (`claude`, `biome`, `lefthook`, `bootstrap`, `scaffolding`)
+- `migrate kit [directory]` - Migrate foundation imports and dependencies to `@outfitter/kit`
+- `update` - Check installed `@outfitter/*` versions and optionally show migration guidance
+- `doctor` - Validate local environment and project dependencies
+- `demo [section]` - Showcase `@outfitter/cli` rendering
+
+## Command Reference
+
+### `create`
+
+Interactive/default scaffolding flow.
 
 ```bash
-outfitter init <cli|mcp|daemon> [directory] [options]
-outfitter init [directory] --template <template> [options]
+outfitter create [directory] [options]
 ```
 
-**Arguments:**
-- `directory` - Target directory (defaults to current directory)
+Options:
 
-**Options:**
-- `-n, --name <name>` - Project name (defaults to directory name)
-- `-b, --bin <name>` - Binary name (defaults to project name)
-- `-t, --template <template>` - Template to use (default: `basic`, used with `outfitter init`)
+- `-n, --name <name>` - Package name
+- `-p, --preset <preset>` - `basic | cli | daemon | mcp`
+- `-s, --structure <structure>` - `single | workspace`
+- `--workspace-name <name>` - Workspace root package name
+- `--local` - Use `workspace:*` for `@outfitter/*` dependencies
+- `--workspace` - Alias for `--local`
+- `-f, --force` - Overwrite existing files
+- `--with <blocks>` - Add specific tooling blocks
+- `--no-tooling` - Skip default tooling blocks
+- `-y, --yes` - Skip prompts and use defaults
+
+Examples:
+
+```bash
+outfitter create my-cli --preset cli --structure single --yes
+outfitter create . --preset mcp --yes --no-tooling
+outfitter create my-workspace --structure workspace --workspace-name @acme/root
+```
+
+### `init`
+
+Template-first scaffolding flow.
+
+```bash
+outfitter init [directory] [options]
+outfitter init cli [directory] [options]
+outfitter init mcp [directory] [options]
+outfitter init daemon [directory] [options]
+```
+
+Options:
+
+- `-n, --name <name>` - Package name
+- `-b, --bin <name>` - Binary name
+- `-t, --template <template>` - Template (`basic`, `cli`, `mcp`, `daemon`)
+- `--local` - Use `workspace:*` for `@outfitter/*` dependencies
+- `--workspace` - Alias for `--local`
+- `--with <blocks>` - Add specific tooling blocks
+- `--no-tooling` - Skip tooling setup
 - `-f, --force` - Overwrite existing files
 
-**Templates:**
-| Template | Description |
-|----------|-------------|
-| `basic` | Minimal TypeScript project structure |
-| `cli` | CLI application with Commander.js |
-| `mcp` | MCP server with typed tools |
-| `daemon` | Background daemon with IPC and health checks |
-
-**Examples:**
+Examples:
 
 ```bash
-# Create in new directory
 outfitter init cli my-project
-
-# Create with specific template
-outfitter init mcp my-mcp
-
-# Create in current directory with custom name
-outfitter init . --name my-custom-name
-
-# Create with a custom binary name
-outfitter init cli my-project --bin my-cli
-
-# Force overwrite existing files
-outfitter init my-project --force
+outfitter init . --template basic --name my-lib
+outfitter init mcp . --name my-mcp --no-tooling
 ```
 
-### doctor
+### `add`
 
-Validates your environment and project dependencies.
+Add a tooling block from the registry.
+
+```bash
+outfitter add <block> [options]
+outfitter add list
+```
+
+Options:
+
+- `-f, --force` - Overwrite existing files
+- `--dry-run` - Preview without writing files
+
+Examples:
+
+```bash
+outfitter add scaffolding
+outfitter add biome --dry-run
+outfitter add list
+```
+
+### `migrate kit`
+
+Codemod for kit-first foundation adoption.
+
+```bash
+outfitter migrate kit [directory] [options]
+```
+
+Options:
+
+- `--dry-run` - Preview changes without writing files
+
+Examples:
+
+```bash
+outfitter migrate kit --dry-run
+outfitter migrate kit .
+```
+
+### `update`
+
+Check installed `@outfitter/*` packages against npm versions.
+
+```bash
+outfitter update [options]
+```
+
+Options:
+
+- `--guide` - Include composed migration guidance
+- `--cwd <path>` - Working directory to inspect
+
+Examples:
+
+```bash
+outfitter update
+outfitter update --guide
+outfitter update --json --cwd .
+```
+
+### `doctor`
+
+Validate local environment and project structure.
 
 ```bash
 outfitter doctor
 ```
 
-Performs the following checks:
-- **Bun Version** - Ensures Bun >= 1.3.6 is installed
-- **package.json** - Validates required fields (name, version)
-- **Dependencies** - Checks if node_modules is present and complete
-- **tsconfig.json** - Verifies TypeScript configuration exists
-- **src/ directory** - Confirms source directory structure
+### `demo`
 
-**Example output:**
+Showcase CLI rendering primitives.
 
-```
-Outfitter Doctor
-
-==================================================
-[PASS] Bun Version: 1.3.6 (requires 1.3.6)
-[PASS] package.json
-       my-project@0.1.0-rc.0
-[PASS] Dependencies
-       12 dependencies installed
-[PASS] tsconfig.json
-[PASS] src/ directory
-
-==================================================
-5/5 checks passed
+```bash
+outfitter demo [section] [options]
 ```
 
-## Template Variables
+Options:
 
-Templates use placeholder syntax for project-specific values:
-
-| Placeholder | Description | Default |
-|-------------|-------------|---------|
-| `{{name}}` | Project name (legacy) | Directory name |
-| `{{projectName}}` | Project name | Directory name |
-| `{{binName}}` | Binary name | Project name |
-| `{{version}}` | Initial version | `0.1.0-rc.0` |
-| `{{description}}` | Project description | Generic description |
-
-Files ending in `.template` have their extension removed after processing (e.g., `package.json.template` becomes `package.json`).
+- `-l, --list` - List available sections
+- `-a, --animate` - Run animated spinner demo
 
 ## Programmatic API
 
-The CLI commands are also available as a programmatic API:
+Root exports:
 
 ```typescript
-import { runInit, runDoctor } from "outfitter";
-
-// Initialize a project programmatically
-const initResult = await runInit({
-  targetDir: "./my-project",
-  name: "my-project",
-  template: "cli",
-  force: false,
-});
-
-if (initResult.isErr()) {
-  console.error("Failed:", initResult.error.message);
-}
-
-// Run doctor checks programmatically
-const doctorResult = await runDoctor({ cwd: process.cwd() });
-
-if (doctorResult.exitCode === 0) {
-  console.log("All checks passed!");
-} else {
-  console.log(`${doctorResult.summary.failed} checks failed`);
-}
+import {
+  runCreate,
+  runDoctor,
+  runInit,
+  runMigrateKit,
+  type CreateOptions,
+  type InitOptions,
+  type MigrateKitOptions,
+} from "outfitter";
 ```
 
-### API Types
+Command subpath exports:
 
 ```typescript
-interface InitOptions {
-  readonly targetDir: string;
-  readonly name: string | undefined;
-  readonly template: string | undefined;
-  readonly force: boolean;
-}
+import { runAdd } from "outfitter/commands/add";
+import { runUpdate } from "outfitter/commands/update";
+```
 
-interface DoctorOptions {
-  readonly cwd: string;
-}
+Example:
 
-interface DoctorResult {
-  readonly checks: {
-    readonly bunVersion: BunVersionCheck;
-    readonly packageJson: PackageJsonCheck;
-    readonly dependencies: DependenciesCheck;
-    readonly configFiles: ConfigFilesCheck;
-    readonly directories: DirectoriesCheck;
-  };
-  readonly summary: DoctorSummary;
-  readonly exitCode: number;
+```typescript
+import { runCreate } from "outfitter";
+
+const result = await runCreate({
+  targetDir: "./my-app",
+  preset: "cli",
+  structure: "single",
+  force: false,
+  yes: true,
+});
+
+if (result.isErr()) {
+  console.error(result.error.message);
 }
 ```
 
 ## Requirements
 
-- Bun >= 1.3.6
+- Bun >= 1.3.7
 
 ## Related Packages
 
-- `@outfitter/cli` - CLI framework for building command-line tools
+- `@outfitter/cli` - CLI framework primitives
+- `@outfitter/contracts` - Result and error contracts
 - `@outfitter/mcp` - MCP server framework
-- `@outfitter/daemon` - Daemon lifecycle management
-- `@outfitter/config` - Configuration loading
-- `@outfitter/contracts` - Result types and error patterns
+- `@outfitter/tooling` - Tooling presets and verification CLI
 
 ## License
 

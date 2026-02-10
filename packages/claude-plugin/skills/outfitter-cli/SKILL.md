@@ -56,7 +56,7 @@ export const myCommand = command("my-command")
 ```typescript
 import { output } from "@outfitter/cli";
 
-await output(data);  // Human for TTY, JSON for pipes
+await output(data);  // Human by default
 ```
 
 ### Mode Priority
@@ -65,7 +65,7 @@ await output(data);  // Human for TTY, JSON for pipes
 2. `OUTFITTER_JSONL=1` env var
 3. `OUTFITTER_JSON=1` env var
 4. `OUTFITTER_JSON=0` forces human
-5. TTY detection fallback
+5. Default fallback: human mode
 
 ### Forcing Modes
 

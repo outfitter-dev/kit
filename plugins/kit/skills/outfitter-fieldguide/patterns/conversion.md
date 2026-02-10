@@ -21,7 +21,7 @@ import { Result, NotFoundError, type Handler } from "@outfitter/contracts";
 
 const getUser: Handler<{ id: string }, User, NotFoundError> = async (input, ctx) => {
   const user = await db.users.findById(input.id);
-  if (!user) return Result.err(new NotFoundError("user", input.id));
+  if (!user) return Result.err(NotFoundError.create("user", input.id));
   return Result.ok(user);
 };
 ```
@@ -131,10 +131,12 @@ function wrapSync<T>(fn: () => T): Result<T, InternalError> {
   try {
     return Result.ok(fn());
   } catch (error) {
-    return Result.err(new InternalError(
-      error instanceof Error ? error.message : "Unknown error",
-      { cause: error }
-    ));
+    return Result.err(
+      InternalError.create(
+        error instanceof Error ? error.message : "Unknown error",
+        { cause: error }
+      )
+    );
   }
 }
 
@@ -145,10 +147,12 @@ async function wrapAsync<T>(fn: () => Promise<T>): Promise<Result<T, InternalErr
   try {
     return Result.ok(await fn());
   } catch (error) {
-    return Result.err(new InternalError(
-      error instanceof Error ? error.message : "Unknown error",
-      { cause: error }
-    ));
+    return Result.err(
+      InternalError.create(
+        error instanceof Error ? error.message : "Unknown error",
+        { cause: error }
+      )
+    );
   }
 }
 ```

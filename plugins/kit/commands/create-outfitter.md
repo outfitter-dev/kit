@@ -21,7 +21,7 @@ ls package.json 2>/dev/null
 Follow the skill's **New Project Scaffolding** section:
 1. Check for context files (CLAUDE.md, SPEC.md, PLAN.md)
 2. Use AskUserQuestion to clarify template and name
-3. Run `outfitter init <template> . --name <name>`
+3. Run `outfitter init <cli|mcp|daemon> . --name <name>` (or `outfitter init . --template <template> --name <name>`)
 
 If $ARGUMENTS is provided, use it as the project name.
 

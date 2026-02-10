@@ -283,9 +283,9 @@ For RPC boundaries and MCP transport. These are standalone functions from `@outf
 Convert an `OutfitterError` to a JSON-safe `SerializedError` object.
 
 ```typescript
-import { serializeError } from "@outfitter/contracts";
+import { NotFoundError, serializeError } from "@outfitter/contracts";
 
-const serialized = serializeError(new NotFoundError("note", "abc123"));
+const serialized = serializeError(NotFoundError.create("note", "abc123"));
 // { _tag: "NotFoundError", category: "not_found", message: "...", context: { resourceType: "note", resourceId: "abc123" } }
 ```
 

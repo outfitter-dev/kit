@@ -12,7 +12,7 @@ Ten error categories that map to exit codes (CLI) and HTTP status codes (API).
 | `permission` | 4 | 403 | `PermissionError` | Forbidden action, insufficient privileges |
 | `timeout` | 5 | 504 | `TimeoutError` | Operation took too long |
 | `rate_limit` | 6 | 429 | `RateLimitError` | Too many requests, quota exceeded |
-| `network` | 7 | 503 | `NetworkError` | Connection failures, DNS errors, unreachable hosts |
+| `network` | 7 | 502 | `NetworkError` | Connection failures, DNS errors, unreachable hosts |
 | `internal` | 8 | 500 | `InternalError` | Unexpected errors, bugs, unhandled cases |
 | `auth` | 9 | 401 | `AuthError` | Authentication required, invalid credentials |
 | `cancelled` | 130 | 499 | `CancelledError` | User interrupted (Ctrl+C), operation aborted |
@@ -26,7 +26,7 @@ interface OutfitterError {
   readonly _tag: string;           // Discriminator for pattern matching
   readonly category: ErrorCategory; // One of the 10 categories
   readonly message: string;         // Human-readable message
-  readonly details?: unknown;       // Additional context
+  readonly context?: Record<string, unknown>; // Additional context
 }
 ```
 
@@ -36,10 +36,10 @@ interface OutfitterError {
 import { ValidationError } from "@outfitter/contracts";
 
 // Basic
-new ValidationError("Invalid email format");
+ValidationError.create("email", "invalid format");
 
-// With details
-new ValidationError("Validation failed", {
+// With context
+ValidationError.create("email", "validation failed", {
   field: "email",
   value: "not-an-email",
   constraint: "email",
@@ -48,9 +48,11 @@ new ValidationError("Validation failed", {
 // From Zod
 const result = schema.safeParse(input);
 if (!result.success) {
-  return Result.err(new ValidationError("Invalid input", {
-    issues: result.error.issues,
-  }));
+  return Result.err(
+    ValidationError.create("input", "invalid", {
+      issues: result.error.issues,
+    })
+  );
 }
 ```
 
@@ -60,7 +62,7 @@ if (!result.success) {
 import { NotFoundError } from "@outfitter/contracts";
 
 // Resource type and ID
-new NotFoundError("user", "user-123");
+NotFoundError.create("user", "user-123");
 
 // Access properties
 error.resourceType;  // "user"
@@ -74,10 +76,10 @@ error.message;       // "user not found: user-123"
 import { ConflictError } from "@outfitter/contracts";
 
 // Already exists
-new ConflictError("User already exists", { email: "user@example.com" });
+ConflictError.create("User already exists", { email: "user@example.com" });
 
 // Version mismatch
-new ConflictError("Version mismatch", {
+ConflictError.create("Version mismatch", {
   expected: 5,
   actual: 7,
 });
@@ -88,7 +90,7 @@ new ConflictError("Version mismatch", {
 ```typescript
 import { PermissionError } from "@outfitter/contracts";
 
-new PermissionError("Cannot delete admin users", {
+PermissionError.create("Cannot delete admin users", {
   action: "delete",
   resource: "user",
   resourceId: "admin-1",
@@ -100,10 +102,7 @@ new PermissionError("Cannot delete admin users", {
 ```typescript
 import { TimeoutError } from "@outfitter/contracts";
 
-new TimeoutError("Database query timed out", {
-  operation: "findUsers",
-  timeoutMs: 5000,
-});
+TimeoutError.create("findUsers", 5000);
 ```
 
 ### RateLimitError
@@ -111,11 +110,7 @@ new TimeoutError("Database query timed out", {
 ```typescript
 import { RateLimitError } from "@outfitter/contracts";
 
-new RateLimitError("API rate limit exceeded", {
-  limit: 100,
-  window: "1m",
-  retryAfter: 30,
-});
+RateLimitError.create("API rate limit exceeded", 30);
 ```
 
 ### NetworkError
@@ -123,7 +118,7 @@ new RateLimitError("API rate limit exceeded", {
 ```typescript
 import { NetworkError } from "@outfitter/contracts";
 
-new NetworkError("Failed to connect to API", {
+NetworkError.create("Failed to connect to API", {
   host: "api.example.com",
   code: "ECONNREFUSED",
 });
@@ -138,7 +133,7 @@ import { InternalError } from "@outfitter/contracts";
 try {
   await riskyOperation();
 } catch (error) {
-  return Result.err(new InternalError("Unexpected error", { cause: error }));
+  return Result.err(InternalError.create("Unexpected error", { cause: error }));
 }
 ```
 
@@ -147,8 +142,8 @@ try {
 ```typescript
 import { AuthError } from "@outfitter/contracts";
 
-new AuthError("Invalid API key");
-new AuthError("Token expired", { expiredAt: "2024-01-01T00:00:00Z" });
+AuthError.create("Invalid API key", "invalid");
+AuthError.create("Token expired", "expired");
 ```
 
 ### CancelledError
@@ -157,7 +152,7 @@ new AuthError("Token expired", { expiredAt: "2024-01-01T00:00:00Z" });
 import { CancelledError } from "@outfitter/contracts";
 
 if (ctx.signal.aborted) {
-  return Result.err(new CancelledError("Operation cancelled by user"));
+  return Result.err(CancelledError.create("Operation cancelled by user"));
 }
 ```
 
@@ -169,7 +164,7 @@ Use `_tag` for type-safe error handling:
 if (result.isErr()) {
   switch (result.error._tag) {
     case "ValidationError":
-      console.log("Invalid input:", result.error.details);
+      console.log("Invalid input:", result.error.context);
       break;
     case "NotFoundError":
       console.log(`${result.error.resourceType} not found`);
@@ -210,7 +205,11 @@ import { ValidationError } from "@outfitter/contracts";
 
 export class EmailValidationError extends ValidationError {
   constructor(email: string) {
-    super("Invalid email format", { email, field: "email" });
+    super({
+      message: "Invalid email format",
+      field: "email",
+      context: { email },
+    });
   }
 }
 ```

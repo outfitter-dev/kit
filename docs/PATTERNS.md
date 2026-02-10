@@ -39,7 +39,7 @@ export const getUser: Handler<GetUserInput, User, NotFoundError> = async (input,
   const user = await db.users.findById(input.id);
 
   if (!user) {
-    return Result.err(new NotFoundError("user", input.id));
+    return Result.err(NotFoundError.create("user", input.id));
   }
 
   return Result.ok(user);
@@ -74,13 +74,13 @@ Outfitter uses `Result<T, E>` from `better-result` for explicit error handling.
 ### Creating Results
 
 ```typescript
-import { Result } from "@outfitter/contracts";
+import { NotFoundError, Result } from "@outfitter/contracts";
 
 // Success
 const ok = Result.ok({ name: "Alice" });
 
 // Failure
-const err = Result.err(new NotFoundError("user", "123"));
+const err = Result.err(NotFoundError.create("user", "123"));
 ```
 
 ### Checking Results
@@ -109,8 +109,8 @@ When you have multiple operations that might fail:
 ```typescript
 import { combine2, combine3 } from "@outfitter/contracts";
 
-const result1 = await getUser("1");
-const result2 = await getUser("2");
+const result1 = await getUser({ id: "1" }, ctx);
+const result2 = await getUser({ id: "2" }, ctx);
 
 // Combine into tuple [User, User] or first error
 const combined = combine2(result1, result2);
@@ -147,22 +147,21 @@ import {
 } from "@outfitter/contracts";
 
 // Validation error with details
-new ValidationError("Invalid email format", {
-  field: "email",
+ValidationError.create("email", "invalid format", {
   value: "not-an-email",
 });
 
 // Not found with resource info
-new NotFoundError("user", "user-123");
+NotFoundError.create("user", "user-123");
 
 // Conflict with existing resource
-new ConflictError("User already exists", {
+ConflictError.create("User already exists", {
   resourceType: "user",
   resourceId: "user-123",
 });
 
 // Internal error (wrap unexpected exceptions)
-new InternalError("Database connection failed", { cause: originalError });
+InternalError.create("Database connection failed", { cause: originalError });
 ```
 
 ### Automatic Code Mapping
@@ -172,7 +171,7 @@ Adapters automatically map errors to appropriate codes:
 ```typescript
 import { getExitCode, getStatusCode } from "@outfitter/contracts";
 
-const error = new NotFoundError("user", "123");
+const error = NotFoundError.create("user", "123");
 
 getExitCode(error.category);   // 2
 getStatusCode(error.category); // 404
@@ -183,7 +182,7 @@ getStatusCode(error.category); // 404
 ```typescript
 switch (error._tag) {
   case "ValidationError":
-    return { status: 400, body: { error: error.message, details: error.details } };
+    return { status: 400, body: { error: error.message, context: error.context } };
   case "NotFoundError":
     return { status: 404, body: { error: `${error.resourceType} not found` } };
   case "AuthError":
@@ -206,11 +205,11 @@ import {
 } from "@outfitter/contracts";
 
 export const UserErrors = {
-  notFound: (id: string) => new NotFoundError("user", id),
+  notFound: (id: string) => NotFoundError.create("user", id),
   emailTaken: (email: string) =>
-    new ConflictError("Email already in use", { email }),
+    ConflictError.create("Email already in use", { email }),
   invalidEmail: (email: string) =>
-    new ValidationError("Invalid email", { field: "email", value: email }),
+    ValidationError.create("email", "invalid", { value: email }),
 };
 ```
 
@@ -247,8 +246,8 @@ const validateUserInput = createValidator(UserInputSchema);
 const result = validateUserInput(rawInput);
 
 if (result.isErr()) {
-  // result.error is ValidationError with details
-  console.log(result.error.details); // Zod error details
+  // result.error is ValidationError with structured context
+  console.log(result.error.context); // e.g. { issues: [...] }
 }
 ```
 
@@ -307,7 +306,7 @@ const ctx = createContext({
 | `signal` | `AbortSignal` | Cancellation signal |
 | `workspaceRoot` | `string` | Project root directory |
 | `cwd` | `string` | Current working directory |
-| `env` | `Record<string, string>` | Environment variables |
+| `env` | `Record<string, string \| undefined>` | Environment variables |
 
 ### Request ID Tracing
 
@@ -329,7 +328,7 @@ const ctx = createContext({ signal: controller.signal });
 
 // In handler
 if (ctx.signal?.aborted) {
-  return Result.err(new CancelledError("Operation cancelled"));
+  return Result.err(CancelledError.create("Operation cancelled"));
 }
 
 // To cancel from outside
@@ -338,14 +337,14 @@ controller.abort();
 
 ## Output Modes
 
-CLI output adapts to the environment: human-readable for terminals, JSON for pipes.
+CLI output defaults to human-readable text. Machine-readable formats are opt-in.
 
 ### Automatic Detection
 
 ```typescript
 import { output } from "@outfitter/cli/output";
 
-await output(data); // Human for TTY, JSON for pipes
+await output(data); // Human by default
 ```
 
 ### Mode Priority
@@ -354,7 +353,7 @@ await output(data); // Human for TTY, JSON for pipes
 2. `OUTFITTER_JSONL=1` environment variable
 3. `OUTFITTER_JSON=1` environment variable
 4. `OUTFITTER_JSON=0` or `OUTFITTER_JSONL=0` forces human mode
-5. TTY detection fallback
+5. Default fallback: human mode
 
 ### Forcing Modes
 

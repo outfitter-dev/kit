@@ -13,7 +13,7 @@ Ten error categories that map to exit codes (CLI) and HTTP status codes (API).
 | `permission` | 4 | 403 | `PermissionError` | Forbidden action, insufficient privileges |
 | `timeout` | 5 | 504 | `TimeoutError` | Operation took too long |
 | `rate_limit` | 6 | 429 | `RateLimitError` | Too many requests, quota exceeded |
-| `network` | 7 | 503 | `NetworkError` | Connection failures, DNS errors, unreachable hosts |
+| `network` | 7 | 502 | `NetworkError` | Connection failures, DNS errors, unreachable hosts |
 | `internal` | 8 | 500 | `InternalError` | Unexpected errors, bugs, unhandled cases |
 | `internal` | 8 | 500 | `AssertionError` | Invariant violations, programming bugs |
 | `auth` | 9 | 401 | `AuthError` | Authentication required, invalid credentials |
@@ -285,7 +285,7 @@ Use `_tag` for type-safe error handling:
 if (result.isErr()) {
   switch (result.error._tag) {
     case "ValidationError":
-      console.log("Invalid input:", result.error.details);
+      console.log("Invalid input:", result.error.context);
       break;
     case "NotFoundError":
       console.log(`${result.error.resourceType} not found`);

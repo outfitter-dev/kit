@@ -56,7 +56,8 @@ Use AskUserQuestion to clarify before running commands. See [references/new-proj
 ### Step 3: Run the CLI
 
 ```bash
-outfitter init <template> . --name <name>
+outfitter init <cli|mcp|daemon> . --name <name>
+# Or: outfitter init . --template <template> --name <name>
 ```
 
 **Options:**

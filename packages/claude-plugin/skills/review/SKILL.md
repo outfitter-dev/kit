@@ -38,7 +38,7 @@ rg "Handler<" --type ts -A 2
 if (!user) throw new Error("Not found");
 
 // GOOD: Result.err
-if (!user) return Result.err(new NotFoundError("user", id));
+if (!user) return Result.err(NotFoundError.create("user", id));
 
 // BAD: try/catch for control flow
 try { await handler(input, ctx); } catch (e) { ... }

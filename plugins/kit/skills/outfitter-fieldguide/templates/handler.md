@@ -79,7 +79,7 @@ export const myHandler: Handler<unknown, Output, HandlerErrors> = async (
   });
 
   if (!resource) {
-    return Result.err(new NotFoundError("resource", input.id));
+    return Result.err(NotFoundError.create("resource", input.id));
   }
 
   // 4. Log success

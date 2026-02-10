@@ -61,7 +61,7 @@ export const myHandler: Handler<unknown, Output, ValidationError | NotFoundError
 
   const resource = await fetchResource(input.id);
   if (!resource) {
-    return Result.err(new NotFoundError("resource", input.id));
+    return Result.err(NotFoundError.create("resource", input.id));
   }
 
   return Result.ok(resource);

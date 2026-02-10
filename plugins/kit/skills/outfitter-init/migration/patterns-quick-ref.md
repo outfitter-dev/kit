@@ -22,7 +22,7 @@ Quick lookup for conversion patterns. All details are in `outfitter-fieldguide`.
 | `permission` | 4 | 403 | Forbidden |
 | `timeout` | 5 | 504 | Too slow |
 | `rate_limit` | 6 | 429 | Too many requests |
-| `network` | 7 | 503 | Connection failed |
+| `network` | 7 | 502 | Connection failed |
 | `internal` | 8 | 500 | Unexpected |
 | `auth` | 9 | 401 | Unauthenticated |
 | `cancelled` | 130 | 499 | User cancelled |

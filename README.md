@@ -7,7 +7,7 @@ Shared infrastructure for building AI-agent-ready tools. CLIs, MCP servers, daem
 ## Quick Start
 
 ```bash
-bunx outfitter init cli my-project
+bunx outfitter create my-project --preset cli --structure single --yes
 cd my-project
 bun install
 bun run dev
@@ -99,7 +99,7 @@ bun run typecheck    # TypeScript validation
 
 ## Requirements
 
-Bun >= 1.3.6
+Bun >= 1.3.7
 
 ## License
 

@@ -142,8 +142,8 @@ expect(result.error.resourceId).toBe("123");
 // Check error message
 expect(result.error.message).toContain("not found");
 
-// Check error details
-expect(result.error.details).toMatchObject({
+// Check error context
+expect(result.error.context).toMatchObject({
   field: "email",
 });
 ```

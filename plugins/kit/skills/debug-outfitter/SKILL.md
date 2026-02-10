@@ -95,7 +95,7 @@ const result = await getUser(id);  // ✅
 // Check: Validation failing?
 const validated = validate(input);
 if (validated.isErr()) {
-  console.log("Validation failed:", validated.error.details);
+  console.log("Validation failed:", validated.error.context);
 }
 ```
 
@@ -119,7 +119,7 @@ const updateResult = await updateUser(getResult.value);
 if (result.isErr()) {
   switch (result.error._tag) {
     case "ValidationError":
-      console.log(result.error.details);
+      console.log(result.error.context);
       break;
     case "NotFoundError":
       console.log(result.error.resourceId);
@@ -167,7 +167,7 @@ await output(data, { mode: "json" });
 
 // Check environment
 // OUTFITTER_JSON=1 forces JSON
-// OUTFITTER_JSON=0 forces human (even with --json flag)
+// OUTFITTER_JSON=0 forces human when no explicit mode is set
 
 // Await output before exit
 await output(data);  // ✅

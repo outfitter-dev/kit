@@ -65,7 +65,7 @@ export const getUser: Handler<unknown, UserOutput, ValidationError | NotFoundErr
   // Business logic
   const user = await db.users.findById(input.id);
   if (!user) {
-    return Result.err(new NotFoundError("user", input.id));
+    return Result.err(NotFoundError.create("user", input.id));
   }
 
   // Return success
@@ -110,7 +110,11 @@ const createOrder: Handler<CreateOrderInput, Order, OrderError> = async (input, 
   // Call another handler
   const userResult = await getUser({ id: input.userId }, ctx);
   if (userResult.isErr()) {
-    return Result.err(new ValidationError("Invalid user", { userId: input.userId }));
+    return Result.err(
+      ValidationError.create("userId", "invalid user", {
+        userId: input.userId,
+      })
+    );
   }
 
   // Continue with order creation
@@ -137,7 +141,7 @@ if (result.isOk()) {
   // result.error is ValidationError | NotFoundError
   switch (result.error._tag) {
     case "ValidationError":
-      console.log(result.error.details);
+      console.log(result.error.context);
       break;
     case "NotFoundError":
       console.log(result.error.resourceId);
@@ -178,7 +182,7 @@ const handler: Handler<Input, Output, Error> = async (input, ctx) => {
 
   // Cancellation
   if (ctx.signal.aborted) {
-    return Result.err(new CancelledError("Operation cancelled"));
+    return Result.err(CancelledError.create("Operation cancelled"));
   }
 
   // Workspace paths
@@ -195,7 +199,7 @@ Never throw in handlers. Return `Result.err()`:
 if (!user) throw new Error("Not found");
 
 // GOOD
-if (!user) return Result.err(new NotFoundError("user", id));
+if (!user) return Result.err(NotFoundError.create("user", id));
 ```
 
 Use taxonomy error classes for consistent categorization:

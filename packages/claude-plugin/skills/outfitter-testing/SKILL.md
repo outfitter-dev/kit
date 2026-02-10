@@ -226,8 +226,8 @@ expect(result.isErr()).toBe(true);
 expect(result.error._tag).toBe("NotFoundError");
 expect(result.error.category).toBe("not_found");
 
-// Error details
-expect(result.error.details).toMatchObject({
+// Error context
+expect(result.error.context).toMatchObject({
   field: "email",
 });
 ```

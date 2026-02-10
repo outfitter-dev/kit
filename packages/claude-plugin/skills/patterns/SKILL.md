@@ -33,7 +33,7 @@ export const getUser: Handler<{ id: string }, User, NotFoundError> = async (inpu
   const user = await db.users.findById(input.id);
 
   if (!user) {
-    return Result.err(new NotFoundError("user", input.id));
+    return Result.err(NotFoundError.create("user", input.id));
   }
   return Result.ok(user);
 };
@@ -46,11 +46,11 @@ export const getUser: Handler<{ id: string }, User, NotFoundError> = async (inpu
 Uses `Result<T, E>` from `better-result` for explicit error handling.
 
 ```typescript
-import { Result } from "@outfitter/contracts";
+import { NotFoundError, Result } from "@outfitter/contracts";
 
 // Create
 const ok = Result.ok({ name: "Alice" });
-const err = Result.err(new NotFoundError("user", "123"));
+const err = Result.err(NotFoundError.create("user", "123"));
 
 // Check
 if (result.isOk()) {
@@ -81,7 +81,7 @@ Ten categories map to exit codes and HTTP status:
 | `permission` | 4 | 403 | Forbidden action |
 | `timeout` | 5 | 504 | Operation took too long |
 | `rate_limit` | 6 | 429 | Too many requests |
-| `network` | 7 | 503 | Connection failures |
+| `network` | 7 | 502 | Connection failures |
 | `internal` | 8 | 500 | Unexpected errors, bugs |
 | `auth` | 9 | 401 | Authentication required |
 | `cancelled` | 130 | 499 | User interrupted (Ctrl+C) |
@@ -89,8 +89,8 @@ Ten categories map to exit codes and HTTP status:
 ```typescript
 import { ValidationError, NotFoundError, getExitCode } from "@outfitter/contracts";
 
-new ValidationError("Invalid email", { field: "email" });
-new NotFoundError("user", "user-123");
+ValidationError.create("email", "invalid");
+NotFoundError.create("user", "user-123");
 
 getExitCode(error.category);   // 2 for not_found
 getStatusCode(error.category); // 404 for not_found

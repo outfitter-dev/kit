@@ -10,10 +10,40 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./commands/check": {
+      "import": {
+        "types": "./dist/commands/check.d.ts",
+        "default": "./dist/commands/check.js"
+      }
+    },
+    "./commands/update-workspace": {
+      "import": {
+        "types": "./dist/commands/update-workspace.d.ts",
+        "default": "./dist/commands/update-workspace.js"
+      }
+    },
+    "./commands/update": {
+      "import": {
+        "types": "./dist/commands/update.d.ts",
+        "default": "./dist/commands/update.js"
+      }
+    },
+    "./commands/demo/errors": {
+      "import": {
+        "types": "./dist/commands/demo/errors.d.ts",
+        "default": "./dist/commands/demo/errors.js"
+      }
+    },
     "./commands/demo": {
       "import": {
         "types": "./dist/commands/demo.d.ts",
         "default": "./dist/commands/demo.js"
+      }
+    },
+    "./commands/doctor": {
+      "import": {
+        "types": "./dist/commands/doctor.d.ts",
+        "default": "./dist/commands/doctor.js"
       }
     },
     "./commands/init": {
@@ -40,28 +70,28 @@
         "default": "./dist/commands/create.js"
       }
     },
+    "./commands/update-planner": {
+      "import": {
+        "types": "./dist/commands/update-planner.d.ts",
+        "default": "./dist/commands/update-planner.js"
+      }
+    },
     "./commands/add": {
       "import": {
         "types": "./dist/commands/add.d.ts",
         "default": "./dist/commands/add.js"
       }
     },
-    "./commands/update": {
-      "import": {
-        "types": "./dist/commands/update.d.ts",
-        "default": "./dist/commands/update.js"
-      }
-    },
-    "./commands/demo/errors": {
-      "import": {
-        "types": "./dist/commands/demo/errors.d.ts",
-        "default": "./dist/commands/demo/errors.js"
-      }
-    },
     "./actions": {
       "import": {
         "types": "./dist/actions.d.ts",
         "default": "./dist/actions.js"
+      }
+    },
+    "./manifest": {
+      "import": {
+        "types": "./dist/manifest.d.ts",
+        "default": "./dist/manifest.js"
       }
     },
     ".": {
@@ -92,12 +122,6 @@
       "import": {
         "types": "./dist/create/planner.d.ts",
         "default": "./dist/create/planner.js"
-      }
-    },
-    "./commands/doctor": {
-      "import": {
-        "types": "./dist/commands/doctor.d.ts",
-        "default": "./dist/commands/doctor.js"
       }
     },
     "./package.json": "./package.json"

@@ -65,7 +65,7 @@ plugin/outfitter:
 
 plugin/kit:
   - changed-files:
-      - any-glob-to-any-file: plugins/kit/**
+      - any-glob-to-any-file: plugins/outfitter/**
 
 plugin/team:
   - changed-files:

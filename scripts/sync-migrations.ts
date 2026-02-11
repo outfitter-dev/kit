@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = dirname(here);
-const source = join(root, "plugins", "kit", "shared", "migrations");
+const source = join(root, "plugins", "outfitter", "shared", "migrations");
 const destination = join(root, "packages", "kit", "shared", "migrations");
 
 try {

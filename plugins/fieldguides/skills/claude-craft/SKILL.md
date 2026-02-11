@@ -174,6 +174,8 @@ See [commands/frontmatter.md](references/commands/frontmatter.md) for complete s
 
 ### Core Features
 
+<!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
+
 | Feature | Syntax | Purpose |
 |---------|--------|---------|
 | Arguments | `$1`, `$2`, `$ARGUMENTS` | Dynamic input from user |

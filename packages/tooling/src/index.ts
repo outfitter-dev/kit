@@ -30,9 +30,6 @@
  * @packageDocumentation
  */
 
-/** Package version */
-export const VERSION = "0.1.0-rc.1";
-
 // Re-export registry types for convenience
 export type {
 	AddBlockOptions,
@@ -43,9 +40,10 @@ export type {
 	Registry,
 	RegistryBuildConfig,
 } from "./registry/index.js";
-
 export {
 	BlockSchema,
 	FileEntrySchema,
 	RegistrySchema,
 } from "./registry/index.js";
+/** Package version, read dynamically from package.json. */
+export { VERSION } from "./version.js";

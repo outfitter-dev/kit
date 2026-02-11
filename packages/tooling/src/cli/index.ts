@@ -8,6 +8,7 @@
  */
 
 import { Command } from "commander";
+import { VERSION } from "../version.js";
 import { runCheck } from "./check.js";
 import { runFix } from "./fix.js";
 import { runInit } from "./init.js";
@@ -19,7 +20,7 @@ const program = new Command();
 program
 	.name("tooling")
 	.description("Dev tooling configuration management for Outfitter projects")
-	.version("0.1.0-rc.1");
+	.version(VERSION);
 
 program
 	.command("init")

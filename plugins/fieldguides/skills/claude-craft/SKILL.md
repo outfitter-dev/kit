@@ -466,6 +466,64 @@ See [skills/context-modes.md](references/skills/context-modes.md) for patterns.
 | [skills/context-modes.md](references/skills/context-modes.md) | Fork vs inherit patterns |
 | [skills/integration.md](references/skills/integration.md) | Commands, hooks, MCP integration |
 | [skills/performance.md](references/skills/performance.md) | Token impact, optimization |
+| [skills/preprocessing-safety.md](references/skills/preprocessing-safety.md) | Safe preprocessing patterns |
+
+---
+
+## Preprocessing
+
+<!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
+
+Claude Code preprocesses <bang>`command` syntax — executing shell commands and injecting output before content reaches Claude. This powers live context in commands (git state, PR details, environment info).
+
+**Critical**: Preprocessing runs in both command files AND SKILL.md files, including inside markdown code fences. There is no escape mechanism.
+
+### Where preprocessing runs
+
+| Context | Preprocessed | Safe to use literal `!`? |
+|---------|-------------|--------------------------|
+| Command files (`commands/*.md`) | Yes | Yes — intentional |
+| SKILL.md | Yes | No — use `<bang>` instead |
+| References, EXAMPLES.md | No | Yes — great for copy-paste demos |
+| Rules, CLAUDE.md, agents | No | Yes |
+
+### Writing SKILL.md files
+
+When documenting or referencing the preprocessing syntax in a SKILL.md, use `<bang>` as a stand-in for `!`. Agents interpret `<bang>` as `!`.
+
+Add an HTML comment explaining the convention:
+
+```html
+<!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
+```
+
+Then use `<bang>` for any inline references:
+
+- <bang>`git status` — injects current git status
+- <bang>`gh pr view --json title` — injects PR details
+
+Move real copy-paste examples with literal `!` to reference files — those are not preprocessed.
+
+### Writing reference files
+
+Reference files (`references/`, `EXAMPLES.md`) are not preprocessed. Use literal `!` freely — these serve as copy-paste sources for command authors:
+
+See [commands/bash-execution.md](references/commands/bash-execution.md) for the full reference with real `!` syntax.
+
+### Intentional preprocessing in skills
+
+Skills that genuinely run commands at load time should declare it in frontmatter:
+
+```yaml
+metadata:
+  preprocess: true
+```
+
+### Validation
+
+Run `/skillcheck` to scan SKILL.md files for unintentional preprocessing patterns. The linter respects `metadata.preprocess: true` and skips intentional uses.
+
+See [skills/preprocessing-safety.md](references/skills/preprocessing-safety.md) for detailed examples, common mistakes, and the full convention.
 
 ---
 

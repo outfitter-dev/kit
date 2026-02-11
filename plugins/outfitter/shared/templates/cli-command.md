@@ -164,18 +164,18 @@ cli.program.addCommand(userCommand);
 ### Interactive Prompts
 
 ```typescript
-import { confirm, text, select } from "@outfitter/cli/prompt";
+import { promptConfirm, promptText, promptSelect } from "@outfitter/cli/prompt";
 
 export const deleteCommand = command("delete")
   .argument("<id>", "Resource ID")
   .option("--force", "Skip confirmation")
   .action(async ({ args, flags }) => {
     if (!flags.force) {
-      const confirmed = await confirm({
+      const result = await promptConfirm({
         message: `Delete resource ${args.id}?`,
       });
 
-      if (!confirmed) {
+      if (result.isErr() || !result.value) {
         console.log("Cancelled");
         return;
       }

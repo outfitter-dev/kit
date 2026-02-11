@@ -585,6 +585,7 @@ interface UpdateActionInput {
   cwd: string;
   guide: boolean;
   apply: boolean;
+  breaking: boolean;
   outputMode?: OutputMode;
 }
 
@@ -592,6 +593,7 @@ const updateInputSchema = z.object({
   cwd: z.string(),
   guide: z.boolean(),
   apply: z.boolean(),
+  breaking: z.boolean(),
   outputMode: outputModeSchema,
 }) as z.ZodType<UpdateActionInput>;
 
@@ -617,6 +619,11 @@ const updateAction = defineAction({
         defaultValue: false,
       },
       {
+        flags: "--breaking",
+        description: "Include breaking updates when used with --apply",
+        defaultValue: false,
+      },
+      {
         flags: "--cwd <path>",
         description: "Working directory (defaults to current directory)",
       },
@@ -631,6 +638,7 @@ const updateAction = defineAction({
         cwd,
         guide: Boolean(context.flags["guide"]),
         apply: Boolean(context.flags["apply"]),
+        breaking: Boolean(context.flags["breaking"]),
         ...(outputMode ? { outputMode } : {}),
       };
     },
@@ -653,6 +661,7 @@ const updateAction = defineAction({
       guide: updateInput.guide,
       cwd: updateInput.cwd,
       applied: updateInput.apply ? result.value.applied : undefined,
+      breaking: updateInput.breaking,
     });
 
     return Result.ok(result.value);

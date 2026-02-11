@@ -32,6 +32,8 @@ export interface UpdateOptions {
   readonly guide?: boolean;
   /** Apply non-breaking updates to package.json and run bun install */
   readonly apply?: boolean;
+  /** Include breaking updates when --apply is used */
+  readonly breaking?: boolean;
   /** Output mode */
   readonly outputMode?: OutputMode;
 }
@@ -391,22 +393,30 @@ export async function runUpdate(
   const nonBreakingUpgradable = plan.packages.filter(
     (a) => a.classification === "upgradableNonBreaking"
   );
-  const breakingSkipped = plan.packages.filter(
+  const breakingUpgradable = plan.packages.filter(
     (a) => a.classification === "upgradableBreaking"
   );
 
+  // When --breaking is set with --apply, include breaking updates in the apply set
+  const includeBreaking = options.apply === true && options.breaking === true;
+  const packagesToApply = includeBreaking
+    ? [...nonBreakingUpgradable, ...breakingUpgradable]
+    : nonBreakingUpgradable;
+  const skippedBreaking: string[] = includeBreaking
+    ? []
+    : breakingUpgradable.map((a) => a.name);
+
   let applied = false;
   const appliedPackages: string[] = [];
-  const skippedBreaking: string[] = breakingSkipped.map((a) => a.name);
 
-  // Apply non-breaking updates if --apply is set
-  if (options.apply && nonBreakingUpgradable.length > 0) {
+  // Apply updates if --apply is set and there are packages to update
+  if (options.apply && packagesToApply.length > 0) {
     if (scan.workspaceRoot !== null) {
       // Workspace mode: update all manifests in one pass, then install once at root
       const applyResult = await applyUpdatesToWorkspace(
         scan.manifestPaths,
         scan.manifestsByPackage,
-        nonBreakingUpgradable
+        packagesToApply
       );
       if (applyResult.isErr()) return applyResult;
 
@@ -414,12 +424,12 @@ export async function runUpdate(
       if (installResult.isErr()) return installResult;
     } else {
       // Single-package mode: applyUpdates handles both write and install
-      const applyResult = await applyUpdates(cwd, nonBreakingUpgradable);
+      const applyResult = await applyUpdates(cwd, packagesToApply);
       if (applyResult.isErr()) return applyResult;
     }
 
     applied = true;
-    appliedPackages.push(...nonBreakingUpgradable.map((a) => a.name));
+    appliedPackages.push(...packagesToApply.map((a) => a.name));
   }
 
   return Result.ok({
@@ -443,6 +453,7 @@ export async function printUpdateResults(
     guide?: boolean;
     cwd?: string;
     applied?: boolean | undefined;
+    breaking?: boolean;
   }
 ): Promise<void> {
   const mode = options?.mode;
@@ -491,15 +502,40 @@ export async function printUpdateResults(
 
   // Apply summary
   if (result.applied && result.appliedPackages.length > 0) {
-    lines.push(
-      theme.success(
-        `Applied ${result.appliedPackages.length} non-breaking update(s):`
-      )
+    // Separate applied packages into breaking and non-breaking for display
+    const breakingApplied = result.appliedPackages.filter((name) =>
+      result.packages.some((p) => p.name === name && p.breaking)
     );
-    for (const name of result.appliedPackages) {
-      lines.push(`  - ${name}`);
+    const nonBreakingApplied = result.appliedPackages.filter(
+      (name) => !result.packages.some((p) => p.name === name && p.breaking)
+    );
+
+    if (nonBreakingApplied.length > 0) {
+      lines.push(
+        theme.success(
+          `Applied ${nonBreakingApplied.length} non-breaking update(s):`
+        )
+      );
+      for (const name of nonBreakingApplied) {
+        lines.push(`  - ${name}`);
+      }
+      lines.push("");
     }
-    lines.push("");
+
+    if (breakingApplied.length > 0) {
+      lines.push(
+        theme.error(`Applied ${breakingApplied.length} breaking update(s):`)
+      );
+      for (const name of breakingApplied) {
+        const pkg = result.packages.find((p) => p.name === name);
+        lines.push(`  - ${name} (${pkg?.current} -> ${pkg?.latest})`);
+      }
+      lines.push(
+        "",
+        theme.muted("Review migration guides: 'outfitter update --guide'")
+      );
+      lines.push("");
+    }
   } else if (options?.applied !== undefined && options.applied === false) {
     // --apply was passed but nothing was applied
     if (result.updatesAvailable === 0) {

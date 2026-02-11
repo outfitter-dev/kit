@@ -457,3 +457,208 @@ describe("update without --apply is read-only", () => {
     expect(result.value.skippedBreaking).toContain("@outfitter/contracts");
   });
 });
+
+// =============================================================================
+// --apply --breaking applies all updates
+// =============================================================================
+
+describe("update --apply --breaking applies all updates", () => {
+  test("applies both non-breaking and breaking updates", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+      "@outfitter/cli": "^0.1.0",
+    });
+
+    // contracts: 0.1.0 -> 0.2.0 is breaking (pre-1.0 minor bump)
+    // cli: 0.1.0 -> 0.1.3 is non-breaking
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.2.0",
+      "@outfitter/cli": "0.1.3",
+    });
+
+    const result = await runUpdate({
+      cwd: tempDir,
+      apply: true,
+      breaking: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.applied).toBe(true);
+    expect(result.value.appliedPackages).toContain("@outfitter/cli");
+    expect(result.value.appliedPackages).toContain("@outfitter/contracts");
+    expect(result.value.skippedBreaking).toHaveLength(0);
+
+    // Verify package.json was updated for both
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.dependencies?.["@outfitter/cli"]).toBe("^0.1.3");
+    expect(pkg.dependencies?.["@outfitter/contracts"]).toBe("^0.2.0");
+  });
+
+  test("applies only breaking updates when all updates are breaking", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    // 0.1.0 -> 0.2.0 is breaking (pre-1.0 minor bump)
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.2.0",
+    });
+
+    const result = await runUpdate({
+      cwd: tempDir,
+      apply: true,
+      breaking: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.applied).toBe(true);
+    expect(result.value.appliedPackages).toContain("@outfitter/contracts");
+    expect(result.value.skippedBreaking).toHaveLength(0);
+
+    // Verify package.json was updated
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.dependencies?.["@outfitter/contracts"]).toBe("^0.2.0");
+  });
+
+  test("applies major version bumps when --breaking is set", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^1.0.0",
+    });
+
+    // 1.0.0 -> 2.0.0 is breaking (major bump)
+    mockNpmAndInstall({
+      "@outfitter/contracts": "2.0.0",
+    });
+
+    const result = await runUpdate({
+      cwd: tempDir,
+      apply: true,
+      breaking: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.applied).toBe(true);
+    expect(result.value.appliedPackages).toContain("@outfitter/contracts");
+    expect(result.value.skippedBreaking).toHaveLength(0);
+
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.dependencies?.["@outfitter/contracts"]).toBe("^2.0.0");
+  });
+
+  test("pre-1.0 minor bumps are applied when --breaking is used", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/cli": "^0.3.0",
+    });
+
+    // 0.3.0 -> 0.4.0 is breaking (pre-1.0 minor bump)
+    mockNpmAndInstall({
+      "@outfitter/cli": "0.4.0",
+    });
+
+    const result = await runUpdate({
+      cwd: tempDir,
+      apply: true,
+      breaking: true,
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.applied).toBe(true);
+    expect(result.value.appliedPackages).toContain("@outfitter/cli");
+
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.dependencies?.["@outfitter/cli"]).toBe("^0.4.0");
+  });
+});
+
+// =============================================================================
+// --apply without --breaking still skips breaking (existing behavior)
+// =============================================================================
+
+describe("update --apply without --breaking preserves existing behavior", () => {
+  test("skips breaking updates without --breaking flag", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+      "@outfitter/cli": "^0.1.0",
+    });
+
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.2.0",
+      "@outfitter/cli": "0.1.3",
+    });
+
+    const result = await runUpdate({ cwd: tempDir, apply: true });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.applied).toBe(true);
+    expect(result.value.appliedPackages).toContain("@outfitter/cli");
+    expect(result.value.appliedPackages).not.toContain("@outfitter/contracts");
+    expect(result.value.skippedBreaking).toContain("@outfitter/contracts");
+
+    // Verify only non-breaking was updated
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.dependencies?.["@outfitter/cli"]).toBe("^0.1.3");
+    expect(pkg.dependencies?.["@outfitter/contracts"]).toBe("^0.1.0");
+  });
+});
+
+// =============================================================================
+// --breaking without --apply is a no-op
+// =============================================================================
+
+describe("update --breaking without --apply is a no-op", () => {
+  test("does not apply any updates when --breaking is set without --apply", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.2.0",
+    });
+
+    const result = await runUpdate({ cwd: tempDir, breaking: true });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.applied).toBe(false);
+    expect(result.value.appliedPackages).toHaveLength(0);
+
+    // Verify package.json unchanged
+    const pkg = readPackageJson(tempDir);
+    expect(pkg.dependencies?.["@outfitter/contracts"]).toBe("^0.1.0");
+
+    // Verify bun install was NOT called
+    const installCalls = spawnCalls.filter(
+      (c) => c.cmd[0] === "bun" && c.cmd[1] === "install"
+    );
+    expect(installCalls).toHaveLength(0);
+  });
+
+  test("still reports available updates in result", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+    });
+
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.2.0",
+    });
+
+    const result = await runUpdate({ cwd: tempDir, breaking: true });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.updatesAvailable).toBe(1);
+    expect(result.value.hasBreaking).toBe(true);
+  });
+});

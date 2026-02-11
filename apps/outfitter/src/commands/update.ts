@@ -239,7 +239,13 @@ export function readMigrationDocs(
     if (Bun.semver.order(docVersion, toVersion) > 0) continue;
 
     const filePath = join(migrationsDir, entry);
-    const content = readFileSync(filePath, "utf-8");
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf-8");
+    } catch {
+      // Skip unreadable migration docs
+      continue;
+    }
     // Strip frontmatter
     const body = content.replace(/^---\n[\s\S]*?\n---\n*/, "").trim();
     if (body) {
@@ -366,9 +372,9 @@ export async function printUpdateResults(
     } else if (!pkg.updateAvailable) {
       migration = theme.muted("up to date");
     } else if (pkg.breaking) {
-      migration = theme.error("major (breaking)");
+      migration = theme.error("breaking");
     } else {
-      migration = theme.success("minor (no breaking)");
+      migration = theme.success("non-breaking");
     }
 
     lines.push(`  ${name} ${current} ${available} ${migration}`);

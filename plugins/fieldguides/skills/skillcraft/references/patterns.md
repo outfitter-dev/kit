@@ -324,19 +324,11 @@ Claude may partially read nested files, getting incomplete information.
 
 ### Topic-Based File Naming
 
-| File | Why it works |
-|------|-------------|
-| `finance.md` | Clear domain |
-| `sales.md` | Clear domain |
-| `product.md` | Clear domain |
-
-**Not:**
-
-| File | Problem |
-|------|---------|
-| `doc1.md` | What's in this? |
-| `reference2.md` | Generic numbering |
-| `stuff.md` | Meaningless name |
+| Good | Bad | Why |
+|------|-----|-----|
+| `finance.md` | `doc1.md` | Clear domain vs opaque numbering |
+| `sales.md` | `reference2.md` | Clear domain vs generic |
+| `product.md` | `stuff.md` | Clear domain vs meaningless |
 
 ---
 
@@ -501,14 +493,12 @@ When gerund feels awkward: `pdf-processing`, `spreadsheet-analysis`, `code-revie
 
 ### File Naming
 
-| File | Naming Strategy |
-|------|----------------|
-| `authentication.md` | Domain topic |
-| `error-handling.md` | Concept |
-| `aws-deployment.md` | Variant-specific |
-| `quick-start.md` | Purpose |
-
-**Not:** `ref1.md`, `DOCS.md`, `more_stuff.md`, `NEW-FILE.md`
+| Good | Bad | Strategy |
+|------|-----|----------|
+| `authentication.md` | `ref1.md` | Domain topic |
+| `error-handling.md` | `DOCS.md` | Concept |
+| `aws-deployment.md` | `more_stuff.md` | Variant-specific |
+| `quick-start.md` | `NEW-FILE.md` | Purpose |
 
 ---
 

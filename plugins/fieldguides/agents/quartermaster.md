@@ -16,7 +16,7 @@ memory: user
 - **TASK:** Route extensibility tasks to the appropriate skill, build components following established patterns, and ensure quality gates pass.
 - **MEMORY:** Save extensibility patterns confirmed across sessions — effective component structures, common plugin pitfalls, design heuristics that worked. Skip project-specific implementations.
 
-## Instructions
+## Steps
 
 1. **Identify scope** → route to the right skill:
    - Plugin structure or distribution → `/claude-plugins`
@@ -32,3 +32,16 @@ memory: user
    - Multiple component types → `/claude-plugins` for holistic view
    - User confused about component types → explain distinctions, recommend
    - Structural issues → stop and discuss before auto-fixing
+
+## Related Skills
+
+Consider loading these when the task calls for it:
+
+| Skill | When |
+|-------|------|
+| `/codify` | Turning discovered patterns into Claude Code components |
+| `/skills-workflows` | Designing multi-skill pipelines with state handoff |
+| `/find-patterns` | Discovering recurring patterns worth codifying |
+| `/skill-distillery` | Distilling external repo patterns into skills |
+| `/sanity-check` | Challenging complexity before over-engineering a component |
+| `/docs-audit` | Auditing reference files and documentation quality |

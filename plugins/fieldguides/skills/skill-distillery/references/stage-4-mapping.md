@@ -51,7 +51,7 @@ hooks/on-commit → loads → skills/commit-checks/SKILL.md
 Agent orchestrates, skills provide methodology.
 
 ```
-agents/developer.md → loads → skills/tdd/SKILL.md
+agents/developer.md → loads → skills/tdd-fieldguide/SKILL.md
 ```
 
 ## Output

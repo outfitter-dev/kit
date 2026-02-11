@@ -92,7 +92,7 @@ model: opus     # Complex reasoning, high-stakes decisions
 Skills to auto-load. **Critical:** Subagents do NOT inherit skills from parent.
 
 ```yaml
-skills: tdd, debugging, type-safety
+skills: tdd-fieldguide, debugging, type-safety
 ```
 
 If your agent needs specific skills, you must explicitly list them here.

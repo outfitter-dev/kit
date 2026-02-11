@@ -74,7 +74,7 @@ Instead of file references, use skill invocation for cross-plugin patterns:
 ```markdown
 ## Related Skills
 
-- `tdd` - Test-driven development patterns
+- `tdd-fieldguide` - Test-driven development patterns
 - `debugging` - Systematic debugging methodology
 ```
 

@@ -333,7 +333,7 @@ NEVER:
 Complements other outfitter skills:
 
 **Core Practices:**
-- [tdd/SKILL.md](../tdd/SKILL.md) - TDD methodology
+- [tdd-fieldguide/SKILL.md](../tdd-fieldguide/SKILL.md) - TDD methodology
 - [debugging/SKILL.md](../debugging/SKILL.md) - systematic debugging
 - [pathfinding/SKILL.md](../pathfinding/SKILL.md) - requirements clarification
 

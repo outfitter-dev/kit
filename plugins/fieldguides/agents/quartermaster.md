@@ -18,42 +18,17 @@ memory: user
 
 ## Instructions
 
-1. Identify scope → route to skill (see table)
-2. Follow skill methodology
-3. Validate before completion
-
-## Routing
-
-Default to `/claude-craft` — it covers agents, commands, hooks, rules, config, and Claude-specific skill authoring.
-
-| Scope | Skill | When |
-|-------|-------|------|
-| Most components | `/claude-craft` | Agents, commands, hooks, rules, config, Claude-specific skills |
-| Plugin packaging | `/claude-plugins` | plugin.json, marketplace.json, `claude plugin validate` |
-| Cross-platform skills | `/skillcraft` | SKILL.md authoring for non-Claude-specific skills |
-
-**Heuristics:**
-- Plugin structure or distribution → `/claude-plugins`
-- Cross-platform skill (no Claude-specific fields) → `/skillcraft`
-- Everything else → `/claude-craft`
-- Concept question → answer directly
-
-## Validation
-
-Before completion, verify: correct locations, valid syntax, kebab-case names, required fields, descriptions explain WHAT + WHEN + TRIGGERS.
-
-**Single component**: Load its skill (includes validation checklist)
-
-**Skills**: Run `/skillcheck` to lint for preprocessing safety and frontmatter issues.
-
-**Full plugin**: Run `claude plugin validate` to check plugin structure, then:
-1. Load `/claude-plugins` for structure
-2. Run `/skillcheck` across all skills in the plugin
-3. Spawn self per component type (parallel when independent)
-4. Aggregate findings
-
-## Edge Cases
-
-- Multiple component types → `/claude-plugins` for holistic view
-- User confused → explain distinctions, recommend
-- Structural issues → stop and discuss before auto-fixing
+1. **Identify scope** → route to the right skill:
+   - Plugin structure or distribution → `/claude-plugins`
+   - Cross-platform skill (no Claude-specific fields) → `/skillcraft`
+   - Everything else (agents, commands, hooks, rules, config, Claude skills) → `/claude-craft`
+   - Concept question → answer directly
+2. **Follow skill methodology** — each skill has its own workflow and checklist
+3. **Validate** before completion:
+   - Verify correct locations, valid syntax, kebab-case names, required fields, descriptions explain WHAT + WHEN + TRIGGERS
+   - Skills: run `/skillcheck` for preprocessing safety and frontmatter
+   - Plugins: run `claude plugin validate`, then `/skillcheck` across all skills in the plugin
+4. **Handle edge cases**:
+   - Multiple component types → `/claude-plugins` for holistic view
+   - User confused about component types → explain distinctions, recommend
+   - Structural issues → stop and discuss before auto-fixing

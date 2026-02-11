@@ -44,8 +44,8 @@ Use when a preferred pattern exists but variation is acceptable.
 
 1. Extract fields from input
 2. For each field:
-   - Check type matches schema[field].type
-   - Check value passes schema[field].validator
+   - Check type matches schema.{field}.type
+   - Check value passes schema.{field}.validator
    - Collect errors for invalid fields
 3. If errors: return { valid: false, errors }
 4. Return { valid: true, data: sanitized }
@@ -57,7 +57,7 @@ Use when a preferred pattern exists but variation is acceptable.
 
 Use for fragile operations requiring exact sequences.
 
-```markdown
+````markdown
 ## Data Validation
 
 Run the validation script:
@@ -67,8 +67,7 @@ bun run scripts/validate.ts --schema=user.json --input=$INPUT_FILE
 ```
 
 Do not modify the validation logic inline. If changes are needed, update scripts/validate.ts.
-
-```
+````
 
 **When to use:** Security-critical, deterministic reliability, complex algorithms.
 
@@ -211,13 +210,13 @@ Complete guide for deploying to AWS.
 - IAM credentials configured
 
 ## Infrastructure Setup
-[Complete AWS-specific content]
+{ complete AWS-specific content }
 
 ## Deployment
-[Complete AWS-specific content]
+{ complete AWS-specific content }
 
 ## Troubleshooting
-[AWS-specific issues]
+{ AWS-specific issues }
 ```
 
 ### Why This Pattern Works
@@ -269,11 +268,11 @@ Files over 100 lines should include a TOC for partial reads.
 
 ## Authentication
 
-[Section content...]
+{ section content }
 
 ## Core Methods
 
-[Section content...]
+{ section content }
 ```
 
 **Why it matters:** Claude may use `head -100` previews. A TOC ensures visibility of full scope even in partial reads.
@@ -296,7 +295,7 @@ Files over 100 lines should include a TOC for partial reads.
 
 **Domain-based routing:**
 
-```markdown
+````markdown
 ## Available Datasets
 
 - **Finance**: Revenue, ARR, billing -> See [finance.md](references/finance.md)
@@ -309,46 +308,27 @@ Find specific metrics:
 ```bash
 grep -i "revenue" references/finance.md
 ```
-
-```
+````
 
 ### Keep References One Level Deep
 
-```
-
+```text
 # Good
-
 SKILL.md -> reference.md
 
 # Bad (too deep)
-
 SKILL.md -> advanced.md -> details.md -> specifics.md
-
 ```
 
 Claude may partially read nested files, getting incomplete information.
 
 ### Topic-Based File Naming
 
-```
-
-references/
-├── finance.md          # Clear domain
-├── sales.md
-└── product.md
-
-```
-
-**Not:**
-
-```
-
-references/
-├── doc1.md             # What's in this?
-├── reference2.md
-└── stuff.md
-
-```
+| Good | Bad | Why |
+|------|-----|-----|
+| `finance.md` | `doc1.md` | Clear domain vs opaque numbering |
+| `sales.md` | `reference2.md` | Clear domain vs generic |
+| `product.md` | `stuff.md` | Clear domain vs meaningless |
 
 ---
 
@@ -360,18 +340,18 @@ Emoji conventions from official Anthropic skills.
 
 | Emoji | Meaning | Example |
 |-------|---------|---------|
-| `[icon]` | Guidelines/checklist | `[checklist] MCP Best Practices` |
-| `[lightning]` | Quick guide | `[lightning] Quick Start` |
-| `[python]` | Python-specific | `[python] Python Setup` |
-| `[check]` | Evaluation/testing | `[check] Test Suite` |
+| `📋` | Guidelines/checklist | `📋 MCP Best Practices` |
+| `⚡` | Quick guide | `⚡ Quick Start` |
+| `🐍` | Python-specific | `🐍 Python Setup` |
+| `✅` | Evaluation/testing | `✅ Test Suite` |
 
 **In context:**
 
 ```markdown
 Load these resources as needed:
-- [checklist] [MCP Best Practices](references/best-practices.md)
-- [lightning] [Quick Start](references/quick-start.md)
-- [python] [Python Client](references/python.md)
+- 📋 [MCP Best Practices](references/best-practices.md)
+- ⚡ [Quick Start](references/quick-start.md)
+- 🐍 [Python Client](references/python.md)
 ```
 
 ### Status Indicators
@@ -379,9 +359,9 @@ Load these resources as needed:
 ```markdown
 ## Implementation Status
 
-- [check] Core API endpoints
-- [check] Authentication flow
-- [pending] Webhook handlers
+- ✅ Core API endpoints
+- ✅ Authentication flow
+- ⏳ Webhook handlers
 - [x] Rate limiting
 ```
 
@@ -440,18 +420,17 @@ a PDF file, you'll need to use a specialized library. We recommend pdfplumber
 because it's easy to use and handles most PDF formats. First, you'll need to
 install it with pip install pdfplumber, then you can open the file and...
 
-[50 more lines explaining basic concepts]
+{ 50 more lines explaining basic concepts }
 ```
 
 ### Template Pattern
 
 For strict output requirements, provide exact templates.
 
-```markdown
+````markdown
 ALWAYS use this exact commit message format:
 
-```
-
+```text
 <type>(<scope>): <subject>
 
 <body>
@@ -463,7 +442,7 @@ Types: feat, fix, docs, style, refactor, test, chore
 
 Example:
 
-```
+```text
 feat(auth): add refresh token rotation
 
 Implements automatic token rotation on refresh to improve security.
@@ -471,8 +450,7 @@ Tokens are invalidated after single use.
 
 Closes #123
 ```
-
-```
+````
 
 ### Checklist Pattern
 
@@ -499,69 +477,28 @@ Conventions for skill, file, and reference naming.
 
 ### Gerund Form (Preferred)
 
-Use verb + -ing form for skill names.
-
-```
-processing-pdfs
-analyzing-spreadsheets
-managing-databases
-testing-code
-writing-documentation
-deploying-applications
-debugging-issues
-```
+Use verb + -ing form for skill names: `processing-pdfs`, `analyzing-spreadsheets`, `managing-databases`, `testing-code`, `writing-documentation`, `deploying-applications`, `debugging-issues`.
 
 ### Noun Form (Acceptable)
 
-When gerund feels awkward.
-
-```
-pdf-processing
-spreadsheet-analysis
-code-review
-api-integration
-```
+When gerund feels awkward: `pdf-processing`, `spreadsheet-analysis`, `code-review`, `api-integration`.
 
 ### Avoid
 
-```
-# Vague
-helper
-utils
-tools
-stuff
-
-# Too Generic
-documents
-data
-files
-code
-
-# Reserved Words
-anthropic-helper
-claude-tools
-claude-assistant
-```
+| Good | Bad | Why |
+|------|-----|-----|
+| `processing-pdfs` | `helper`, `utils` | Vague — says nothing about what the skill does |
+| `api-integration` | `data`, `files`, `code` | Too generic — could mean anything |
+| `skill-creator` | `claude-tools`, `anthropic-helper` | Reserved — `anthropic` and `claude` are reserved words |
 
 ### File Naming
 
-```
-references/
-├── authentication.md    # Domain topic
-├── error-handling.md    # Concept
-├── aws-deployment.md    # Variant-specific
-└── quick-start.md       # Purpose
-```
-
-**Not:**
-
-```
-references/
-├── ref1.md
-├── DOCS.md
-├── more_stuff.md
-└── NEW-FILE.md
-```
+| Good | Bad | Strategy |
+|------|-----|----------|
+| `authentication.md` | `ref1.md` | Domain topic |
+| `error-handling.md` | `DOCS.md` | Concept |
+| `aws-deployment.md` | `more_stuff.md` | Variant-specific |
+| `quick-start.md` | `NEW-FILE.md` | Purpose |
 
 ---
 

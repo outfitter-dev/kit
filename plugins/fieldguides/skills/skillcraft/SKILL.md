@@ -2,7 +2,7 @@
 name: skillcraft
 description: "Creates and validates Agent Skills (SKILL.md). Use when creating skills, writing frontmatter, or validating skill structure."
 metadata:
-  version: "2.2.1"
+  version: "2.2.2"
   author: outfitter
   related-skills:
     - claude-craft
@@ -133,6 +133,7 @@ description: "Extracts text and tables from PDF files, fills forms, merges docum
 - [ ] Matches parent directory name
 - [ ] No `--`, leading/trailing hyphens
 - [ ] No `anthropic` or `claude` in name
+- [ ] Does not collide with a built-in slash command
 
 #### C. Description Quality
 
@@ -147,7 +148,7 @@ description: "Extracts text and tables from PDF files, fills forms, merges docum
 - [ ] All referenced files exist
 - [ ] No TODO/placeholder markers
 - [ ] Progressive disclosure (details in `references/`)
-- [ ] No <bang>`command` preprocessing patterns (use `<bang>` instead of `!`)
+- [ ] No `` <bang>`command` `` preprocessing patterns (use `<bang>` instead of `!`)
 
 ### Report Format
 
@@ -188,7 +189,7 @@ Keep SKILL.md under 500 lines. Move details to:
 
 ### Preprocessing safety
 
-SKILL.md files are preprocessed by Claude Code — <bang>`command` syntax executes at load time, even inside code fences. When documenting this syntax in SKILL.md, use `<bang>` as a stand-in for `!`. Reference files and EXAMPLES.md are not preprocessed, so literal `!` is safe there.
+SKILL.md files are preprocessed by Claude Code — `` <bang>`command` `` syntax executes at load time, even inside code fences. When documenting this syntax in SKILL.md, use `<bang>` as a stand-in for `!`. Reference files and EXAMPLES.md are not preprocessed, so literal `!` is safe there.
 
 Skills that intentionally preprocess should declare `metadata.preprocess: true`. Run `/skillcheck` to lint for unintentional preprocessing patterns.
 
@@ -212,6 +213,7 @@ See [patterns.md](references/patterns.md) for detailed examples.
 - Cannot start/end with hyphen or contain `--`
 - Must match parent directory name
 - Cannot contain `anthropic` or `claude`
+- Must not collide with built-in slash commands (`/help`, `/status`, `/config`, `/compact`, `/review`, `/model`, `/init`, `/login`, `/logout`, `/doctor`, `/clear`, `/mcp`, `/memory`, `/permissions`, `/terminal-setup`, `/vim`, `/cost`, `/bug`). Built-in commands take precedence — a skill with a colliding name will be unreachable via slash invocation.
 
 **Recommended**: Gerund form (`processing-pdfs`, `reviewing-code`)
 

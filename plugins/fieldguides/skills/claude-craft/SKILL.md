@@ -2,7 +2,7 @@
 name: claude-craft
 description: "Claude Code extensibility — agents, commands, hooks, skills, rules, and configuration. Use when creating, configuring, or troubleshooting Claude Code components, or when agent.md, /command, hooks.json, SKILL.md, .claude/rules, settings.json, MCP server, PreToolUse, or create agent/command/hook are mentioned."
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
   related-skills:
     - skillcraft
     - claude-plugins
@@ -174,10 +174,12 @@ See [commands/frontmatter.md](references/commands/frontmatter.md) for complete s
 
 ### Core Features
 
+<!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
+
 | Feature | Syntax | Purpose |
 |---------|--------|---------|
 | Arguments | `$1`, `$2`, `$ARGUMENTS` | Dynamic input from user |
-| Bash execution | `` !`command` `` | Include shell output in context |
+| Bash execution | `` <bang>`command` `` | Include shell output in context |
 | File references | `@path/to/file` | Include file contents |
 | Tool restrictions | `allowed-tools:` | Limit Claude's capabilities |
 
@@ -464,6 +466,64 @@ See [skills/context-modes.md](references/skills/context-modes.md) for patterns.
 | [skills/context-modes.md](references/skills/context-modes.md) | Fork vs inherit patterns |
 | [skills/integration.md](references/skills/integration.md) | Commands, hooks, MCP integration |
 | [skills/performance.md](references/skills/performance.md) | Token impact, optimization |
+| [skills/preprocessing-safety.md](references/skills/preprocessing-safety.md) | Safe preprocessing patterns |
+
+---
+
+## Preprocessing
+
+<!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
+
+Claude Code preprocesses `` <bang>`command` `` syntax — executing shell commands and injecting output before content reaches Claude. This powers live context in commands (git state, PR details, environment info).
+
+**Critical**: Preprocessing runs in both command files AND SKILL.md files, including inside markdown code fences. There is no escape mechanism.
+
+### Where preprocessing runs
+
+| Context | Preprocessed | Safe to use literal `!`? |
+|---------|-------------|--------------------------|
+| Command files (`commands/*.md`) | Yes | Yes — intentional |
+| SKILL.md | Yes | No — use `<bang>` instead |
+| References, EXAMPLES.md | No | Yes — great for copy-paste demos |
+| Rules, CLAUDE.md, agents | No | Yes |
+
+### Writing SKILL.md files
+
+When documenting or referencing the preprocessing syntax in a SKILL.md, use `<bang>` as a stand-in for `!`. Agents interpret `<bang>` as `!`.
+
+Add an HTML comment explaining the convention:
+
+```html
+<!-- <bang> represents ! — literal !`command` in SKILL.md triggers preprocessing -->
+```
+
+Then use `<bang>` for any inline references:
+
+- `` <bang>`git status` `` — injects current git status
+- `` <bang>`gh pr view --json title` `` — injects PR details
+
+Move real copy-paste examples with literal `!` to reference files — those are not preprocessed.
+
+### Writing reference files
+
+Reference files (`references/`, `EXAMPLES.md`) are not preprocessed. Use literal `!` freely — these serve as copy-paste sources for command authors:
+
+See [commands/bash-execution.md](references/commands/bash-execution.md) for the full reference with real `!` syntax.
+
+### Intentional preprocessing in skills
+
+Skills that genuinely run commands at load time should declare it in frontmatter:
+
+```yaml
+metadata:
+  preprocess: true
+```
+
+### Validation
+
+Run `/skillcheck` to scan SKILL.md files for unintentional preprocessing patterns. The linter respects `metadata.preprocess: true` and skips intentional uses.
+
+See [skills/preprocessing-safety.md](references/skills/preprocessing-safety.md) for detailed examples, common mistakes, and the full convention.
 
 ---
 

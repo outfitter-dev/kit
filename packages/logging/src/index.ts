@@ -19,6 +19,7 @@ import {
   getEnvironmentDefaults as _getEnvironmentDefaults,
 } from "@outfitter/config";
 import {
+  type Logger as ContractLogger,
   type LoggerAdapter as ContractLoggerAdapter,
   type LoggerFactory as ContractLoggerFactory,
   type LoggerFactoryConfig as ContractLoggerFactoryConfig,
@@ -287,7 +288,7 @@ export interface OutfitterLoggerFactoryOptions {
  * logger.debug("Debug info", { details: "..." });
  * ```
  */
-export interface LoggerInstance {
+export interface LoggerInstance extends ContractLogger {
   /**
    * Log at trace level (most verbose, for detailed debugging).
    * @param message - Human-readable log message

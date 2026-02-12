@@ -19,6 +19,7 @@ function toCoreOptions(options: ExecuteSyncCommandOptions): PackageDocsOptions {
     ...(options.excludedFilenames
       ? { excludedFilenames: options.excludedFilenames }
       : {}),
+    ...(options.mdxMode ? { mdxMode: options.mdxMode } : {}),
   };
 }
 
@@ -39,5 +40,8 @@ export async function executeSyncCommand(
   io.out(
     `Wrote ${result.value.writtenFiles.length} file(s), removed ${result.value.removedFiles.length} stale file(s).`
   );
+  for (const warning of result.value.warnings) {
+    io.err(`docs warning: ${warning.path}: ${warning.message}`);
+  }
   return 0;
 }

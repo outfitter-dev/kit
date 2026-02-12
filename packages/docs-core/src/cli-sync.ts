@@ -4,6 +4,7 @@ import { syncLlmsDocs, syncPackageDocs } from "./index.js";
 
 interface CliOptions {
   cwd?: string;
+  mdxMode?: "strict" | "lossy";
   packagesDir?: string;
   outputDir?: string;
 }
@@ -31,6 +32,14 @@ function parseArgs(argv: readonly string[]): CliOptions {
       continue;
     }
 
+    if (arg === "--mdx-mode") {
+      if (nextValue === "strict" || nextValue === "lossy") {
+        options.mdxMode = nextValue;
+        i += 1;
+      }
+      continue;
+    }
+
     if (arg === "--output-dir" && typeof nextValue === "string") {
       options.outputDir = nextValue;
       i += 1;
@@ -45,6 +54,7 @@ async function main(): Promise<void> {
 
   const result = await syncPackageDocs({
     ...(options.cwd ? { workspaceRoot: options.cwd } : {}),
+    ...(options.mdxMode ? { mdxMode: options.mdxMode } : {}),
     ...(options.packagesDir ? { packagesDir: options.packagesDir } : {}),
     ...(options.outputDir ? { outputDir: options.outputDir } : {}),
   });
@@ -59,9 +69,13 @@ async function main(): Promise<void> {
       `${result.value.writtenFiles.length} file(s) written, ` +
       `${result.value.removedFiles.length} stale file(s) removed\n`
   );
+  for (const warning of result.value.warnings) {
+    process.stderr.write(`docs warning: ${warning.path}: ${warning.message}\n`);
+  }
 
   const llmsResult = await syncLlmsDocs({
     ...(options.cwd ? { workspaceRoot: options.cwd } : {}),
+    ...(options.mdxMode ? { mdxMode: options.mdxMode } : {}),
     ...(options.packagesDir ? { packagesDir: options.packagesDir } : {}),
     ...(options.outputDir ? { outputDir: options.outputDir } : {}),
   });
@@ -75,6 +89,9 @@ async function main(): Promise<void> {
     `llms sync complete: ${llmsResult.value.packageNames.length} package(s), ` +
       `${llmsResult.value.writtenFiles.length} file(s) written\n`
   );
+  for (const warning of llmsResult.value.warnings) {
+    process.stderr.write(`docs warning: ${warning.path}: ${warning.message}\n`);
+  }
 }
 
 main().catch((error) => {

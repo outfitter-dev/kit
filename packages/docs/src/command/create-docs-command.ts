@@ -35,9 +35,11 @@ export function createDocsCommand(options?: CreateDocsCommandOptions): Command {
     .option("--cwd <path>", "Workspace root to operate in")
     .option("--packages-dir <path>", "Packages directory relative to workspace")
     .option("--output-dir <path>", "Output directory relative to workspace")
+    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
     .action(
       async (cmdOptions: {
         cwd?: string;
+        mdxMode?: "strict" | "lossy";
         packagesDir?: string;
         outputDir?: string;
       }) => {
@@ -54,9 +56,11 @@ export function createDocsCommand(options?: CreateDocsCommandOptions): Command {
     .option("--cwd <path>", "Workspace root to operate in")
     .option("--packages-dir <path>", "Packages directory relative to workspace")
     .option("--output-dir <path>", "Output directory relative to workspace")
+    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
     .action(
       async (cmdOptions: {
         cwd?: string;
+        mdxMode?: "strict" | "lossy";
         packagesDir?: string;
         outputDir?: string;
       }) => {
@@ -73,6 +77,7 @@ export function createDocsCommand(options?: CreateDocsCommandOptions): Command {
     .option("--cwd <path>", "Workspace root to operate in")
     .option("--packages-dir <path>", "Packages directory relative to workspace")
     .option("--output-dir <path>", "Output directory relative to workspace")
+    .option("--mdx-mode <mode>", "MDX handling mode: strict or lossy")
     .option("--llms-file <path>", "llms.txt output path relative to workspace")
     .option(
       "--llms-full-file <path>",
@@ -88,6 +93,7 @@ export function createDocsCommand(options?: CreateDocsCommandOptions): Command {
         cwd?: string;
         llmsFile?: string;
         llmsFullFile?: string;
+        mdxMode?: "strict" | "lossy";
         outputDir?: string;
         packagesDir?: string;
         target?: string;

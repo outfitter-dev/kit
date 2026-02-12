@@ -7,6 +7,7 @@ CLI and host command adapter for Outfitter docs workflows.
 - `docs sync` — assemble package docs output
 - `docs check` — verify package docs output freshness
 - `docs export --target <packages|llms|llms-full|all>` — export docs artifacts
+- `--mdx-mode <strict|lossy>` — control MDX handling for sync/check/export
 
 ## Host CLI Adapter
 

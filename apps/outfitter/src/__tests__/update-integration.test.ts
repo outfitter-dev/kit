@@ -75,10 +75,11 @@ function writeMigrationDoc(
   dir: string,
   shortName: string,
   version: string,
-  body: string
+  body: string,
+  breaking = true
 ): void {
   const filename = `outfitter-${shortName}-${version}.md`;
-  const content = `---\npackage: "@outfitter/${shortName}"\nversion: ${version}\nbreaking: true\n---\n\n${body}\n`;
+  const content = `---\npackage: "@outfitter/${shortName}"\nversion: ${version}\nbreaking: ${breaking}\n---\n\n${body}\n`;
   writeFileSync(join(dir, filename), content);
 }
 
@@ -420,6 +421,38 @@ describe("integration: apply flow with mocked Bun.spawn", () => {
 // =============================================================================
 
 describe("integration: breaking classification for pre-1.0 packages", () => {
+  test("migration doc breaking:false overrides pre-1.0 semver heuristic", async () => {
+    const migrationsDir = join(tempDir, "plugins/outfitter/shared/migrations");
+    mkdirSync(migrationsDir, { recursive: true });
+    writeMigrationDoc(
+      migrationsDir,
+      "types",
+      "0.2.0",
+      "Version alignment release with no API changes.",
+      false
+    );
+
+    writePackageJson(tempDir, {
+      "@outfitter/types": "^0.1.0",
+    });
+
+    mockNpmAndInstall({
+      "@outfitter/types": "0.2.0",
+    });
+
+    const result = await runUpdate({ cwd: tempDir });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    const typesPkg = result.value.packages.find(
+      (p) => p.name === "@outfitter/types"
+    );
+    expect(typesPkg).toBeDefined();
+    expect(typesPkg?.breaking).toBe(false);
+    expect(result.value.hasBreaking).toBe(false);
+  });
+
   test("pre-1.0 minor bump (0.1.0 -> 0.2.0) is classified as breaking", async () => {
     writePackageJson(tempDir, {
       "@outfitter/contracts": "^0.1.0",
@@ -675,6 +708,31 @@ describe("integration: guide output via runUpdate({ guide: true })", () => {
     expect(result.value.guides?.[0]?.steps[0]).toContain(
       "Update all import paths"
     );
+  });
+
+  test("guidePackages filters guides to selected package names", async () => {
+    writePackageJson(tempDir, {
+      "@outfitter/contracts": "^0.1.0",
+      "@outfitter/cli": "^0.1.0",
+    });
+
+    mockNpmAndInstall({
+      "@outfitter/contracts": "0.2.0",
+      "@outfitter/cli": "0.1.5",
+    });
+
+    const result = await runUpdate({
+      cwd: tempDir,
+      guide: true,
+      guidePackages: ["@outfitter/contracts"],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (!result.isOk()) return;
+
+    expect(result.value.guides).toBeDefined();
+    expect(result.value.guides).toHaveLength(1);
+    expect(result.value.guides?.[0]?.packageName).toBe("@outfitter/contracts");
   });
 
   test("guides are not included when guide option is not set", async () => {

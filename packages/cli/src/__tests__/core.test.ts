@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { type CLI, command, createCLI } from "../command.js";
 
 describe("createCLI()", () => {
@@ -92,5 +92,99 @@ describe("command()", () => {
     expect(registered).toBeDefined();
     expect(registered?.name()).toBe("hello");
     expect(receivedArgs).toEqual(["World"]);
+  });
+});
+
+describe("--json env var bridge", () => {
+  let originalJson: string | undefined;
+
+  beforeEach(() => {
+    originalJson = process.env["OUTFITTER_JSON"];
+    delete process.env["OUTFITTER_JSON"];
+  });
+
+  afterEach(() => {
+    if (originalJson === undefined) {
+      delete process.env["OUTFITTER_JSON"];
+    } else {
+      process.env["OUTFITTER_JSON"] = originalJson;
+    }
+  });
+
+  it("global --json sets OUTFITTER_JSON env var", async () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+    let envValue: string | undefined;
+
+    cli.register(
+      command("hello")
+        .description("Say hello")
+        .action(async () => {
+          envValue = process.env["OUTFITTER_JSON"];
+        })
+    );
+
+    await cli.parse(["node", "test", "--json", "hello"]);
+    expect(envValue).toBe("1");
+  });
+
+  it("restores OUTFITTER_JSON after --json parse", async () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+
+    cli.register(
+      command("hello")
+        .description("Say hello")
+        .action(async () => undefined)
+    );
+
+    await cli.parse(["node", "test", "--json", "hello"]);
+    expect(process.env["OUTFITTER_JSON"]).toBeUndefined();
+  });
+
+  it("restores existing OUTFITTER_JSON value after --json parse", async () => {
+    process.env["OUTFITTER_JSON"] = "0";
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+
+    cli.register(
+      command("hello")
+        .description("Say hello")
+        .action(async () => undefined)
+    );
+
+    await cli.parse(["node", "test", "--json", "hello"]);
+    expect(process.env["OUTFITTER_JSON"]).toBe("0");
+  });
+
+  it("does not leak --json into subsequent parse calls", async () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+    const envValues: (string | undefined)[] = [];
+
+    cli.register(
+      command("hello")
+        .description("Say hello")
+        .action(async () => {
+          envValues.push(process.env["OUTFITTER_JSON"]);
+        })
+    );
+
+    await cli.parse(["node", "test", "--json", "hello"]);
+    await cli.parse(["node", "test", "hello"]);
+
+    expect(envValues).toEqual(["1", undefined]);
+  });
+
+  it("does not set OUTFITTER_JSON when --json is not passed", async () => {
+    const cli = createCLI({ name: "test", version: "0.1.0-rc.0" });
+    let envValue: string | undefined;
+
+    cli.register(
+      command("hello")
+        .description("Say hello")
+        .action(async () => {
+          envValue = process.env["OUTFITTER_JSON"];
+        })
+    );
+
+    await cli.parse(["node", "test", "hello"]);
+    expect(envValue).toBeUndefined();
   });
 });

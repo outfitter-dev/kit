@@ -395,6 +395,21 @@ const isVerbose = resolveVerbose();
 const isVerbose = resolveVerbose(cliFlags.verbose);
 ```
 
+### JSON Output
+
+`createCLI()` registers a global `--json` flag that bridges to `OUTFITTER_JSON=1` via a `preAction` hook. This means `output()` auto-detects JSON mode — no manual `if (json)` branching needed:
+
+```typescript
+// No need for this:
+if (opts.json) output(data, { mode: "json" });
+else output(data);
+
+// Just use output() directly — it reads OUTFITTER_JSON:
+output(data);
+```
+
+The bridge uses `optsWithGlobals()` so global and subcommand `--json` flags both work and coalesce into a single env var. Subcommands should **not** define their own `--json` — use the global flag. If they do, both coalesce safely.
+
 ### Output Mode Priority
 
 1. Explicit `mode` option in `output()` call

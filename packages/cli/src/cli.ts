@@ -48,14 +48,44 @@ function isCommanderHelp(error: { code?: string }): boolean {
  */
 export function createCLI(config: CLIConfig): CLI {
   const program = new Command();
+  let bridgedJsonEnvPrevious: string | undefined;
+  let bridgedJsonEnvActive = false;
+
+  const restoreJsonEnvBridge = (): void => {
+    if (!bridgedJsonEnvActive) {
+      return;
+    }
+
+    if (bridgedJsonEnvPrevious === undefined) {
+      process.env["OUTFITTER_JSON"] = undefined;
+    } else {
+      process.env["OUTFITTER_JSON"] = bridgedJsonEnvPrevious;
+    }
+
+    bridgedJsonEnvPrevious = undefined;
+    bridgedJsonEnvActive = false;
+  };
 
   program.name(config.name).version(config.version);
   if (config.description) {
     program.description(config.description);
   }
 
-  // Global --json flag available to all commands
+  // Global --json flag available to all commands.
+  // The preAction hook bridges any --json flag (global or subcommand) into
+  // the OUTFITTER_JSON env var so output() auto-detects JSON mode.
   program.option("--json", "Output as JSON", false);
+  program.hook("preAction", (thisCommand) => {
+    const allOpts = thisCommand.optsWithGlobals();
+    if (allOpts["json"] && !bridgedJsonEnvActive) {
+      bridgedJsonEnvPrevious = process.env["OUTFITTER_JSON"];
+      process.env["OUTFITTER_JSON"] = "1";
+      bridgedJsonEnvActive = true;
+    }
+  });
+  program.hook("postAction", () => {
+    restoreJsonEnvBridge();
+  });
 
   const exit =
     config.onExit ?? ((code: number): void => void process.exit(code));
@@ -81,6 +111,8 @@ export function createCLI(config: CLIConfig): CLI {
       const errorExitCode = (error as { exitCode?: number }).exitCode;
       const exitCode = typeof errorExitCode === "number" ? errorExitCode : 1;
       await exit(exitCode);
+    } finally {
+      restoreJsonEnvBridge();
     }
   };
 

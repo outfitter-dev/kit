@@ -216,6 +216,50 @@ export function readMigrationDocs(
   return docs.map((d) => d.content);
 }
 
+/**
+ * Read the `breaking` flag for an exact migration doc version, if present.
+ *
+ * Returns:
+ * - `true` or `false` when the frontmatter contains `breaking: ...`
+ * - `undefined` when the doc is missing, unreadable, or has no valid flag
+ */
+export function readMigrationBreakingFlag(
+  migrationsDir: string,
+  shortName: string,
+  version: string
+): boolean | undefined {
+  const filePath = join(migrationsDir, `outfitter-${shortName}-${version}.md`);
+
+  if (!existsSync(filePath)) {
+    return undefined;
+  }
+
+  let content: string;
+  try {
+    content = readFileSync(filePath, "utf-8");
+  } catch {
+    return undefined;
+  }
+
+  const frontmatter = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!frontmatter?.[1]) {
+    return undefined;
+  }
+
+  const breakingLine = frontmatter[1]
+    .split(/\r?\n/)
+    .find((line) => line.trimStart().startsWith("breaking:"));
+
+  if (breakingLine === undefined) {
+    return undefined;
+  }
+
+  const rawValue = breakingLine.split(":").slice(1).join(":").trim();
+  if (rawValue === "true") return true;
+  if (rawValue === "false") return false;
+  return undefined;
+}
+
 // =============================================================================
 // Migration Guide Builder
 // =============================================================================
@@ -393,6 +437,10 @@ export async function runUpdate(
   options: UpdateOptions
 ): Promise<Result<UpdateResult, OutfitterError>> {
   const cwd = resolve(options.cwd);
+  const migrationsDir = findMigrationDocsDir(cwd);
+  // For breaking classification overrides, only use project-discoverable docs.
+  // Passing `cwd` as `binaryDir` disables the dev-mode fallback to repo-root docs.
+  const migrationFlagsDir = findMigrationDocsDir(cwd, cwd);
 
   // Workspace-aware scanning: detect workspace root and collect all manifests
   const scanResult = getInstalledPackagesFromWorkspace(cwd);
@@ -429,8 +477,17 @@ export async function runUpdate(
       installedMap.set(pkg.name, pkg.version);
       const latest = await getLatestVersion(pkg.name);
       if (latest !== null) {
-        // npm doesn't tell us if it's breaking; leave undefined so the planner infers from semver
-        latestVersions.set(pkg.name, { version: latest });
+        // npm doesn't tell us if it's breaking. When local migration docs include
+        // an explicit breaking flag for this exact target version, prefer it.
+        const shortName = pkg.name.replace("@outfitter/", "");
+        const docBreaking =
+          migrationFlagsDir !== null
+            ? readMigrationBreakingFlag(migrationFlagsDir, shortName, latest)
+            : undefined;
+        latestVersions.set(pkg.name, {
+          version: latest,
+          ...(docBreaking !== undefined ? { breaking: docBreaking } : {}),
+        });
       } else {
         npmFailures.add(pkg.name);
       }
@@ -500,7 +557,7 @@ export async function runUpdate(
   // Build structured migration guides when --guide is requested
   let guidesData =
     options.guide === true
-      ? buildMigrationGuides(packages, findMigrationDocsDir(cwd))
+      ? buildMigrationGuides(packages, migrationsDir)
       : undefined;
 
   // Filter guides to specific packages when --guide packages are specified

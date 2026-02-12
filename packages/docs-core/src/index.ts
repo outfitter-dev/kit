@@ -577,6 +577,11 @@ function toOutputRelativePath(relativePath: string): string {
   return `${relativePath.slice(0, -".mdx".length)}.md`;
 }
 
+function getCodeFenceDelimiter(line: string): string | null {
+  const fenceMatch = /^\s*(```+|~~~+)/u.exec(line);
+  return fenceMatch?.at(1) ?? null;
+}
+
 function strictMdxError(input: {
   workspaceRoot: string;
   sourceAbsolutePath: string;
@@ -613,10 +618,30 @@ function processDocsSourceContent(input: {
   const outputLines: string[] = [];
   const warnings: DocsWarning[] = [];
   const sourceLines = input.content.split(/\r?\n/u);
+  let activeFenceDelimiter: string | null = null;
 
   for (let index = 0; index < sourceLines.length; index += 1) {
     const line = sourceLines[index] ?? "";
     const lineNumber = index + 1;
+    const fenceDelimiter = getCodeFenceDelimiter(line);
+
+    if (activeFenceDelimiter) {
+      outputLines.push(line);
+      if (
+        fenceDelimiter &&
+        fenceDelimiter[0] === activeFenceDelimiter[0] &&
+        fenceDelimiter.length >= activeFenceDelimiter.length
+      ) {
+        activeFenceDelimiter = null;
+      }
+      continue;
+    }
+
+    if (fenceDelimiter) {
+      activeFenceDelimiter = fenceDelimiter;
+      outputLines.push(line);
+      continue;
+    }
 
     if (/^\s*(import|export)\s/u.test(line)) {
       if (input.mdxMode === "strict") {
@@ -717,6 +742,7 @@ async function buildExpectedOutput(
   const collectedFiles: CollectedMarkdownFile[] = [];
   const files = new Map<string, string>();
   const warnings: DocsWarning[] = [];
+  const sourceByDestinationPath = new Map<string, string>();
 
   for (const discoveredPackage of discoveredPackages) {
     const publishable = await isPublishablePackage(
@@ -746,6 +772,30 @@ async function buildExpectedOutput(
         discoveredPackage.packageDirName,
         toOutputRelativePath(relativeFromPackageRoot)
       );
+      const existingSourceAbsolutePath = sourceByDestinationPath.get(
+        destinationAbsolutePath
+      );
+      if (existingSourceAbsolutePath) {
+        throw DocsCoreError.validation(
+          "Multiple source docs files resolve to the same output path",
+          {
+            outputPath: relativeToWorkspace(
+              options.workspaceRoot,
+              destinationAbsolutePath
+            ),
+            firstSourcePath: relativeToWorkspace(
+              options.workspaceRoot,
+              existingSourceAbsolutePath
+            ),
+            secondSourcePath: relativeToWorkspace(
+              options.workspaceRoot,
+              sourceAbsolutePath
+            ),
+          }
+        );
+      }
+
+      sourceByDestinationPath.set(destinationAbsolutePath, sourceAbsolutePath);
       collectedFiles.push({
         packageName: discoveredPackage.packageDirName,
         sourceAbsolutePath,

@@ -1,0 +1,53 @@
+# llms.txt
+
+Outfitter package docs index for LLM retrieval.
+
+## agents
+- docs/packages/agents/README.md — @outfitter/agents
+
+## cli
+- docs/packages/cli/HARVEST_MAP.md — @outfitter/cli Harvest Map
+- docs/packages/cli/README.md — @outfitter/cli
+
+## config
+- docs/packages/config/README.md — @outfitter/config
+
+## contracts
+- docs/packages/contracts/README.md — @outfitter/contracts
+
+## daemon
+- docs/packages/daemon/README.md — @outfitter/daemon
+
+## docs
+- docs/packages/docs/README.md — @outfitter/docs
+
+## docs-core
+- docs/packages/docs-core/README.md — @outfitter/docs-core
+
+## file-ops
+- docs/packages/file-ops/README.md — @outfitter/file-ops
+
+## index
+- docs/packages/index/README.md — @outfitter/index
+
+## kit
+- docs/packages/kit/README.md — @outfitter/kit
+- docs/packages/kit/VERSIONS.md — Version Compatibility Matrix
+
+## logging
+- docs/packages/logging/README.md — @outfitter/logging
+
+## mcp
+- docs/packages/mcp/README.md — @outfitter/mcp
+
+## state
+- docs/packages/state/README.md — @outfitter/state
+
+## testing
+- docs/packages/testing/README.md — @outfitter/testing
+
+## tooling
+- docs/packages/tooling/README.md — @outfitter/tooling
+
+## types
+- docs/packages/types/README.md — @outfitter/types

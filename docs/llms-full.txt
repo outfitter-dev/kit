@@ -1,0 +1,5389 @@
+# llms-full.txt
+
+Outfitter package docs corpus for LLM retrieval.
+
+---
+path: docs/packages/agents/README.md
+package: agents
+title: @outfitter/agents
+---
+
+# @outfitter/agents
+
+> **⚠️ DEPRECATED**: This package is deprecated. Use `npx outfitter add scaffolding` instead.
+>
+> The shadcn-style registry in `outfitter` CLI now provides the same functionality with better flexibility:
+>
+> ```bash
+> # Add all scaffolding files
+> npx outfitter add scaffolding
+>
+> # Or add individual blocks
+> npx outfitter add claude      # Claude Code settings & hooks
+> npx outfitter add biome       # Biome configuration
+> npx outfitter add lefthook    # Git hooks
+> npx outfitter add bootstrap   # Bootstrap script
+> ```
+>
+> See the [outfitter CLI documentation](https://github.com/outfitter-dev/outfitter) for more details.
+
+---
+
+Agent scaffolding and bootstrap utilities for AI-ready projects.
+
+## Installation
+
+```bash
+bun add @outfitter/agents
+```
+
+## Quick Start
+
+Initialize agent documentation in your project:
+
+```typescript
+import { initAgentDocs } from "@outfitter/agents";
+
+await initAgentDocs();
+```
+
+This creates:
+- `AGENTS.md` — Guidelines for AI agents working in your project
+- `CLAUDE.md` — Project-level instructions for Claude
+- `.claude/CLAUDE.md` — Additional Claude-specific guidance
+- `.claude/settings.json` — Claude Code settings
+- `.claude/hooks/bootstrap.sh` — Bootstrap hook script
+
+## Features
+
+- **Agent Documentation** — Scaffolds `AGENTS.md` and `CLAUDE.md` templates
+- **Bootstrap Tooling** — Ensures core development tools are installed
+- **Settings Management** — Merges Claude Code settings without overwriting
+- **CI-Friendly** — Quiet mode for automated environments
+
+## API Reference
+
+### initAgentDocs(options)
+
+Initialize agent documentation in a directory.
+
+```typescript
+interface InitOptions {
+  target?: string;   // Target directory (default: cwd)
+  merge?: boolean;   // Merge with existing files (default: false)
+  force?: boolean;   // Overwrite existing files (default: false)
+  quiet?: boolean;   // Suppress output (default: false)
+}
+
+// Basic initialization
+await initAgentDocs();
+
+// Initialize in specific directory
+await initAgentDocs({ target: "/path/to/project" });
+
+// Merge settings.json with existing
+await initAgentDocs({ merge: true });
+
+// Force overwrite all files
+await initAgentDocs({ force: true });
+```
+
+**Behavior:**
+- Without `force` or `merge`, existing files are skipped
+- With `merge`, only `settings.json` is merged; other files are skipped
+- With `force`, all files are overwritten
+
+### bootstrap(options)
+
+Run development environment bootstrap with optional extensions.
+
+```typescript
+interface BootstrapOptions {
+  tools?: string[];                  // Additional tools to install
+  extend?: () => Promise<void>;      // Project-specific setup
+  force?: boolean;                   // Skip checks, run full bootstrap
+  quiet?: boolean;                   // Suppress output (for CI)
+}
+
+// Basic bootstrap
+await bootstrap();
+
+// With additional tools
+await bootstrap({
+  tools: ["ripgrep", "fd"],
+});
+
+// With project extensions
+await bootstrap({
+  extend: async () => {
+    await setupDatabase();
+    await seedTestData();
+  },
+});
+
+// Quiet mode for CI
+await bootstrap({ quiet: true });
+```
+
+**Core tools installed:**
+- `gh` — GitHub CLI
+- `gt` — Graphite CLI for stacked PRs
+- `markdownlint-cli2` — Markdown linting
+
+**Authentication checks:**
+- GitHub CLI (`gh auth status` or `GH_TOKEN`/`GITHUB_TOKEN`)
+- Graphite CLI (`gt auth status` or `GT_AUTH_TOKEN`)
+
+### mergeSettings(existing, defaults)
+
+Merge Claude Code settings without losing user customizations.
+
+```typescript
+interface SettingsJson {
+  mcpServers?: Record<string, unknown>;
+  hooks?: Record<string, HookConfig>;
+  allowedTools?: string[];
+  customInstructions?: string;
+  // ... other settings
+}
+
+interface HookConfig {
+  command: string;
+  event: string;
+  // ... hook configuration
+}
+
+const merged = mergeSettings(existingSettings, defaultSettings);
+```
+
+**Merge behavior:**
+- Arrays are concatenated and deduplicated
+- Objects are recursively merged
+- User values take precedence over defaults
+
+## Generated Files
+
+### AGENTS.md
+
+Guidelines for AI agents working in your codebase:
+
+```markdown
+# AGENTS.md
+
+Guidelines for AI agents and developers working in this repository.
+
+## Project Overview
+[Project description and context]
+
+## Project Structure
+[Directory layout and conventions]
+
+## Commands
+[Build, test, lint commands]
+
+## Architecture
+[Key patterns and decisions]
+```
+
+### CLAUDE.md
+
+Project-level instructions for Claude:
+
+```markdown
+# CLAUDE.md
+
+This file provides AI agents with project-specific context.
+
+@.claude/CLAUDE.md
+@AGENTS.md
+```
+
+### .claude/settings.json
+
+Claude Code settings with hooks:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "command": ".claude/hooks/bootstrap.sh",
+        "event": "Bash",
+        "matcher": "bun install"
+      }
+    ]
+  }
+}
+```
+
+### .claude/hooks/bootstrap.sh
+
+Bootstrap hook that runs after `bun install`:
+
+```bash
+#!/bin/bash
+# Runs after bun install to ensure environment is ready
+bun run bootstrap 2>/dev/null || true
+```
+
+## Usage Patterns
+
+### CI/CD Bootstrap
+
+```typescript
+// In CI, run quietly and skip interactive prompts
+await bootstrap({ quiet: true, force: true });
+```
+
+### Monorepo Setup
+
+```typescript
+// Initialize docs at monorepo root
+await initAgentDocs({ target: "/path/to/monorepo" });
+
+// Individual packages can extend with their own AGENTS.md
+```
+
+### Custom Tool Requirements
+
+```typescript
+await bootstrap({
+  tools: ["jq", "yq", "fzf"],
+  extend: async () => {
+    // Project-specific setup after core tools
+    console.log("Running database migrations...");
+    await runMigrations();
+  },
+});
+```
+
+### Pre-commit Hook Integration
+
+```bash
+#!/bin/bash
+# .husky/pre-commit or lefthook.yml
+bun run -e "import { bootstrap } from '@outfitter/agents'; await bootstrap({ quiet: true })"
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `GH_TOKEN` | GitHub CLI authentication token |
+| `GITHUB_TOKEN` | Alternative GitHub token (fallback) |
+| `GT_AUTH_TOKEN` | Graphite CLI authentication token |
+
+## Platform Support
+
+- **macOS**: Uses Homebrew for `gh` and `gt` installation
+- **Linux/Windows**: Falls back to npm/bun global installs
+
+## Related Packages
+
+- [@outfitter/cli](../cli/README.md) — CLI framework for building tools
+- [@outfitter/config](../config/README.md) — XDG-compliant configuration
+
+---
+path: docs/packages/cli/HARVEST_MAP.md
+package: cli
+title: @outfitter/cli Harvest Map
+---
+
+# @outfitter/cli Harvest Map
+
+This document catalogs CLI patterns discovered in waymark and firewatch codebases, mapping them to the @outfitter/cli implementation plan defined in SPEC.md.
+
+## Source Repositories
+
+### waymark/packages/cli
+
+**Path**: `~/Developer/outfitter/waymark/packages/cli/`
+
+**Key files analyzed**:
+
+| File | Purpose |
+|------|---------|
+| `src/exit-codes.ts` | Standardized exit code constants |
+| `src/errors.ts` | CliError class with exit code mapping |
+| `src/program.ts` | Commander.js program builder, command registration |
+| `src/utils/output.ts` | JSON/JSONL/text rendering helpers |
+| `src/utils/stdin.ts` | stdin stream reading utilities |
+| `src/utils/terminal.ts` | TTY detection, color support detection |
+| `src/utils/flags/*.ts` | Flag parsing utilities (json, string-list, iterator) |
+| `src/utils/display/pagination.ts` | Basic pagination (slice-based) |
+| `src/utils/display/formatters/styles.ts` | Chalk-based styling utilities |
+| `src/types.ts` | GlobalOptions, CommandContext types |
+
+### firewatch/apps/cli
+
+**Path**: `~/Developer/outfitter/firewatch/apps/cli/`
+
+**Key files analyzed**:
+
+| File | Purpose |
+|------|---------|
+| `bin/fw.ts` | Entrypoint with graceful shutdown handlers |
+| `src/index.ts` | Commander.js program with extensive option parsing |
+| `src/utils/json.ts` | JSONL output with backpressure handling |
+| `src/utils/tty.ts` | TTY detection with env var overrides |
+| `src/utils/color.ts` | Lazy-initialized ansis color handling |
+| `src/commands/ack.ts` | Command example with structured output |
+
+---
+
+## Pattern Categories
+
+### 1. Output Patterns
+
+#### JSON/JSONL Handling
+
+**Source**: `firewatch/apps/cli/src/utils/json.ts:5-30`
+
+```typescript
+export async function writeJsonLine(value: unknown): Promise<void> {
+  const serialized = JSON.stringify(value);
+  const line = `${serialized ?? "null"}\n`;
+  if (!process.stdout.write(line)) {
+    await once(process.stdout, "drain");
+  }
+}
+
+export async function outputStructured(
+  value: unknown,
+  format: OutputFormat
+): Promise<void> {
+  if (format === "json") {
+    const serialized = JSON.stringify(value, null, 2);
+    const line = `${serialized ?? "null"}\n`;
+    if (!process.stdout.write(line)) {
+      await once(process.stdout, "drain");
+    }
+    return;
+  }
+
+  const items = Array.isArray(value) ? value : [value];
+  for (const item of items) {
+    await writeJsonLine(item);
+  }
+}
+```
+
+**Key insight**: Backpressure handling with `once(process.stdout, "drain")` is essential for large outputs piped to slower consumers.
+
+**Source**: `waymark/packages/cli/src/utils/output.ts:57-83`
+
+```typescript
+export function renderRecords(
+  records: WaymarkRecord[],
+  format: ScanOutputFormat
+): string {
+  if (records.length === 0) {
+    return "";
+  }
+  const cleanedRecords = records.map(cleanRecord);
+
+  switch (format) {
+    case "json":
+      return JSON.stringify(cleanedRecords);
+    case "jsonl":
+      return cleanedRecords.map((record) => JSON.stringify(record)).join("\n");
+    case "text":
+      return JSON.stringify(cleanedRecords, null, 2);
+    default:
+      return records
+        .map(
+          (record) =>
+            `${record.file}:${record.startLine} ${record.type} ::: ${record.contentText}`
+        )
+        .join("\n");
+  }
+}
+```
+
+**Key insight**: Waymark uses sync string building, suitable for smaller outputs. Outfitter should support both patterns based on output size.
+
+#### TTY Detection
+
+**Source**: `firewatch/apps/cli/src/utils/tty.ts:23-70`
+
+```typescript
+export function shouldOutputJson(
+  options: OutputModeOptions,
+  defaultFormat?: "human" | "json"
+): boolean {
+  // Explicit flag takes precedence
+  if (options.jsonl === true) return true;
+  if (options.jsonl === false) return false;
+  if (options.json === true) return true;
+  if (options.json === false) return false;
+
+  // Environment variable (prefer JSONL)
+  if (process.env.FIREWATCH_JSONL === "1") return true;
+  if (process.env.FIREWATCH_JSONL === "0") return false;
+  if (process.env.FIREWATCH_JSON === "1") return true;
+  if (process.env.FIREWATCH_JSON === "0") return false;
+
+  if (defaultFormat === "json") return true;
+  if (defaultFormat === "human") return false;
+
+  // TTY detection - if not a TTY (piped), default to JSON
+  if (!process.stdout.isTTY) return true;
+
+  // Interactive terminal - default to human-readable
+  return false;
+}
+```
+
+**Key insight**: Priority cascade: explicit flag > env var > config default > TTY detection. This is the blessed pattern for Outfitter.
+
+**Source**: `waymark/packages/cli/src/utils/terminal.ts:36-53`
+
+```typescript
+export function shouldUseColor(noColorFlag?: boolean): boolean {
+  if (noColorFlag) return false;
+  if (hasNoColor()) return false;  // NO_COLOR env
+  if (hasForceColor()) return true; // FORCE_COLOR env
+  if (!process.stdout.isTTY) return false;
+  if (isDumbTerminal()) return false; // TERM=dumb
+  return true;
+}
+```
+
+**Key insight**: Respects `NO_COLOR`, `FORCE_COLOR`, and `TERM=dumb` conventions. Outfitter MUST honor these.
+
+#### Color Handling
+
+**Source**: `firewatch/apps/cli/src/utils/color.ts:1-61`
+
+```typescript
+let colorInstance: Ansis | null = null;
+
+function shouldUseColor(): boolean {
+  if (process.env.NO_COLOR) return false;
+  if (process.env.FORCE_COLOR) return true;
+  if (process.env.TERM === "dumb") return false;
+  return process.stdout.isTTY ?? false;
+}
+
+export function getAnsis(): Ansis {
+  if (colorInstance) return colorInstance;
+
+  if (shouldUseColor()) {
+    colorInstance = ansis;
+  } else {
+    colorInstance = new Ansis(0);
+  }
+  return colorInstance;
+}
+
+export function resetColorInstance(): void {
+  colorInstance = null;
+}
+```
+
+**Key insight**: Lazy initialization allows CLI flags to be processed before color decision. Essential for `--no-color` to work correctly.
+
+---
+
+### 2. Input Patterns
+
+#### Flag Parsing (Iterator Pattern)
+
+**Source**: `waymark/packages/cli/src/utils/flags/iterator.ts:6-75`
+
+```typescript
+export class ArgIterator {
+  private index = 0;
+  private readonly argv: readonly string[];
+
+  constructor(argv: readonly string[]) {
+    this.argv = argv;
+  }
+
+  hasNext(): boolean {
+    return this.index < this.argv.length;
+  }
+
+  next(): string | undefined {
+    if (!this.hasNext()) return;
+    const value = this.argv[this.index];
+    this.index += 1;
+    return value;
+  }
+
+  peek(): string | undefined {
+    return this.argv[this.index];
+  }
+
+  consumeValue(optionName: string): string {
+    const value = this.next();
+    if (typeof value !== "string" || isFlag(value)) {
+      throw new Error(`${optionName} requires a value`);
+    }
+    return value;
+  }
+}
+
+export function isFlag(token: string | undefined): boolean {
+  return typeof token === "string" && token.startsWith("-");
+}
+
+export function matchesFlag(
+  token: string | undefined,
+  names: readonly string[]
+): boolean {
+  if (typeof token !== "string") return false;
+  return names.includes(token);
+}
+```
+
+**Key insight**: Custom arg iterator with lookahead. Outfitter uses Commander.js but this pattern is useful for custom parsing.
+
+#### CSV/List Parsing
+
+**Source**: `firewatch/apps/cli/src/index.ts:96-157`
+
+```typescript
+function parseCsvList(value?: string): string[] {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function parsePrList(value: string | boolean | undefined): number[] {
+  if (!value || value === true) return [];
+  return value
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const parsed = Number.parseInt(part, 10);
+      if (Number.isNaN(parsed)) {
+        throw new TypeError(`Invalid PR number: ${part}`);
+      }
+      return parsed;
+    });
+}
+
+function parseAuthorFilters(value?: string): {
+  include: string[];
+  exclude: string[];
+} {
+  const items = parseCsvList(value);
+  const include: string[] = [];
+  const exclude: string[] = [];
+
+  for (const item of items) {
+    if (item.startsWith("!")) {
+      const trimmed = item.slice(1).trim();
+      if (trimmed) exclude.push(trimmed);
+    } else {
+      include.push(item);
+    }
+  }
+
+  return { include, exclude };
+}
+```
+
+**Key insight**: Pattern for include/exclude lists with `!` prefix. Outfitter should standardize this pattern.
+
+#### stdin Reading
+
+**Source**: `waymark/packages/cli/src/utils/stdin.ts:8-28`
+
+```typescript
+export async function readStream(
+  stream: NodeJS.ReadableStream
+): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    if (typeof chunk === "string") {
+      chunks.push(Buffer.from(chunk));
+    } else {
+      chunks.push(chunk);
+    }
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+export async function readFromStdin(): Promise<string> {
+  return await readStream(process.stdin);
+}
+```
+
+**Key insight**: Simple async stdin reading. Outfitter should expand this to support `@-` and `-` conventions.
+
+---
+
+### 3. Error Patterns
+
+#### Exit Codes
+
+**Source**: `waymark/packages/cli/src/exit-codes.ts:3-11`
+
+```typescript
+export const ExitCode = {
+  success: 0,
+  failure: 1,
+  usageError: 2,
+  configError: 3,
+  ioError: 4,
+} as const;
+
+export type ExitCode = (typeof ExitCode)[keyof typeof ExitCode];
+```
+
+**Key insight**: Waymark uses a simple 5-code system. SPEC.md defines a more comprehensive mapping based on error categories.
+
+#### Error Classes
+
+**Source**: `waymark/packages/cli/src/errors.ts:5-31`
+
+```typescript
+export class CliError extends Error {
+  exitCode: ExitCode;
+
+  constructor(message: string, exitCode: ExitCode) {
+    super(message);
+    this.name = "CliError";
+    this.exitCode = exitCode;
+  }
+}
+
+export function createUsageError(message: string): CliError {
+  return new CliError(message, ExitCode.usageError);
+}
+
+export function createConfigError(message: string): CliError {
+  return new CliError(message, ExitCode.configError);
+}
+```
+
+**Key insight**: Factory functions for common error types. Outfitter should build on this but derive from OutfitterError base.
+
+#### Error Resolution
+
+**Source**: `waymark/packages/cli/src/program.ts:106-142`
+
+```typescript
+function resolveCommanderExitCode(error: CommanderError): ExitCode {
+  if (error.exitCode === 0) return ExitCode.success;
+  if (error.code.startsWith("commander.")) return ExitCode.usageError;
+  return (error.exitCode ?? ExitCode.failure) as ExitCode;
+}
+
+function resolveExitCode(error: unknown): ExitCode {
+  if (error instanceof CliError) return error.exitCode;
+  if (error instanceof CommanderError) return resolveCommanderExitCode(error);
+  if (
+    error &&
+    typeof error === "object" &&
+    "code" in error &&
+    typeof (error as NodeJS.ErrnoException).code === "string"
+  ) {
+    return ExitCode.ioError;
+  }
+  return ExitCode.failure;
+}
+
+function resolveErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+  if (typeof error === "string" && error.trim().length > 0) {
+    return error;
+  }
+  return "Unexpected error";
+}
+```
+
+**Key insight**: Robust error type detection including Commander.js errors and Node.js errno errors.
+
+#### Error Serialization for JSON Output
+
+**Source**: `firewatch/apps/cli/src/commands/ack.ts:221-233`
+
+```typescript
+if (outputJson) {
+  await outputStructured(
+    {
+      ok: true,
+      repo,
+      ...(pr !== undefined && { pr }),
+      id: shortId,
+      gh_id: commentId,
+      removed,
+    },
+    "jsonl"
+  );
+  return;
+}
+```
+
+**Key insight**: Structured output uses `{ ok: boolean, ... }` envelope pattern. Outfitter formalizes this as `Envelope<T>`.
+
+---
+
+### 4. Pagination Patterns
+
+#### Basic Pagination (What Exists)
+
+**Source**: `waymark/packages/cli/src/utils/display/pagination.ts:13-28`
+
+```typescript
+export function paginateRecords(
+  records: WaymarkRecord[],
+  limit?: number,
+  page?: number
+): WaymarkRecord[] {
+  if (!(limit || page)) return records;
+
+  const pageSize = limit || DEFAULT_PAGE_SIZE;
+  const pageNumber = page || 1;
+  const startIndex = (pageNumber - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  return records.slice(startIndex, endIndex);
+}
+```
+
+**Source**: `waymark/packages/cli/src/utils/display/types.ts:19-21`
+
+```typescript
+export const DEFAULT_PAGE_SIZE = 50;
+```
+
+**Key insight**: Waymark uses simple offset/limit pagination with in-memory slicing. Firewatch similarly uses `--limit` and `--offset` options.
+
+**What's missing**: Cursor persistence, `--next` flag, context-scoped state buckets. These are spec-driven features.
+
+---
+
+### 5. Command Structure Patterns
+
+#### Commander.js Usage
+
+**Source**: `waymark/packages/cli/src/program.ts:1116-1243`
+
+```typescript
+export async function createProgram(): Promise<Command> {
+  const packageJsonPath = new URL("../package.json", import.meta.url);
+  const packageJson = await import(packageJsonPath.href);
+  const version = packageJson.default.version as string;
+
+  const program = new Command();
+  program.exitOverride((error) => {
+    const exitCode = resolveCommanderExitCode(error);
+    process.exit(exitCode);
+  });
+
+  const jsonOption = new Option("--json", "Output as JSON array");
+  const jsonlOption = new Option("--jsonl", "Output as JSON Lines");
+  const textOption = new Option("--text", "Output as human-readable text");
+  jsonOption.conflicts("jsonl");
+  jsonOption.conflicts("text");
+  jsonlOption.conflicts("json");
+  jsonlOption.conflicts("text");
+  textOption.conflicts("json");
+  textOption.conflicts("jsonl");
+
+  program
+    .name("wm")
+    .description("Waymark CLI - scan, filter, format, and manage waymarks")
+    .version(version, "--version, -v", "output the current version")
+    .helpOption("--help, -h", "display help for command")
+    .addHelpCommand(false)
+    .configureHelp({
+      formatHelp: buildCustomHelpFormatter(),
+    })
+    .addOption(new Option("--scope <scope>", "config scope")
+      .choices(["default", "project", "user"])
+      .default("default"))
+    .option("--config <path>", "load additional config file")
+    .option("--cache", "use scan cache")
+    .option("--no-input", "fail if interactive input required")
+    .option("--verbose", "enable verbose logging")
+    .option("--debug", "enable debug logging")
+    .option("--quiet, -q", "only show errors")
+    .addOption(jsonOption)
+    .addOption(jsonlOption)
+    .addOption(textOption)
+    .option("--no-color", "disable ANSI colors")
+    .hook("preAction", (thisCommand) => {
+      const opts = thisCommand.opts();
+      setPromptPolicy({ noInput: Boolean(opts.noInput) });
+      if (opts.debug) logger.level = "debug";
+      else if (opts.verbose) logger.level = "info";
+      else if (opts.quiet) logger.level = "error";
+    });
+
+  registerCommands(program, { /* handlers */ });
+
+  return program;
+}
+```
+
+**Key insight**: Option conflicts declared explicitly. Global options handled in `preAction` hook. Version from package.json.
+
+**Source**: `firewatch/apps/cli/src/index.ts:407-456`
+
+```typescript
+const program = new Command();
+program.enablePositionalOptions();
+
+program
+  .name("fw")
+  .description("GitHub PR activity logger")
+  .version(version)
+  .option("--pr [numbers]", "Filter to PR domain")
+  .option("--repo <name>", "Filter to specific repository")
+  .option("--all", "Include all cached repos")
+  .option("--mine", "Items on PRs assigned to me")
+  .option("--reviews", "PRs I need to review")
+  .option("-s, --since <duration>", "Filter by time window")
+  .option("--offline", "Use cache only")
+  .option("--refresh [full]", "Force sync before query")
+  .option("-n, --limit <count>", "Limit results", Number.parseInt)
+  .option("--offset <count>", "Skip first N results", Number.parseInt)
+  .option("--summary", "Aggregate entries")
+  .option("-j, --jsonl", "Force structured output")
+  .option("--no-jsonl", "Force human-readable output")
+  .option("--debug", "Enable debug logging")
+  .option("--no-color", "Disable color output")
+  .addHelpText("after", "Examples:\n  ...")
+  .action(async (options) => { /* ... */ });
+```
+
+**Key insight**: `enablePositionalOptions()` for better positional arg handling. Example text in help.
+
+#### Signal Handling
+
+**Source**: `waymark/packages/cli/src/program.ts:161-176`
+
+```typescript
+let signalHandlersRegistered = false;
+const SIGINT_EXIT_CODE = 130;
+const SIGTERM_EXIT_CODE = 143;
+
+function registerSignalHandlers(): void {
+  if (signalHandlersRegistered) return;
+  signalHandlersRegistered = true;
+  process.once("SIGINT", () => process.exit(SIGINT_EXIT_CODE));
+  process.once("SIGTERM", () => process.exit(SIGTERM_EXIT_CODE));
+}
+```
+
+**Source**: `firewatch/apps/cli/bin/fw.ts:15-47`
+
+```typescript
+function setupShutdownHandlers(): void {
+  let shuttingDown = false;
+
+  const shutdown = () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    closeFirewatchDb();
+  };
+
+  process.on("exit", shutdown);
+  process.on("SIGINT", () => { shutdown(); process.exit(0); });
+  process.on("SIGTERM", () => { shutdown(); process.exit(0); });
+  process.on("uncaughtException", (err) => {
+    console.error("Uncaught exception:", err);
+    shutdown();
+    process.exit(1);
+  });
+}
+```
+
+**Key insight**: Firewatch does cleanup (DB close) on shutdown. Outfitter should provide shutdown hooks for resource cleanup.
+
+#### Spinner Pattern
+
+**Source**: `waymark/packages/cli/src/program.ts:78-89`
+
+```typescript
+function shouldEnableSpinner(options: {
+  quiet?: boolean;
+  structuredOutput?: boolean;
+}): boolean {
+  if (options.structuredOutput) return false;
+  if (options.quiet) return false;
+  return Boolean(process.stderr.isTTY);
+}
+```
+
+**Key insight**: Spinners disabled for quiet mode and structured output. Use stderr for spinners.
+
+---
+
+## Code Snippets to Adapt
+
+### Output Mode Selection (from firewatch)
+
+Outfitter should generalize this pattern:
+
+```typescript
+// @outfitter/cli output mode detection
+export function resolveOutputMode(options: {
+  json?: boolean;
+  jsonl?: boolean;
+  text?: boolean;
+}, config?: { defaultFormat?: "human" | "json" }): OutputMode {
+  // Explicit flags first
+  if (options.json) return "json";
+  if (options.jsonl) return "jsonl";
+  if (options.text) return "text";
+
+  // Env var override (generic pattern)
+  const envJson = process.env[`${APP_PREFIX}_JSON`];
+  const envJsonl = process.env[`${APP_PREFIX}_JSONL`];
+  if (envJsonl === "1") return "jsonl";
+  if (envJson === "1") return "json";
+  if (envJsonl === "0" || envJson === "0") return "text";
+
+  // Config default
+  if (config?.defaultFormat === "json") return "jsonl";
+
+  // TTY detection
+  return process.stdout.isTTY ? "text" : "jsonl";
+}
+```
+
+### Standardized Exit Code Mapping (extending waymark)
+
+```typescript
+// @outfitter/cli exit codes (mapped from ErrorCategory)
+export const ExitCode = {
+  success: 0,
+  validation: 1,     // Bad input, invalid flags
+  not_found: 2,      // Resource not found
+  conflict: 3,       // State conflict, version mismatch
+  permission: 4,     // Auth/authz failure
+  io: 5,             // File/network/database I/O
+  transient: 6,      // Retry-able failure
+  internal: 7,       // Bug, unexpected state
+  cancelled: 8,      // User cancelled (Ctrl+C handled separately)
+} as const;
+```
+
+### Backpressure-Aware JSONL (from firewatch)
+
+```typescript
+// @outfitter/cli streaming output
+import { once } from "node:events";
+
+export async function writeJsonl<T>(
+  items: AsyncIterable<T> | Iterable<T>,
+  stream: NodeJS.WritableStream = process.stdout
+): Promise<void> {
+  for await (const item of items) {
+    const line = JSON.stringify(item) + "\n";
+    if (!stream.write(line)) {
+      await once(stream, "drain");
+    }
+  }
+}
+```
+
+### Lazy Color Initialization (from firewatch)
+
+```typescript
+// @outfitter/cli color utilities (using Bun.color)
+let colorEnabled: boolean | null = null;
+
+export function shouldUseColor(): boolean {
+  if (colorEnabled !== null) return colorEnabled;
+
+  if (process.env.NO_COLOR) colorEnabled = false;
+  else if (process.env.FORCE_COLOR) colorEnabled = true;
+  else if (process.env.TERM === "dumb") colorEnabled = false;
+  else colorEnabled = process.stdout.isTTY ?? false;
+
+  return colorEnabled;
+}
+
+export function resetColorDecision(): void {
+  colorEnabled = null;
+}
+```
+
+---
+
+## Patterns NOT Suitable for Outfitter
+
+### 1. Waymark-specific Styling (styles.ts)
+
+The extensive chalk-based styling for waymark syntax (tags, mentions, properties) is domain-specific. Outfitter provides semantic tokens via `@outfitter/cli/render`; individual CLIs style their domain objects.
+
+**Reason**: Too coupled to waymark grammar. Outfitter tokens are semantic (success, warning, danger), not domain-specific.
+
+### 2. Record Cleaning Logic (output.ts cleanRecord)
+
+Waymark's record cleaning removes empty arrays and specific fields. This is schema-specific.
+
+**Reason**: Outfitter handles generic JSON output. Schema-aware cleaning belongs in domain handlers.
+
+### 3. Waymark-specific Iterator Patterns
+
+The custom flag parsing with `handleStringListFlag`, `handleJsonFlag`, etc., works around Commander.js limitations for waymark's unified command. Outfitter relies on Commander.js native patterns.
+
+**Reason**: Over-engineering for Outfitter's scope. Commander.js handles most cases.
+
+### 4. Firewatch-specific Repo Detection
+
+The `detectRepo()`, `ensureRepoCache()`, and GitHub-specific patterns are firewatch domain logic.
+
+**Reason**: Not generalizable CLI infrastructure.
+
+---
+
+## Spec-Driven Features
+
+These features are defined in SPEC.md but do NOT exist in waymark or firewatch. They must be built fresh for Outfitter.
+
+### 1. Cursor Persistence (`--next` flag)
+
+**SPEC.md requirement**: "Pagination state is persisted **per command**. `--next` continues from persisted state. `--reset` clears the persisted state."
+
+**What exists**: Waymark/firewatch have offset-based pagination but no state persistence.
+
+**Outfitter implementation needed**:
+- State storage in `@outfitter/state` (XDG state directory)
+- Per-command cursor serialization
+- `--next` flag that loads last cursor
+- `--reset` flag that clears cursor
+
+### 2. Context-Scoped State Buckets (`--context` flag)
+
+**SPEC.md requirement**: "A user-supplied context key scopes state buckets. Preferred flag name: `--context <name>`."
+
+**What exists**: Neither repo implements this.
+
+**Outfitter implementation needed**:
+- State keyed by `(command, context)` tuple
+- Default context when not specified
+- State isolation between contexts
+
+### 3. @file Expansion Convention
+
+**SPEC.md requirement**: "`@file` for file-sourced inputs. `@` prefix may also be used to disambiguate identifiers."
+
+**What exists**: Neither repo implements this systematically.
+
+**Outfitter implementation needed**:
+- `expandFileArg()` utility that reads `@path` files
+- Integration with `collectIds()` for multi-ID collection
+- Support for `@-` reading from stdin
+
+### 4. Workspace-Constrained Globs
+
+**SPEC.md requirement**: "`parseGlob()` — Glob pattern expansion with workspace constraints."
+
+**What exists**: Waymark has workspace detection but no constrained glob expansion.
+
+**Outfitter implementation needed**:
+- `parseGlob()` that enforces paths stay within workspace
+- Integration with `@outfitter/file-ops` for `secureResolvePath()`
+- Error on glob patterns that escape workspace
+
+### 5. Result-Based Error Handling
+
+**SPEC.md requirement**: All handlers return `Result<T, E>` with `OutfitterError` subclasses.
+
+**What exists**: Waymark/firewatch use thrown exceptions.
+
+**Outfitter implementation needed**:
+- CLI adapter converts `Result.err()` to appropriate exit code
+- Structured error serialization for `--json` output
+- Error envelope format: `{ ok: false, error: { _tag, message, ... } }`
+
+### 6. Shape-Based Output System
+
+**SPEC.md requirement**: Semantic shapes (`Collection`, `Hierarchy`, `KeyValue`, `Resource`) that render to any mode.
+
+**What exists**: Waymark has formatters but no shape abstraction. Firewatch has no abstraction.
+
+**Outfitter implementation needed**:
+- `@outfitter/cli/render` shapes
+- `@outfitter/cli` output() function that auto-selects renderer
+- Integration with `--json`, `--jsonl`, `--tree`, `--table` flags
+
+### 7. Handler Contract
+
+**SPEC.md requirement**: "CLI and MCP are thin adapters over shared handlers."
+
+**What exists**: Waymark has some handler separation. Firewatch mixes command logic with output.
+
+**Outfitter implementation needed**:
+- Clear handler interface: `(input, ctx) => Promise<Result<T, E>>`
+- CLI adapter that maps flags to handler input
+- Handler knows nothing about output format
+
+---
+
+## Harvest Priority
+
+Based on SPEC.md and existing patterns:
+
+| Priority | Feature | Source | Notes |
+|----------|---------|--------|-------|
+| P0 | Exit code constants | waymark | Extend with full error category mapping |
+| P0 | Output mode detection | firewatch | Generalize env var pattern |
+| P0 | TTY/color detection | both | Combine best of both |
+| P0 | JSONL with backpressure | firewatch | Critical for streaming |
+| P1 | Commander.js patterns | waymark | Option conflicts, hooks, help customization |
+| P1 | CSV parsing utilities | firewatch | Standardize include/exclude pattern |
+| P1 | Signal handlers | both | Combine with cleanup hooks |
+| P1 | stdin reading | waymark | Extend for @- convention |
+| P2 | Spinner integration | waymark | stderr-based, quiet-aware |
+| P2 | Custom help formatting | waymark | May not need for v1 |
+
+---
+
+## Next Steps
+
+1. **Create core utilities**: Exit codes, output modes, TTY detection
+2. **Build input parsing**: `collectIds()`, `expandFileArg()`, `parseGlob()`, `parseKeyValue()`
+3. **Implement state persistence**: Cursor storage for `--next`/`--context`
+4. **Integrate with @outfitter/cli/render**: Shape-to-output rendering
+5. **Create typed Commander.js wrapper**: The `createCLI()`, `command()`, `output()` API
+
+---
+path: docs/packages/cli/README.md
+package: cli
+title: @outfitter/cli
+---
+
+# @outfitter/cli
+
+Typed CLI runtime with output contracts, input parsing, and pagination for Bun.
+
+## Installation
+
+```bash
+bun add @outfitter/cli
+```
+
+## Quick Start
+
+```typescript
+import { output } from "@outfitter/cli/output";
+import { collectIds } from "@outfitter/cli/input";
+import { loadCursor, saveCursor } from "@outfitter/cli/pagination";
+
+// Output data with automatic mode detection
+output({ id: "123", name: "Example" });
+
+// Collect IDs from various input formats
+const ids = await collectIds("id1,id2,id3");
+
+// Handle pagination state
+const cursor = loadCursor({ command: "list", toolName: "myapp" });
+if (cursor) {
+  // Continue from last position
+}
+```
+
+## API Reference
+
+### Output Utilities
+
+#### `output(data, options?)`
+
+Output data to the console with automatic mode selection.
+
+Defaults to human-friendly output. Override via `mode` option or `OUTFITTER_JSON`/`OUTFITTER_JSONL` environment variables.
+
+```typescript
+import { output } from "@outfitter/cli/output";
+
+// Basic usage - mode auto-detected
+output(results);
+
+// Force JSON mode
+output(results, { mode: "json" });
+
+// Pretty-print JSON
+output(results, { mode: "json", pretty: true });
+
+// Output to stderr
+output(errors, { stream: process.stderr });
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `mode` | `OutputMode` | auto | Force a specific output mode |
+| `stream` | `WritableStream` | `stdout` | Stream to write to |
+| `pretty` | `boolean` | `false` | Pretty-print JSON output |
+
+**Output Modes:**
+
+- `human` - Human-readable key: value format
+- `json` - Single JSON object
+- `jsonl` - JSON Lines (one object per line)
+- `tree` - Tree structure (reserved)
+- `table` - Table format (reserved)
+
+#### `exitWithError(error)`
+
+Exit the process with an error message and appropriate exit code.
+
+```typescript
+import { exitWithError } from "@outfitter/cli/output";
+
+try {
+  await riskyOperation();
+} catch (error) {
+  exitWithError(error instanceof Error ? error : new Error(String(error)));
+}
+```
+
+### Input Utilities
+
+#### `collectIds(input, options?)`
+
+Collect IDs from various input formats: space-separated, comma-separated, repeated flags, `@file`, and stdin.
+
+```typescript
+import { collectIds } from "@outfitter/cli/input";
+
+// All these produce the same result:
+// myapp show id1 id2 id3
+// myapp show id1,id2,id3
+// myapp show --ids id1 --ids id2
+// myapp show @ids.txt
+// echo "id1\nid2" | myapp show @-
+
+const ids = await collectIds(args.ids, {
+  allowFile: true,
+  allowStdin: true,
+});
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `allowFile` | `boolean` | `true` | Allow `@file` expansion |
+| `allowStdin` | `boolean` | `true` | Allow `@-` for stdin |
+
+#### `expandFileArg(input, options?)`
+
+Expand `@file` references to file contents. Returns input unchanged if not a file reference.
+
+```typescript
+import { expandFileArg } from "@outfitter/cli/input";
+
+// myapp create @template.md
+const content = await expandFileArg(args.content);
+
+// With options
+const content = await expandFileArg(args.content, {
+  maxSize: 1024 * 1024, // 1MB limit
+  trim: true,
+});
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `encoding` | `BufferEncoding` | `utf-8` | File encoding |
+| `maxSize` | `number` | - | Maximum file size in bytes |
+| `trim` | `boolean` | `false` | Trim whitespace |
+
+#### `parseGlob(pattern, options?)`
+
+Parse and expand glob patterns using `Bun.Glob`.
+
+```typescript
+import { parseGlob } from "@outfitter/cli/input";
+
+const files = await parseGlob("src/**/*.ts", {
+  cwd: workspaceRoot,
+  ignore: ["node_modules/**", "**/*.test.ts"],
+  onlyFiles: true,
+});
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `cwd` | `string` | `process.cwd()` | Working directory |
+| `ignore` | `string[]` | `[]` | Patterns to exclude |
+| `onlyFiles` | `boolean` | `false` | Only match files |
+| `onlyDirectories` | `boolean` | `false` | Only match directories |
+| `followSymlinks` | `boolean` | `false` | Follow symbolic links |
+
+#### `parseKeyValue(input)`
+
+Parse `key=value` pairs from CLI input.
+
+```typescript
+import { parseKeyValue } from "@outfitter/cli/input";
+
+// --set key=value --set key2=value2
+// --set key=value,key2=value2
+const result = parseKeyValue(args.set);
+
+if (result.isOk()) {
+  // [{ key: "key", value: "value" }, { key: "key2", value: "value2" }]
+  console.log(result.value);
+}
+```
+
+#### `parseRange(input, type)`
+
+Parse numeric or date range inputs.
+
+```typescript
+import { parseRange } from "@outfitter/cli/input";
+
+// Numeric range
+const numResult = parseRange("1-10", "number");
+// => { type: "number", min: 1, max: 10 }
+
+// Date range
+const dateResult = parseRange("2024-01-01..2024-12-31", "date");
+// => { type: "date", start: Date, end: Date }
+
+// Single value
+const single = parseRange("5", "number");
+// => { type: "number", min: 5, max: 5 }
+```
+
+#### `parseFilter(input)`
+
+Parse filter expressions from CLI input.
+
+```typescript
+import { parseFilter } from "@outfitter/cli/input";
+
+const result = parseFilter("status:active,priority:>=high,!archived:true");
+
+if (result.isOk()) {
+  // [
+  //   { field: "status", value: "active" },
+  //   { field: "priority", value: "high", operator: "gte" },
+  //   { field: "archived", value: "true", operator: "ne" }
+  // ]
+}
+```
+
+**Filter Operators:**
+
+| Prefix | Operator | Description |
+|--------|----------|-------------|
+| (none) | `eq` | Equals (default) |
+| `!` | `ne` | Not equals |
+| `>` | `gt` | Greater than |
+| `<` | `lt` | Less than |
+| `>=` | `gte` | Greater than or equal |
+| `<=` | `lte` | Less than or equal |
+| `~` | `contains` | Contains substring |
+
+#### `parseSortSpec(input)`
+
+Parse sort specification from CLI input.
+
+```typescript
+import { parseSortSpec } from "@outfitter/cli/input";
+
+const result = parseSortSpec("modified:desc,title:asc");
+
+if (result.isOk()) {
+  // [
+  //   { field: "modified", direction: "desc" },
+  //   { field: "title", direction: "asc" }
+  // ]
+}
+```
+
+#### `normalizeId(input, options?)`
+
+Normalize an identifier with validation.
+
+```typescript
+import { normalizeId } from "@outfitter/cli/input";
+
+const result = normalizeId("  MY-ID  ", {
+  trim: true,
+  lowercase: true,
+  minLength: 3,
+  maxLength: 50,
+  pattern: /^[a-z0-9-]+$/,
+});
+
+if (result.isOk()) {
+  // "my-id"
+}
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `trim` | `boolean` | `false` | Trim whitespace |
+| `lowercase` | `boolean` | `false` | Convert to lowercase |
+| `minLength` | `number` | - | Minimum length |
+| `maxLength` | `number` | - | Maximum length |
+| `pattern` | `RegExp` | - | Required pattern |
+
+#### `confirmDestructive(options)`
+
+Prompt for confirmation before destructive operations. Respects `--yes` flag for non-interactive mode.
+
+```typescript
+import { confirmDestructive } from "@outfitter/cli/input";
+
+const result = await confirmDestructive({
+  message: "Delete 5 notes?",
+  bypassFlag: flags.yes,
+  itemCount: 5,
+});
+
+if (result.isErr()) {
+  // User cancelled or non-TTY environment
+  console.error("Operation cancelled");
+  process.exit(0);
+}
+
+// Proceed with destructive operation
+```
+
+### Pagination Utilities
+
+Pagination state persists per-command to support `--next` and `--reset` functionality.
+
+**XDG State Directory Pattern:**
+
+```
+$XDG_STATE_HOME/{toolName}/cursors/{command}[/{context}]/cursor.json
+```
+
+#### `loadCursor(options)`
+
+Load persisted pagination state for a command.
+
+```typescript
+import { loadCursor } from "@outfitter/cli/pagination";
+
+const state = loadCursor({
+  command: "list",
+  toolName: "waymark",
+  context: "workspace-123", // optional
+  maxAgeMs: 30 * 60 * 1000, // optional expiration window
+});
+
+if (state) {
+  // Continue from last position
+  const results = await listNotes({ cursor: state.cursor });
+}
+```
+
+#### `saveCursor(cursor, options)`
+
+Save pagination state for a command.
+
+```typescript
+import { saveCursor } from "@outfitter/cli/pagination";
+
+const results = await listNotes({ limit: 20 });
+
+if (results.hasMore) {
+  saveCursor(results.cursor, {
+    command: "list",
+    toolName: "waymark",
+  });
+}
+```
+
+#### `clearCursor(options)`
+
+Clear persisted pagination state for a command.
+
+```typescript
+import { clearCursor } from "@outfitter/cli/pagination";
+
+// User passed --reset flag
+if (flags.reset) {
+  clearCursor({
+    command: "list",
+    toolName: "waymark",
+  });
+}
+```
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OUTFITTER_ENV` | Environment profile (`development`, `production`, `test`) | `production` |
+| `OUTFITTER_VERBOSE` | Override verbose mode (`1` or `0`) | - |
+| `OUTFITTER_JSON` | Set to `1` to force JSON output | - |
+| `OUTFITTER_JSONL` | Set to `1` to force JSONL output (takes priority over JSON) | - |
+| `XDG_STATE_HOME` | State directory for pagination | Platform-specific |
+
+### `resolveVerbose(verbose?)`
+
+Resolve verbose mode from environment configuration. Use this instead of hardcoding verbosity so your CLI responds to `OUTFITTER_ENV` and `OUTFITTER_VERBOSE` automatically.
+
+**Precedence** (highest wins):
+1. `OUTFITTER_VERBOSE` environment variable (`"1"` or `"0"`)
+2. Explicit `verbose` parameter (from `--verbose` CLI flag)
+3. `OUTFITTER_ENV` profile defaults (`true` in development)
+4. `false` (default)
+
+```typescript
+import { resolveVerbose } from "@outfitter/cli/output";
+
+const isVerbose = resolveVerbose();
+// With OUTFITTER_ENV=development → true
+// With OUTFITTER_VERBOSE=0 → false (overrides everything)
+// With nothing set → false
+
+// Pass through from CLI flag
+const isVerbose = resolveVerbose(cliFlags.verbose);
+```
+
+### JSON Output
+
+`createCLI()` registers a global `--json` flag that bridges to `OUTFITTER_JSON=1` via a `preAction` hook. This means `output()` auto-detects JSON mode — no manual `if (json)` branching needed:
+
+```typescript
+// No need for this:
+if (opts.json) output(data, { mode: "json" });
+else output(data);
+
+// Just use output() directly — it reads OUTFITTER_JSON:
+output(data);
+```
+
+The bridge uses `optsWithGlobals()` so global and subcommand `--json` flags both work and coalesce into a single env var. Subcommands should **not** define their own `--json` — use the global flag. If they do, both coalesce safely.
+
+### Output Mode Priority
+
+1. Explicit `mode` option in `output()` call
+2. `OUTFITTER_JSONL=1` environment variable (highest env priority)
+3. `OUTFITTER_JSON=1` environment variable
+4. `OUTFITTER_JSON=0` or `OUTFITTER_JSONL=0` forces human mode
+5. Default fallback: `human`
+
+## Error Handling
+
+### Exit Code Mapping
+
+Exit codes are automatically determined from error categories:
+
+| Category | Exit Code |
+|----------|-----------|
+| `validation` | 1 |
+| `not_found` | 2 |
+| `conflict` | 3 |
+| `permission` | 4 |
+| `timeout` | 5 |
+| `rate_limit` | 6 |
+| `network` | 7 |
+| `internal` | 8 |
+| `auth` | 9 |
+| `cancelled` | 130 |
+
+### Tagged Errors
+
+Errors with a `category` property are automatically mapped to exit codes:
+
+```typescript
+const error = new Error("File not found") as Error & { category: string };
+error.category = "not_found";
+
+exitWithError(error); // Exits with code 2
+```
+
+## Types
+
+All types are exported for TypeScript consumers:
+
+```typescript
+import type { CLIConfig, CommandConfig, CommandAction, CommandFlags } from "@outfitter/cli/command";
+import type { OutputMode, OutputOptions } from "@outfitter/cli/output";
+import type { CollectIdsOptions, ExpandFileOptions, ParseGlobOptions } from "@outfitter/cli/input";
+import type { PaginationState, CursorOptions } from "@outfitter/cli/pagination";
+```
+
+## Upgrading
+
+Run `outfitter update --guide` for version-specific migration instructions, or check the [migration docs](https://github.com/outfitter-dev/outfitter/tree/main/plugins/outfitter/shared/migrations) for detailed upgrade steps.
+
+## License
+
+MIT
+
+---
+path: docs/packages/config/README.md
+package: config
+title: @outfitter/config
+---
+
+# @outfitter/config
+
+XDG-compliant configuration loading with schema validation for Outfitter applications.
+
+## Features
+
+- **XDG Base Directory Specification** - Proper paths for config, data, cache, and state
+- **Multi-format support** - TOML, YAML, JSON, and JSON5
+- **Schema validation** - Zod-powered type-safe configuration
+- **Multi-source merging** - Combine defaults, files, env vars, and CLI flags
+- **Deep merge** - Intelligent merging of nested configuration objects
+
+## Installation
+
+```bash
+bun add @outfitter/config
+```
+
+## Quick Start
+
+```typescript
+import { loadConfig, resolveConfig, getConfigDir } from "@outfitter/config";
+import { z } from "zod";
+
+// Define your configuration schema
+const AppConfigSchema = z.object({
+  apiKey: z.string(),
+  timeout: z.number().default(5000),
+  features: z.object({
+    darkMode: z.boolean().default(false),
+  }),
+});
+
+// Load from XDG paths (~/.config/myapp/config.toml)
+const result = await loadConfig("myapp", AppConfigSchema);
+
+if (result.isOk()) {
+  console.log("Config loaded:", result.value);
+} else {
+  console.error("Failed:", result.error.message);
+}
+```
+
+## API Reference
+
+### Configuration Loading
+
+#### `loadConfig(appName, schema, options?)`
+
+Load configuration from XDG-compliant paths with schema validation.
+
+```typescript
+const result = await loadConfig("myapp", AppConfigSchema);
+
+if (result.isOk()) {
+  const config = result.value;
+  // Type-safe access to your config
+}
+```
+
+**Parameters:**
+- `appName` - Application name for XDG directory lookup
+- `schema` - Zod schema for validation
+- `options.searchPaths` - Custom search paths (overrides XDG defaults)
+
+**Search Order:**
+1. Custom `searchPaths` if provided
+2. `$XDG_CONFIG_HOME/{appName}/config.{ext}`
+3. `~/.config/{appName}/config.{ext}`
+
+**File Format Preference:** `.toml` > `.yaml` > `.yml` > `.json` > `.jsonc` > `.json5`
+
+**Returns:** `Result<T, NotFoundError | ValidationError | ParseError>`
+
+---
+
+#### `resolveConfig(schema, sources)`
+
+Merge configuration from multiple sources with precedence rules.
+
+```typescript
+const result = resolveConfig(AppSchema, {
+  defaults: { port: 3000, host: "localhost" },
+  file: loadedConfig,
+  env: { port: parseInt(process.env.PORT!) },
+  flags: cliArgs,
+});
+```
+
+**Parameters:**
+- `schema` - Zod schema for validation
+- `sources` - Configuration sources to merge
+
+**Returns:** `Result<T, ValidationError | ParseError>`
+
+---
+
+#### `parseConfigFile(content, filename)`
+
+Parse configuration file content based on extension.
+
+```typescript
+const toml = `
+[server]
+port = 3000
+host = "localhost"
+`;
+
+const result = parseConfigFile(toml, "config.toml");
+if (result.isOk()) {
+  console.log(result.value.server.port); // 3000
+}
+```
+
+**Parameters:**
+- `content` - Raw file content
+- `filename` - Filename (extension determines parser)
+
+**Returns:** `Result<Record<string, unknown>, ParseError>`
+
+---
+
+### XDG Path Helpers
+
+#### `getConfigDir(appName)`
+
+Get the XDG config directory for an application.
+
+```typescript
+getConfigDir("myapp");
+// With XDG_CONFIG_HOME="/custom": "/custom/myapp"
+// Default: "~/.config/myapp"
+```
+
+#### `getDataDir(appName)`
+
+Get the XDG data directory for an application.
+
+```typescript
+getDataDir("myapp");
+// With XDG_DATA_HOME="/custom": "/custom/myapp"
+// Default: "~/.local/share/myapp"
+```
+
+#### `getCacheDir(appName)`
+
+Get the XDG cache directory for an application.
+
+```typescript
+getCacheDir("myapp");
+// With XDG_CACHE_HOME="/custom": "/custom/myapp"
+// Default: "~/.cache/myapp"
+```
+
+#### `getStateDir(appName)`
+
+Get the XDG state directory for an application.
+
+```typescript
+getStateDir("myapp");
+// With XDG_STATE_HOME="/custom": "/custom/myapp"
+// Default: "~/.local/state/myapp"
+```
+
+---
+
+### Utilities
+
+#### `deepMerge(target, source)`
+
+Deep merge two objects with configurable semantics.
+
+```typescript
+const defaults = { server: { port: 3000, host: "localhost" } };
+const overrides = { server: { port: 8080 } };
+
+const merged = deepMerge(defaults, overrides);
+// { server: { port: 8080, host: "localhost" } }
+```
+
+**Merge Behavior:**
+- Recursively merges nested plain objects
+- Arrays are replaced (not concatenated)
+- `null` explicitly replaces the target value
+- `undefined` is skipped (does not override)
+
+---
+
+### Types
+
+#### `ConfigSources<T>`
+
+Configuration sources for multi-layer resolution.
+
+```typescript
+interface ConfigSources<T> {
+  defaults?: Partial<T>;  // Lowest precedence
+  file?: Partial<T>;      // From config file
+  env?: Partial<T>;       // Environment variables
+  flags?: Partial<T>;     // CLI flags (highest)
+}
+```
+
+#### `LoadConfigOptions`
+
+Options for `loadConfig()`.
+
+```typescript
+interface LoadConfigOptions {
+  searchPaths?: string[];  // Custom search paths
+}
+```
+
+#### `ParseError`
+
+Error thrown when configuration file parsing fails.
+
+```typescript
+class ParseError {
+  readonly _tag = "ParseError";
+  readonly message: string;
+  readonly filename: string;
+  readonly line?: number;
+  readonly column?: number;
+}
+```
+
+---
+
+## Environment Profiles
+
+Unified environment detection for consistent defaults across all Outfitter packages.
+
+### `getEnvironment()`
+
+Reads `OUTFITTER_ENV` and returns the current profile. Falls back to `"production"` when unset or invalid.
+
+```typescript
+import { getEnvironment } from "@outfitter/config";
+
+const env = getEnvironment();
+// "development" | "production" | "test"
+```
+
+### `getEnvironmentDefaults(env)`
+
+Returns profile-specific defaults for an environment.
+
+```typescript
+import { getEnvironmentDefaults } from "@outfitter/config";
+
+const defaults = getEnvironmentDefaults("development");
+// { logLevel: "debug", verbose: true, errorDetail: "full" }
+
+const prodDefaults = getEnvironmentDefaults("production");
+// { logLevel: null, verbose: false, errorDetail: "message" }
+```
+
+| Setting | `development` | `production` | `test` |
+|---------|--------------|-------------|--------|
+| logLevel | `"debug"` | `null` | `null` |
+| verbose | `true` | `false` | `false` |
+| errorDetail | `"full"` | `"message"` | `"full"` |
+
+### Types
+
+#### `OutfitterEnv`
+
+```typescript
+type OutfitterEnv = "development" | "production" | "test";
+```
+
+#### `EnvironmentDefaults`
+
+```typescript
+interface EnvironmentDefaults {
+  logLevel: "debug" | "info" | "warn" | "error" | null;
+  verbose: boolean;
+  errorDetail: "full" | "message";
+}
+```
+
+---
+
+## XDG Base Directory Specification
+
+This package follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) for locating configuration files.
+
+| Variable | macOS/Linux Default | Purpose |
+|----------|---------------------|---------|
+| `XDG_CONFIG_HOME` | `~/.config` | User-specific configuration |
+| `XDG_DATA_HOME` | `~/.local/share` | User-specific data files |
+| `XDG_CACHE_HOME` | `~/.cache` | Non-essential cached data |
+| `XDG_STATE_HOME` | `~/.local/state` | Persistent state (logs, history) |
+
+---
+
+## Override Precedence
+
+Configuration sources are merged with the following precedence (highest to lowest):
+
+```
++---------------------------------------+
+|  flags (CLI arguments)      HIGHEST   |
++---------------------------------------+
+|  env (environment variables)          |
++---------------------------------------+
+|  file (config file)                   |
++---------------------------------------+
+|  defaults                   LOWEST    |
++---------------------------------------+
+```
+
+Higher precedence sources override lower ones. Nested objects are deep-merged.
+
+---
+
+## Supported File Formats
+
+| Extension | Parser | Notes |
+|-----------|--------|-------|
+| `.toml` | smol-toml | Preferred for configuration |
+| `.yaml`, `.yml` | yaml | YAML anchors/aliases supported |
+| `.json` | JSON.parse | Strict parsing |
+| `.jsonc` | json5 | JSON with comments and trailing commas |
+| `.json5` | json5 | Comments and trailing commas allowed |
+
+---
+
+## Examples
+
+### Loading with Custom Paths
+
+```typescript
+const result = await loadConfig("myapp", AppConfigSchema, {
+  searchPaths: ["/etc/myapp", "/opt/myapp/config"],
+});
+```
+
+### Multi-Source Configuration
+
+```typescript
+import { loadConfig, resolveConfig } from "@outfitter/config";
+
+// Load base config from file
+const fileResult = await loadConfig("myapp", RawConfigSchema);
+const fileConfig = fileResult.isOk() ? fileResult.value : {};
+
+// Resolve with all sources
+const result = resolveConfig(AppConfigSchema, {
+  defaults: {
+    server: { port: 3000, host: "localhost" },
+    logging: { level: "info" },
+  },
+  file: fileConfig,
+  env: {
+    server: { port: parseInt(process.env.PORT || "3000") },
+    logging: { level: process.env.LOG_LEVEL },
+  },
+  flags: {
+    logging: { level: cliArgs.verbose ? "debug" : undefined },
+  },
+});
+```
+
+### Error Handling
+
+```typescript
+const result = await loadConfig("myapp", AppConfigSchema);
+
+if (result.isErr()) {
+  switch (result.error._tag) {
+    case "NotFoundError":
+      console.log("Config file not found, using defaults");
+      break;
+    case "ValidationError":
+      console.error("Invalid config:", result.error.message);
+      break;
+    case "ParseError":
+      console.error("Parse error in", result.error.filename);
+      break;
+  }
+}
+```
+
+---
+
+## License
+
+MIT
+
+---
+path: docs/packages/contracts/README.md
+package: contracts
+title: @outfitter/contracts
+---
+
+# @outfitter/contracts
+
+Result/Error patterns, error taxonomy, handler contracts, and shared interfaces for the Outfitter ecosystem.
+
+## Status
+
+**Active** - Stable core contracts with active feature development.
+
+## Installation
+
+```bash
+bun add @outfitter/contracts
+```
+
+## Overview
+
+This package provides the foundational contracts that all Outfitter packages depend on:
+
+- **Error taxonomy** - 10 concrete error classes with category-based exit/status codes
+- **Handler contract** - Transport-agnostic domain logic interface
+- **Validation** - Zod-based input validation returning Results
+- **Serialization** - Safe JSON handling with redaction
+- **Adapters** - Pluggable interfaces for indexing, caching, auth, and storage
+
+## Usage
+
+```typescript
+import {
+  Result,
+  NotFoundError,
+  Handler,
+  HandlerContext,
+  createContext,
+} from "@outfitter/contracts";
+
+// Define a handler
+const getNote: Handler<{ id: string }, Note, NotFoundError> = async (input, ctx) => {
+  const note = await db.notes.find(input.id);
+  if (!note) return Result.err(NotFoundError.create("note", input.id));
+  return Result.ok(note);
+};
+
+// Create context and invoke
+const ctx = createContext({ logger, config });
+const result = await getNote({ id: "abc123" }, ctx);
+```
+
+## Error Factory Reference
+
+All error classes provide a static `create()` factory method that generates a consistent message from structured parameters. Use `create()` for structured errors and the constructor for custom messages.
+
+| Error Class | `create()` Signature | Generated Message |
+|---|---|---|
+| `ValidationError` | `create(field, reason, context?)` | `"email: format invalid"` |
+| `ValidationError` | `fromMessage(message, context?)` | *(your message as-is)* |
+| `AmbiguousError` | `create(what, candidates, context?)` | `"Ambiguous heading: 2 matches found"` |
+| `NotFoundError` | `create(resourceType, resourceId, context?)` | `"note not found: abc123"` |
+| `AlreadyExistsError` | `create(resourceType, resourceId, context?)` | `"file already exists: notes/meeting.md"` |
+| `ConflictError` | `create(message, context?)` | *(your message as-is)* |
+| `PermissionError` | `create(message, context?)` | *(your message as-is)* |
+| `TimeoutError` | `create(operation, timeoutMs)` | `"database query timed out after 5000ms"` |
+| `RateLimitError` | `create(message, retryAfterSeconds?)` | *(your message as-is)* |
+| `NetworkError` | `create(message, context?)` | *(your message as-is)* |
+| `InternalError` | `create(message, context?)` | *(your message as-is)* |
+| `AuthError` | `create(message, reason?)` | *(your message as-is)* |
+| `CancelledError` | `create(message)` | *(your message as-is)* |
+
+### Message Casing
+
+`create()` factories that auto-generate messages use **lowercase** `resourceType`:
+
+```typescript
+NotFoundError.create("piece", "abc123");
+// → "piece not found: abc123" (not "Piece not found: abc123")
+```
+
+If you need a capitalized message, use the constructor directly:
+
+```typescript
+new NotFoundError({
+  message: "Piece not found: abc123",
+  resourceType: "piece",
+  resourceId: "abc123",
+});
+```
+
+## License
+
+MIT
+
+---
+path: docs/packages/daemon/README.md
+package: daemon
+title: @outfitter/daemon
+---
+
+# @outfitter/daemon
+
+Daemon lifecycle management, IPC communication, and health checks for background processes.
+
+## Installation
+
+```bash
+bun add @outfitter/daemon
+```
+
+## Quick Start
+
+```typescript
+import {
+  createDaemon,
+  createIpcServer,
+  createHealthChecker,
+  getSocketPath,
+  getLockPath,
+} from "@outfitter/daemon";
+
+// Create a daemon with lifecycle management
+const daemon = createDaemon({
+  name: "my-service",
+  pidFile: getLockPath("my-service"),
+  shutdownTimeout: 10000,
+});
+
+// Register cleanup handlers
+daemon.onShutdown(async () => {
+  await database.close();
+});
+
+// Start the daemon
+const result = await daemon.start();
+if (result.isErr()) {
+  console.error("Failed to start:", result.error.message);
+  process.exit(1);
+}
+
+// Set up IPC server
+const server = createIpcServer(getSocketPath("my-service"));
+server.onMessage(async (msg) => {
+  if (msg.type === "status") {
+    return { status: "ok", uptime: process.uptime() };
+  }
+  return { error: "Unknown command" };
+});
+await server.listen();
+```
+
+## Platform Detection
+
+Utilities for detecting the platform and resolving platform-specific paths.
+
+### isUnixPlatform
+
+Check if running on a Unix-like platform (macOS or Linux).
+
+```typescript
+import { isUnixPlatform } from "@outfitter/daemon";
+
+if (isUnixPlatform()) {
+  // Use Unix domain sockets
+} else {
+  // Use named pipes (Windows)
+}
+```
+
+### Path Resolution
+
+Get platform-appropriate paths for daemon files.
+
+```typescript
+import {
+  getSocketPath,
+  getLockPath,
+  getPidPath,
+  getDaemonDir,
+} from "@outfitter/daemon";
+
+const socketPath = getSocketPath("waymark");
+// Linux: "/run/user/1000/waymark/daemon.sock"
+// macOS: "/var/folders/.../waymark/daemon.sock"
+// Windows: "\\\\.\\pipe\\waymark-daemon"
+
+const lockPath = getLockPath("waymark");
+// Linux: "/run/user/1000/waymark/daemon.lock"
+
+const pidPath = getPidPath("waymark");
+// Linux: "/run/user/1000/waymark/daemon.pid"
+
+const daemonDir = getDaemonDir("waymark");
+// Linux: "/run/user/1000/waymark"
+```
+
+Path resolution follows XDG standards:
+- `$XDG_RUNTIME_DIR` takes precedence if set
+- Linux: Falls back to `/run/user/<uid>`
+- macOS: Uses `$TMPDIR`
+- Windows: Uses `%TEMP%`
+
+## Locking
+
+PID-based locking with stale detection for ensuring single daemon instances.
+
+### Acquire and Release Locks
+
+```typescript
+import {
+  acquireDaemonLock,
+  releaseDaemonLock,
+  type LockHandle,
+} from "@outfitter/daemon";
+
+const result = await acquireDaemonLock("/run/user/1000/waymark/daemon.lock");
+
+if (result.isOk()) {
+  const handle: LockHandle = result.value;
+  console.log(`Lock acquired for PID ${handle.pid}`);
+
+  try {
+    // ... run daemon ...
+  } finally {
+    await releaseDaemonLock(handle);
+  }
+} else {
+  console.error(`Failed to acquire lock: ${result.error.message}`);
+}
+```
+
+### Process Liveness Checks
+
+```typescript
+import { isProcessAlive, isDaemonAlive, readLockPid } from "@outfitter/daemon";
+
+// Check if a specific PID is alive
+if (isProcessAlive(12345)) {
+  console.log("Process is still running");
+}
+
+// Check if a daemon is alive via its lock file
+const alive = await isDaemonAlive("/run/user/1000/waymark/daemon.lock");
+if (!alive) {
+  // Safe to start a new daemon
+}
+
+// Read the PID from a lock file
+const pid = await readLockPid("/run/user/1000/waymark/daemon.lock");
+if (pid !== undefined) {
+  console.log(`Daemon running with PID ${pid}`);
+}
+```
+
+### LockHandle Interface
+
+```typescript
+interface LockHandle {
+  readonly lockPath: string;  // Path to the lock file
+  readonly pid: number;       // PID that owns the lock
+}
+```
+
+## Lifecycle
+
+Daemon lifecycle management with PID file handling, signal handling, and graceful shutdown.
+
+### Creating a Daemon
+
+```typescript
+import { createDaemon, type DaemonOptions } from "@outfitter/daemon";
+
+const options: DaemonOptions = {
+  name: "my-daemon",
+  pidFile: "/var/run/my-daemon.pid",
+  logger: myLogger,           // Optional @outfitter/logging instance
+  shutdownTimeout: 10000,     // Optional, default: 5000ms
+};
+
+const daemon = createDaemon(options);
+```
+
+### Daemon Lifecycle
+
+```typescript
+// Register shutdown handlers (called during graceful shutdown)
+daemon.onShutdown(async () => {
+  await database.close();
+});
+
+daemon.onShutdown(async () => {
+  await cache.disconnect();
+});
+
+// Start the daemon
+const startResult = await daemon.start();
+if (startResult.isErr()) {
+  console.error("Failed to start:", startResult.error.message);
+  process.exit(1);
+}
+
+// Check running state
+console.log("Running:", daemon.isRunning());  // true
+console.log("State:", daemon.state);          // "running"
+
+// Stop gracefully (also triggered by SIGTERM/SIGINT)
+const stopResult = await daemon.stop();
+if (stopResult.isErr()) {
+  console.error("Shutdown issue:", stopResult.error.message);
+}
+```
+
+### Daemon States
+
+The daemon follows a state machine:
+
+| State | Description |
+|-------|-------------|
+| `stopped` | Initial state, daemon not running |
+| `starting` | Transitioning to running (creating PID file) |
+| `running` | Daemon is active and processing |
+| `stopping` | Graceful shutdown in progress |
+
+State transitions:
+- `stopped` -> `starting` -> `running` (via `start()`)
+- `running` -> `stopping` -> `stopped` (via `stop()` or signal)
+- `starting` -> `stopped` (if start fails)
+
+### Daemon Interface
+
+```typescript
+interface Daemon {
+  readonly state: DaemonState;
+  start(): Promise<Result<void, DaemonError>>;
+  stop(): Promise<Result<void, DaemonError>>;
+  isRunning(): boolean;
+  onShutdown(handler: ShutdownHandler): void;
+}
+
+type DaemonState = "stopped" | "starting" | "running" | "stopping";
+type ShutdownHandler = () => Promise<void>;
+```
+
+## IPC
+
+Inter-process communication via Unix domain sockets using JSON-serialized messages.
+
+### IPC Server
+
+```typescript
+import { createIpcServer, type IpcServer } from "@outfitter/daemon";
+
+const server: IpcServer = createIpcServer("/var/run/my-daemon.sock");
+
+// Register message handler
+server.onMessage(async (msg) => {
+  const message = msg as { type: string };
+
+  switch (message.type) {
+    case "status":
+      return { status: "ok", uptime: process.uptime() };
+    case "ping":
+      return { pong: true };
+    default:
+      return { error: "Unknown command" };
+  }
+});
+
+// Start listening
+await server.listen();
+
+// Stop and cleanup
+await server.close();
+```
+
+### IPC Client
+
+```typescript
+import { createIpcClient, type IpcClient } from "@outfitter/daemon";
+
+const client: IpcClient = createIpcClient("/var/run/my-daemon.sock");
+
+// Connect to the server
+await client.connect();
+
+// Send messages and receive responses
+interface StatusResponse {
+  status: string;
+  uptime: number;
+}
+
+const response = await client.send<StatusResponse>({ type: "status" });
+console.log("Daemon uptime:", response.uptime);
+
+// Close connection
+client.close();
+```
+
+### IPC Interfaces
+
+```typescript
+interface IpcServer {
+  listen(): Promise<void>;
+  close(): Promise<void>;
+  onMessage(handler: IpcMessageHandler): void;
+}
+
+interface IpcClient {
+  connect(): Promise<void>;
+  send<T>(message: unknown): Promise<T>;
+  close(): void;
+}
+
+type IpcMessageHandler = (message: unknown) => Promise<unknown>;
+```
+
+## Health Checks
+
+Parallel health check execution with aggregated status reporting.
+
+### Creating a Health Checker
+
+```typescript
+import {
+  createHealthChecker,
+  type HealthCheck,
+  type HealthChecker,
+} from "@outfitter/daemon";
+import { Result } from "@outfitter/contracts";
+
+// Define health checks
+const checks: HealthCheck[] = [
+  {
+    name: "database",
+    check: async () => {
+      try {
+        await db.ping();
+        return Result.ok(undefined);
+      } catch (error) {
+        return Result.err(error as Error);
+      }
+    },
+  },
+  {
+    name: "cache",
+    check: async () => {
+      try {
+        await redis.ping();
+        return Result.ok(undefined);
+      } catch (error) {
+        return Result.err(error as Error);
+      }
+    },
+  },
+];
+
+// Create health checker
+const checker: HealthChecker = createHealthChecker(checks);
+
+// Register additional checks at runtime
+checker.register({
+  name: "queue",
+  check: async () => {
+    const connected = await queue.isConnected();
+    return connected
+      ? Result.ok(undefined)
+      : Result.err(new Error("Queue disconnected"));
+  },
+});
+```
+
+### Running Health Checks
+
+```typescript
+const status = await checker.check();
+
+console.log("Overall healthy:", status.healthy);  // true only if ALL checks pass
+console.log("Uptime (seconds):", status.uptime);
+console.log("Checks:", status.checks);
+// {
+//   database: { healthy: true },
+//   cache: { healthy: false, message: "Connection refused" },
+//   queue: { healthy: true }
+// }
+
+if (!status.healthy) {
+  const failed = Object.entries(status.checks)
+    .filter(([, result]) => !result.healthy)
+    .map(([name, result]) => `${name}: ${result.message}`);
+
+  console.error("Failed checks:", failed.join(", "));
+}
+```
+
+### Health Check Types
+
+```typescript
+interface HealthCheck {
+  name: string;
+  check(): Promise<Result<void, Error>>;
+}
+
+interface HealthCheckResult {
+  healthy: boolean;
+  message?: string;  // Error message on failure
+}
+
+interface HealthStatus {
+  healthy: boolean;                          // true only if ALL checks pass
+  checks: Record<string, HealthCheckResult>; // Individual results
+  uptime: number;                            // Seconds since checker created
+}
+
+interface HealthChecker {
+  check(): Promise<HealthStatus>;
+  register(check: HealthCheck): void;
+}
+```
+
+## Error Types
+
+### DaemonError
+
+Main error type for daemon lifecycle operations.
+
+```typescript
+import { DaemonError, type DaemonErrorCode } from "@outfitter/daemon";
+
+const error = new DaemonError({
+  code: "ALREADY_RUNNING",
+  message: "Daemon is already running with PID 1234",
+});
+
+// Error codes
+type DaemonErrorCode =
+  | "ALREADY_RUNNING"    // Daemon start requested but already running
+  | "NOT_RUNNING"        // Daemon stop requested but not running
+  | "SHUTDOWN_TIMEOUT"   // Graceful shutdown exceeded timeout
+  | "PID_ERROR"          // PID file operations failed
+  | "START_FAILED";      // Daemon failed to start
+```
+
+### Connection Errors
+
+Discriminated union for IPC connection failures.
+
+```typescript
+import {
+  StaleSocketError,
+  ConnectionRefusedError,
+  ConnectionTimeoutError,
+  ProtocolError,
+  LockError,
+  type DaemonConnectionError,
+} from "@outfitter/daemon";
+
+// Handle connection errors with exhaustive matching
+function handleError(error: DaemonConnectionError): string {
+  switch (error._tag) {
+    case "StaleSocketError":
+      return `Stale socket at ${error.socketPath}, PID: ${error.pid}`;
+    case "ConnectionRefusedError":
+      return "Daemon not running";
+    case "ConnectionTimeoutError":
+      return `Timeout after ${error.timeoutMs}ms`;
+    case "ProtocolError":
+      return `Protocol error: ${error.details}`;
+  }
+}
+
+// Lock errors
+const lockError = new LockError({
+  message: "Daemon already running",
+  lockPath: "/run/user/1000/waymark/daemon.lock",
+  pid: 12345,
+});
+```
+
+## Platform Support
+
+| Platform | Socket Type | Runtime Dir |
+|----------|-------------|-------------|
+| Linux | Unix domain socket | `$XDG_RUNTIME_DIR` or `/run/user/<uid>` |
+| macOS | Unix domain socket | `$TMPDIR` |
+| Windows | Named pipe | `%TEMP%` |
+
+## Related Packages
+
+- `@outfitter/contracts` - Result types and TaggedError base classes
+- `@outfitter/logging` - Structured logging for daemon messages
+- `@outfitter/config` - Configuration loading with schema validation
+
+## License
+
+MIT
+
+---
+path: docs/packages/docs-core/README.md
+package: docs-core
+title: @outfitter/docs-core
+---
+
+# @outfitter/docs-core
+
+Core docs assembly and freshness-check primitives for Outfitter-based projects.
+
+## Scope
+
+- Discover publishable workspace packages
+- Assemble package docs into a centralized output tree
+- Rewrite relative links so relocated docs remain valid
+- Check generated docs for drift (missing, changed, unexpected files)
+- Render `llms.txt` and `llms-full.txt` from the same docs graph
+
+## API
+
+```ts
+import {
+  checkLlmsDocs,
+  checkPackageDocs,
+  syncLlmsDocs,
+  syncPackageDocs,
+} from "@outfitter/docs-core";
+
+const syncResult = await syncPackageDocs({
+  workspaceRoot: process.cwd(),
+});
+
+const checkResult = await checkPackageDocs({
+  workspaceRoot: process.cwd(),
+});
+
+const llmsSyncResult = await syncLlmsDocs({
+  workspaceRoot: process.cwd(),
+  targets: ["llms", "llms-full"],
+});
+
+const llmsCheckResult = await checkLlmsDocs({
+  workspaceRoot: process.cwd(),
+  targets: ["llms", "llms-full"],
+});
+```
+
+## License
+
+MIT
+
+---
+path: docs/packages/docs/README.md
+package: docs
+title: @outfitter/docs
+---
+
+# @outfitter/docs
+
+CLI and host command adapter for Outfitter docs workflows.
+
+## Commands
+
+- `docs sync` — assemble package docs output
+- `docs check` — verify package docs output freshness
+- `docs export --target <packages|llms|llms-full|all>` — export docs artifacts
+
+## Host CLI Adapter
+
+```ts
+import { createDocsCommand } from "@outfitter/docs";
+
+program.addCommand(createDocsCommand());
+```
+
+## Standalone CLI
+
+```bash
+bunx @outfitter/docs docs sync
+bunx @outfitter/docs docs check
+bunx @outfitter/docs docs export --target llms
+```
+
+## License
+
+MIT
+
+---
+path: docs/packages/file-ops/README.md
+package: file-ops
+title: @outfitter/file-ops
+---
+
+# @outfitter/file-ops
+
+Workspace detection, secure path handling, glob patterns, file locking, and atomic write utilities for Outfitter projects.
+
+## Installation
+
+```bash
+bun add @outfitter/file-ops
+```
+
+## Quick Start
+
+```typescript
+import {
+  findWorkspaceRoot,
+  securePath,
+  glob,
+  withLock,
+  atomicWrite
+} from "@outfitter/file-ops";
+
+// Find workspace root by marker files (.git, package.json)
+const rootResult = await findWorkspaceRoot(process.cwd());
+if (rootResult.isOk()) {
+  const root = rootResult.value;
+
+  // Secure path resolution (prevents traversal attacks)
+  const pathResult = securePath("src/config.json", root);
+  if (pathResult.isOk()) {
+    console.log("Safe path:", pathResult.value);
+  }
+}
+
+// Find files with glob patterns
+const files = await glob("**/*.ts", {
+  cwd: "/project",
+  ignore: ["node_modules/**", "**/*.test.ts"]
+});
+
+// Atomic write with file locking
+await withLock("/path/to/file.json", async () => {
+  await atomicWrite("/path/to/file.json", JSON.stringify(data));
+});
+```
+
+## API Reference
+
+### Workspace Detection
+
+#### `findWorkspaceRoot(startPath, options?)`
+
+Finds the workspace root by searching for marker files/directories.
+
+```typescript
+const result = await findWorkspaceRoot("/project/src/lib");
+if (result.isOk()) {
+  console.log("Workspace:", result.value); // "/project"
+}
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `markers` | `string[]` | `[".git", "package.json"]` | Marker files/directories to search for |
+| `stopAt` | `string` | filesystem root | Stop searching at this directory |
+
+```typescript
+// Custom markers for Rust or Python projects
+const result = await findWorkspaceRoot(startPath, {
+  markers: ["Cargo.toml", "pyproject.toml"],
+  stopAt: "/home/user"
+});
+```
+
+#### `getRelativePath(absolutePath)`
+
+Returns the path relative to the workspace root.
+
+```typescript
+const result = await getRelativePath("/project/src/lib/utils.ts");
+if (result.isOk()) {
+  console.log(result.value); // "src/lib/utils.ts"
+}
+```
+
+#### `isInsideWorkspace(path, workspaceRoot)`
+
+Checks if a path is inside a workspace directory.
+
+```typescript
+const inside = await isInsideWorkspace("/project/src/file.ts", "/project");
+console.log(inside); // true
+
+const outside = await isInsideWorkspace("/etc/passwd", "/project");
+console.log(outside); // false
+```
+
+### Path Security
+
+**IMPORTANT**: These functions protect against path traversal attacks. Always use them when handling user-provided paths.
+
+#### Security Model
+
+| Attack Vector | Protection |
+|--------------|------------|
+| Path traversal (`../`) | Blocked by all security functions |
+| Null bytes (`\x00`) | Rejected immediately |
+| Absolute paths | Blocked when relative expected |
+| Escape from base directory | Defense-in-depth verification |
+
+#### `securePath(path, basePath)`
+
+Validates and secures a user-provided path, preventing path traversal attacks.
+
+```typescript
+// SAFE: Validates path stays within basePath
+const result = securePath("data/file.json", "/app/workspace");
+if (result.isOk()) {
+  // Safe to use: /app/workspace/data/file.json
+  console.log(result.value);
+}
+
+// These all return ValidationError:
+securePath("../etc/passwd", base);      // Traversal sequence
+securePath("/etc/passwd", base);        // Absolute path
+securePath("file\x00.txt", base);       // Null byte
+```
+
+**UNSAFE pattern - never do this:**
+
+```typescript
+// DON'T: User input directly in path.join
+const bad = path.join("/base", userInput); // VULNERABLE!
+
+// DO: Always validate with securePath first
+const result = securePath(userInput, "/base");
+if (result.isOk()) {
+  // Now safe to use
+}
+```
+
+#### `isPathSafe(path, basePath)`
+
+Quick boolean check for path safety.
+
+```typescript
+if (isPathSafe(userInput, basePath)) {
+  // Safe to proceed
+}
+```
+
+#### `resolveSafePath(basePath, ...segments)`
+
+Safely joins multiple path segments.
+
+```typescript
+const result = resolveSafePath("/app", "data", "users", "profile.json");
+if (result.isOk()) {
+  console.log(result.value); // "/app/data/users/profile.json"
+}
+
+// Rejects dangerous segments
+resolveSafePath("/app", "..", "etc");     // Error: traversal
+resolveSafePath("/app", "/etc/passwd");   // Error: absolute segment
+```
+
+### Glob Patterns
+
+#### `glob(pattern, options?)`
+
+Finds files matching a glob pattern. Uses `Bun.Glob` internally.
+
+```typescript
+// Find all TypeScript files
+const result = await glob("**/*.ts", { cwd: "/project" });
+
+// Exclude test files and node_modules
+const result = await glob("**/*.ts", {
+  cwd: "/project",
+  ignore: ["**/*.test.ts", "**/node_modules/**"]
+});
+
+// Include dot files
+const result = await glob("**/.*", { cwd: "/project", dot: true });
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `cwd` | `string` | `process.cwd()` | Base directory for matching |
+| `ignore` | `string[]` | `[]` | Patterns to exclude |
+| `followSymlinks` | `boolean` | `false` | Follow symbolic links |
+| `dot` | `boolean` | `false` | Include dot files |
+
+**Pattern Syntax:**
+
+| Pattern | Matches |
+|---------|---------|
+| `*` | Any characters except `/` |
+| `**` | Any characters including `/` (recursive) |
+| `{a,b}` | Alternation (matches `a` or `b`) |
+| `[abc]` | Character class (matches `a`, `b`, or `c`) |
+| `!pattern` | Negation (in ignore array) |
+
+```typescript
+// Negation patterns in ignore array
+const result = await glob("src/**/*.ts", {
+  cwd: "/project",
+  ignore: ["**/*.ts", "!**/index.ts"]  // Ignore all except index.ts
+});
+```
+
+#### `globSync(pattern, options?)`
+
+Synchronous version of `glob`.
+
+```typescript
+const result = globSync("src/*.ts", { cwd: "/project" });
+```
+
+### File Locking
+
+Advisory file locking for cross-process coordination. Uses `.lock` files to indicate locks.
+
+**Note**: This is advisory locking. All processes must cooperate by using these APIs.
+
+#### `withLock(path, callback)`
+
+Recommended approach. Executes a callback while holding an exclusive lock, with automatic release.
+
+```typescript
+const result = await withLock("/data/config.json", async () => {
+  const config = JSON.parse(await Bun.file("/data/config.json").text());
+  config.counter++;
+  await atomicWrite("/data/config.json", JSON.stringify(config));
+  return config.counter;
+});
+
+if (result.isOk()) {
+  console.log("New counter:", result.value);
+} else if (result.error._tag === "ConflictError") {
+  console.log("File is locked by another process");
+}
+```
+
+#### `acquireLock(path)` / `releaseLock(lock)`
+
+Manual lock management. Use `withLock` when possible.
+
+```typescript
+const lockResult = await acquireLock("/data/file.db");
+if (lockResult.isOk()) {
+  const lock = lockResult.value;
+  try {
+    // ... do work ...
+  } finally {
+    await releaseLock(lock);
+  }
+}
+```
+
+#### `isLocked(path)`
+
+Checks if a file is currently locked.
+
+```typescript
+if (await isLocked("/data/file.db")) {
+  console.log("File is in use");
+}
+```
+
+#### FileLock Interface
+
+```typescript
+interface FileLock {
+  path: string;      // Path to the locked file
+  lockPath: string;  // Path to the .lock file
+  pid: number;       // Process ID holding the lock
+  timestamp: number; // When lock was acquired
+}
+```
+
+### Atomic Writes
+
+Write files atomically using temp-file-then-rename strategy. This prevents partial writes and corruption.
+
+#### `atomicWrite(path, content, options?)`
+
+Writes content to a file atomically.
+
+```typescript
+const result = await atomicWrite("/data/config.json", JSON.stringify(data));
+if (result.isErr()) {
+  console.error("Write failed:", result.error.message);
+}
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `createParentDirs` | `boolean` | `true` | Create parent directories if needed |
+| `preservePermissions` | `boolean` | `false` | Keep permissions from existing file |
+| `mode` | `number` | `0o644` | File mode for new files |
+
+```typescript
+// Preserve executable permissions
+await atomicWrite("/scripts/run.sh", newContent, {
+  preservePermissions: true
+});
+
+// Create nested directories automatically
+await atomicWrite("/data/deep/nested/file.json", content, {
+  createParentDirs: true
+});
+```
+
+#### `atomicWriteJson(path, data, options?)`
+
+Serializes and writes JSON data atomically.
+
+```typescript
+const result = await atomicWriteJson("/data/config.json", {
+  name: "app",
+  version: "1.0.0",
+  settings: { debug: false }
+});
+```
+
+## Error Handling
+
+All functions return `Result` types from `@outfitter/contracts`. Use `.isOk()` and `.isErr()` to handle outcomes.
+
+```typescript
+import type { Result } from "@outfitter/contracts";
+
+const result = await findWorkspaceRoot("/path");
+
+if (result.isOk()) {
+  const workspace = result.value;
+} else {
+  // result.error has _tag, message, and error-specific fields
+  console.error(result.error._tag, result.error.message);
+}
+```
+
+**Error Types:**
+
+| Error | Functions | When |
+|-------|-----------|------|
+| `NotFoundError` | `findWorkspaceRoot`, `getRelativePath` | No workspace marker found |
+| `ValidationError` | `securePath`, `isPathSafe`, `resolveSafePath`, `atomicWriteJson` | Invalid path or data |
+| `ConflictError` | `acquireLock`, `withLock` | File already locked |
+| `InternalError` | `glob`, `releaseLock`, `withLock`, `atomicWrite` | Filesystem or system error |
+
+## Dependencies
+
+- `@outfitter/contracts` - Result types and error classes
+- `@outfitter/types` - Type utilities
+
+## License
+
+MIT
+
+---
+path: docs/packages/index/README.md
+package: index
+title: @outfitter/index
+---
+
+# @outfitter/index
+
+SQLite FTS5 full-text search indexing with WAL mode and Result-based error handling.
+
+## Installation
+
+```bash
+bun add @outfitter/index
+```
+
+## Quick Start
+
+```typescript
+import { createIndex } from "@outfitter/index";
+
+// Create an index
+const index = createIndex({ path: "./data/search.db" });
+
+// Add documents
+await index.add({
+  id: "doc-1",
+  content: "Hello world, this is searchable content",
+  metadata: { title: "Greeting", tags: ["hello", "world"] },
+});
+
+// Search with FTS5 syntax
+const results = await index.search({ query: "hello" });
+
+if (results.isOk()) {
+  for (const result of results.value) {
+    console.log(result.id, result.score, result.highlights);
+  }
+}
+
+// Cleanup
+index.close();
+```
+
+## Features
+
+- **FTS5 Full-Text Search** — BM25 ranking with snippet highlights
+- **WAL Mode** — Better concurrency for read-heavy workloads
+- **Typed Metadata** — Generic type parameter for document metadata
+- **Result-Based API** — All operations return `Result<T, StorageError>`
+- **Tokenizer Options** — unicode61, porter (stemming), or trigram
+- **Batch Operations** — Efficient bulk document insertion
+- **Version Migration** — Built-in schema migration support
+
+## API Reference
+
+### createIndex(options)
+
+Creates an FTS5 full-text search index.
+
+```typescript
+interface IndexOptions {
+  path: string;                   // Path to SQLite database file
+  tableName?: string;             // FTS5 table name (default: "documents")
+  tokenizer?: TokenizerType;      // Tokenizer (default: "unicode61")
+  tool?: string;                  // Tool identifier for metadata
+  toolVersion?: string;           // Tool version for metadata
+  migrations?: IndexMigrationRegistry;  // Optional migration registry
+}
+
+const index = createIndex<MyMetadata>({
+  path: "./data/index.db",
+  tableName: "notes_fts",
+  tokenizer: "porter",
+});
+```
+
+### Tokenizer Types
+
+| Tokenizer | Use Case |
+|-----------|----------|
+| `unicode61` | Default, Unicode-aware word tokenization |
+| `porter` | English text with stemming (finds "running" when searching "run") |
+| `trigram` | Substring matching, typo tolerance |
+
+### Index Methods
+
+```typescript
+interface Index<T = unknown> {
+  // Add single document (replaces if ID exists)
+  add(doc: IndexDocument): Promise<Result<void, StorageError>>;
+
+  // Add multiple documents in a transaction
+  addMany(docs: IndexDocument[]): Promise<Result<void, StorageError>>;
+
+  // Search with FTS5 query syntax
+  search(query: SearchQuery): Promise<Result<SearchResult<T>[], StorageError>>;
+
+  // Remove document by ID
+  remove(id: string): Promise<Result<void, StorageError>>;
+
+  // Clear all documents
+  clear(): Promise<Result<void, StorageError>>;
+
+  // Close database connection
+  close(): void;
+}
+```
+
+### Document Structure
+
+```typescript
+interface IndexDocument {
+  id: string;                           // Unique document ID
+  content: string;                      // Searchable text
+  metadata?: Record<string, unknown>;   // Optional metadata (stored as JSON)
+}
+
+await index.add({
+  id: "note-123",
+  content: "Meeting notes from standup",
+  metadata: {
+    title: "Standup Notes",
+    date: "2024-01-15",
+    tags: ["meeting", "standup"],
+  },
+});
+```
+
+### Search Query
+
+```typescript
+interface SearchQuery {
+  query: string;    // FTS5 query string
+  limit?: number;   // Max results (default: 25)
+  offset?: number;  // Skip results for pagination (default: 0)
+}
+
+// Simple search
+const results = await index.search({ query: "typescript" });
+
+// Phrase search with pagination
+const paged = await index.search({
+  query: '"error handling"',
+  limit: 10,
+  offset: 20,
+});
+```
+
+### FTS5 Query Syntax
+
+FTS5 supports powerful query syntax:
+
+| Syntax | Example | Description |
+|--------|---------|-------------|
+| Terms | `typescript bun` | Match all terms (implicit AND) |
+| Phrase | `"error handling"` | Exact phrase match |
+| OR | `ts OR typescript` | Match either term |
+| NOT | `typescript NOT javascript` | Exclude term |
+| Prefix | `type*` | Prefix matching |
+| Grouping | `(react OR vue) AND typescript` | Complex queries |
+
+### Search Results
+
+```typescript
+interface SearchResult<T = unknown> {
+  id: string;           // Document ID
+  content: string;      // Full document content
+  score: number;        // BM25 relevance (negative; closer to 0 = better match)
+  metadata?: T;         // Document metadata
+  highlights?: string[];  // Matching snippets with <b> tags
+}
+
+const results = await index.search({ query: "hello world" });
+
+if (results.isOk()) {
+  for (const result of results.value) {
+    console.log(`${result.id}: ${result.highlights?.[0]}`);
+    // "doc-1: <b>Hello</b> <b>world</b>, this is..."
+  }
+}
+```
+
+## Batch Operations
+
+For bulk indexing, use `addMany` for transactional efficiency:
+
+```typescript
+const documents = [
+  { id: "1", content: "First document" },
+  { id: "2", content: "Second document" },
+  { id: "3", content: "Third document" },
+];
+
+const result = await index.addMany(documents);
+
+if (result.isErr()) {
+  // Transaction rolled back, no documents added
+  console.error(result.error.message);
+}
+```
+
+## Version Migration
+
+Indexes track their schema version. Provide a migration registry for upgrades:
+
+```typescript
+import { createIndex, createMigrationRegistry } from "@outfitter/index";
+
+const migrations = createMigrationRegistry();
+
+migrations.register(1, 2, (ctx) => {
+  ctx.db.run("ALTER TABLE documents ADD COLUMN category TEXT");
+  return Result.ok(undefined);
+});
+
+const index = createIndex({
+  path: "./data/index.db",
+  migrations,
+});
+```
+
+### Migration Registry
+
+```typescript
+interface IndexMigrationRegistry {
+  register(
+    fromVersion: number,
+    toVersion: number,
+    migrate: (ctx: IndexMigrationContext) => Result<void, StorageError>
+  ): void;
+
+  migrate(
+    ctx: IndexMigrationContext,
+    fromVersion: number,
+    toVersion: number
+  ): Result<void, StorageError>;
+}
+
+interface IndexMigrationContext {
+  db: Database;  // bun:sqlite Database instance
+}
+```
+
+## Index Metadata
+
+Indexes store metadata for tracking provenance:
+
+```typescript
+interface IndexMetadata {
+  version: number;      // Schema version
+  created: string;      // ISO timestamp
+  tool: string;         // Creating tool identifier
+  toolVersion: string;  // Creating tool version
+}
+```
+
+## Version Constant
+
+The current index format version is exported for compatibility checks:
+
+```typescript
+import { INDEX_VERSION } from "@outfitter/index";
+
+console.log(`Using index format version ${INDEX_VERSION}`);
+```
+
+## Error Handling
+
+All operations return `Result<T, StorageError>`:
+
+```typescript
+const result = await index.add(doc);
+
+if (result.isErr()) {
+  console.error("Failed to add document:", result.error.message);
+  // result.error.cause contains the underlying error
+}
+```
+
+Common error scenarios:
+- Index closed after `close()` called
+- Invalid table name or tokenizer
+- SQLite errors (disk full, permissions)
+- Version mismatch without migrations
+
+## Performance Tips
+
+1. **Use WAL mode** — Enabled by default for better read concurrency
+2. **Batch inserts** — Use `addMany` for bulk operations
+3. **Choose tokenizer wisely** — `porter` for English, `unicode61` for general use
+4. **Limit results** — Use pagination for large result sets
+5. **Close when done** — Call `close()` to release resources
+
+## Related Packages
+
+- [@outfitter/contracts](../contracts/README.md) — Result types and StorageError
+- [@outfitter/file-ops](../file-ops/README.md) — Path utilities and workspace detection
+
+---
+path: docs/packages/kit/README.md
+package: kit
+title: @outfitter/kit
+---
+
+# @outfitter/kit
+
+Foundation facade for Outfitter.
+
+`@outfitter/kit` provides a single foundation entrypoint over:
+
+- `@outfitter/contracts`
+- `@outfitter/types`
+
+Runtime and transport packages (`@outfitter/cli`, `@outfitter/mcp`, etc.) remain explicit dependencies.
+
+## Install
+
+```bash
+bun add @outfitter/kit
+```
+
+## Root Facade
+
+The root entrypoint re-exports the contracts surface and exposes types under a namespace.
+
+```typescript
+import { Result, ValidationError, Types } from "@outfitter/kit";
+
+const value = Result.ok({ id: Types.shortId() });
+```
+
+## Foundation Subpaths
+
+Use subpaths when you want explicit import intent.
+
+### Contracts
+
+```typescript
+import { Result, createLoggerFactory } from "@outfitter/kit/foundation/contracts";
+```
+
+### Types
+
+```typescript
+import { shortId, isDefined } from "@outfitter/kit/foundation/types";
+```
+
+### Aggregate Foundation
+
+```typescript
+import { Result, Types } from "@outfitter/kit/foundation";
+```
+
+## What Kit Does Not Hide
+
+`@outfitter/kit` does not implicitly install or expose runtime transports.
+Keep transport dependencies explicit in your app:
+
+```bash
+bun add @outfitter/kit @outfitter/cli @outfitter/mcp
+```
+
+## License
+
+MIT
+
+---
+path: docs/packages/kit/VERSIONS.md
+package: kit
+title: Version Compatibility Matrix
+---
+
+# Version Compatibility Matrix
+
+This document tracks version compatibility across @outfitter packages.
+
+## Current Release
+
+| Package | Version | Status |
+|---------|---------|--------|
+| @outfitter/contracts | 0.1.0-rc.0 | RC |
+| @outfitter/types | 0.1.0-rc.0 | RC |
+| @outfitter/cli | 0.1.0-rc.0 | RC |
+| @outfitter/config | 0.1.0-rc.0 | RC |
+| @outfitter/logging | 0.1.0-rc.0 | RC |
+| @outfitter/file-ops | 0.1.0-rc.0 | RC |
+| @outfitter/state | 0.1.0-rc.0 | RC |
+| @outfitter/mcp | 0.1.0-rc.0 | RC |
+| @outfitter/index | 0.1.0-rc.0 | RC |
+| @outfitter/daemon | 0.1.0-rc.0 | RC |
+| @outfitter/testing | 0.1.0-rc.0 | RC |
+
+## Dependency Tiers
+
+### Foundation (cold)
+- `@outfitter/contracts` - Result/Error patterns
+- `@outfitter/types` - Branded types
+
+### Runtime (warm)
+- `@outfitter/cli` - CLI framework (includes terminal rendering)
+- `@outfitter/config` - Configuration
+- `@outfitter/logging` - Structured logging
+- `@outfitter/file-ops` - File operations
+- `@outfitter/state` - State management
+- `@outfitter/mcp` - MCP server framework
+- `@outfitter/index` - SQLite FTS5 indexing
+- `@outfitter/daemon` - Daemon lifecycle
+
+### Tooling (lukewarm)
+- `@outfitter/testing` - Test harnesses
+
+---
+path: docs/packages/logging/README.md
+package: logging
+title: @outfitter/logging
+---
+
+# @outfitter/logging
+
+Structured logging via logtape with automatic sensitive data redaction. Provides consistent log formatting across CLI, MCP, and server contexts.
+
+## Installation
+
+```bash
+bun add @outfitter/logging
+```
+
+## Quick Start
+
+```typescript
+import {
+  createLogger,
+  createConsoleSink,
+  configureRedaction,
+} from "@outfitter/logging";
+
+// Configure global redaction (optional - defaults already cover common sensitive keys)
+configureRedaction({
+  keys: ["apiKey", "accessToken"],
+  patterns: [/sk-[a-zA-Z0-9]+/g],
+});
+
+// Create a logger
+const logger = createLogger({
+  name: "my-service",
+  level: "debug",
+  sinks: [createConsoleSink()],
+  redaction: { enabled: true },
+});
+
+// Log with metadata
+logger.info("Request received", {
+  path: "/api/users",
+  apiKey: "secret-key-123", // Will be redacted to "[REDACTED]"
+});
+```
+
+## Log Levels
+
+| Level    | Priority | Use For                                    |
+| -------- | -------- | ------------------------------------------ |
+| `trace`  | 0        | Very detailed debugging (loops, internals) |
+| `debug`  | 1        | Development debugging                      |
+| `info`   | 2        | Normal operations                          |
+| `warn`   | 3        | Unexpected but handled situations          |
+| `error`  | 4        | Failures requiring attention               |
+| `fatal`  | 5        | Unrecoverable failures                     |
+| `silent` | 6        | Disable all logging                        |
+
+Messages are filtered by minimum level. Setting `level: "warn"` filters out `trace`, `debug`, and `info`.
+
+```typescript
+const logger = createLogger({
+  name: "app",
+  level: "warn", // Only warn, error, fatal will be logged
+  sinks: [createConsoleSink()],
+});
+
+logger.debug("Filtered out");
+logger.warn("This appears");
+```
+
+### Changing Level at Runtime
+
+```typescript
+logger.setLevel("debug"); // Enable debug logging
+logger.setLevel("silent"); // Disable all logging
+```
+
+## Redaction
+
+Automatic redaction protects sensitive data from appearing in logs.
+
+### Default Sensitive Keys
+
+These keys are redacted by default (case-insensitive matching):
+
+- `password`
+- `secret`
+- `token`
+- `apikey`
+
+### Custom Redaction Patterns
+
+```typescript
+configureRedaction({
+  patterns: [
+    /Bearer [a-zA-Z0-9._-]+/g, // Bearer tokens
+    /sk-[a-zA-Z0-9]{20,}/g, // OpenAI keys
+    /ghp_[a-zA-Z0-9]{36}/g, // GitHub PATs
+  ],
+  keys: ["credentials", "privateKey"],
+});
+```
+
+### Per-Logger Redaction
+
+```typescript
+const logger = createLogger({
+  name: "auth",
+  redaction: {
+    enabled: true,
+    patterns: [/custom-secret-\d+/g],
+    keys: ["myCustomKey"],
+    replacement: "***", // Custom replacement (default: "[REDACTED]")
+  },
+});
+```
+
+### Nested Object Redaction
+
+Redaction is recursive and applies to nested objects:
+
+```typescript
+logger.info("Config loaded", {
+  database: {
+    host: "localhost",
+    password: "super-secret", // Redacted
+  },
+  api: {
+    url: "https://api.example.com",
+    token: "jwt-token", // Redacted
+  },
+});
+// Output: { database: { host: "localhost", password: "[REDACTED]" }, ... }
+```
+
+## Child Loggers
+
+Create scoped loggers that inherit parent configuration and merge context:
+
+```typescript
+const parent = createLogger({
+  name: "app",
+  context: { service: "api" },
+  sinks: [createConsoleSink()],
+  redaction: { enabled: true },
+});
+
+const child = createChildLogger(parent, { handler: "getUser" });
+
+child.info("Processing request");
+// Output includes merged context: { service: "api", handler: "getUser" }
+```
+
+Child loggers:
+
+- Inherit parent's sinks, level, and redaction config
+- Merge context (child overrides parent for conflicting keys)
+- Share the same `setLevel()` and `addSink()` behavior
+
+## Formatters
+
+### JSON Formatter
+
+Machine-readable output for log aggregation:
+
+```typescript
+import { createJsonFormatter } from "@outfitter/logging";
+
+const formatter = createJsonFormatter();
+// Output: {"timestamp":1705936800000,"level":"info","category":"app","message":"Hello","userId":"123"}
+```
+
+### Pretty Formatter
+
+Human-readable output with optional ANSI colors:
+
+```typescript
+import { createPrettyFormatter } from "@outfitter/logging";
+
+const formatter = createPrettyFormatter({ colors: true, timestamp: true });
+// Output: 2024-01-22T12:00:00.000Z [INFO] app: Hello {"userId":"123"}
+```
+
+## Sinks
+
+### Console Sink
+
+Routes logs to stdout/stderr based on level:
+
+- `trace`, `debug`, `info` -> stdout
+- `warn`, `error`, `fatal` -> stderr
+ - Falls back to `console.*` when process streams are unavailable (edge/serverless)
+
+```typescript
+import { createConsoleSink } from "@outfitter/logging";
+
+const logger = createLogger({
+  name: "app",
+  sinks: [createConsoleSink()],
+});
+
+// Use JSON formatting instead of the default pretty formatter
+const jsonLogger = createLogger({
+  name: "app",
+  sinks: [createConsoleSink({ formatter: createJsonFormatter() })],
+});
+```
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `colors` | `boolean` | auto-detect | Enable ANSI colors |
+| `formatter` | `Formatter` | `createPrettyFormatter()` | Custom log formatter |
+
+### File Sink
+
+Buffered writes to a file path:
+
+```typescript
+import { createFileSink, flush } from "@outfitter/logging";
+
+const logger = createLogger({
+  name: "app",
+  sinks: [createFileSink({ path: "/var/log/app.log" })],
+});
+
+logger.info("Application started");
+
+// Call flush() before exit to ensure all logs are written
+await flush();
+```
+
+### Custom Sinks
+
+Implement the `Sink` interface for custom destinations:
+
+```typescript
+import type { Sink, LogRecord, Formatter } from "@outfitter/logging";
+
+const customSink: Sink = {
+  formatter: createJsonFormatter(), // Optional
+  write(record: LogRecord, formatted?: string): void {
+    // Send to your destination
+    sendToRemote(formatted ?? JSON.stringify(record));
+  },
+  async flush(): Promise<void> {
+    // Optional: ensure pending writes complete
+    await flushPendingWrites();
+  },
+};
+```
+
+### Multiple Sinks
+
+Logs can be sent to multiple destinations:
+
+```typescript
+const logger = createLogger({
+  name: "app",
+  sinks: [
+    createConsoleSink(),
+    createFileSink({ path: "/var/log/app.log" }),
+    customRemoteSink,
+  ],
+});
+```
+
+## Structured Metadata
+
+### Basic Metadata
+
+```typescript
+logger.info("User logged in", {
+  userId: "u123",
+  email: "user@example.com",
+});
+```
+
+### Error Serialization
+
+Error objects are automatically serialized with name, message, and stack:
+
+```typescript
+try {
+  await riskyOperation();
+} catch (error) {
+  logger.error("Operation failed", { error });
+  // error is serialized as: { name: "Error", message: "...", stack: "..." }
+}
+```
+
+### Context Inheritance
+
+Logger context is merged with per-call metadata:
+
+```typescript
+const logger = createLogger({
+  name: "api",
+  context: { requestId: "abc123" },
+  sinks: [createConsoleSink()],
+});
+
+logger.info("Processing", { step: 1 });
+// Metadata: { requestId: "abc123", step: 1 }
+```
+
+## Flushing
+
+Call `flush()` before process exit to ensure buffered logs are written:
+
+```typescript
+import { flush } from "@outfitter/logging";
+
+process.on("beforeExit", async () => {
+  await flush();
+});
+
+// Or before explicit exit
+logger.info("Shutting down");
+await flush();
+process.exit(0);
+```
+
+## Environment-Aware Log Level
+
+### `resolveLogLevel(level?)`
+
+Resolve the log level from environment configuration. Use this instead of hardcoding levels so your app responds to `OUTFITTER_ENV` and `OUTFITTER_LOG_LEVEL` automatically.
+
+Accepts `LogLevel` or a plain `string` — useful when forwarding CLI flags or MCP values without casting. Invalid strings are ignored and fall through to the next precedence level.
+
+**Precedence** (highest wins):
+1. `OUTFITTER_LOG_LEVEL` environment variable
+2. Explicit `level` parameter
+3. `OUTFITTER_ENV` profile defaults (`"debug"` in development)
+4. `"info"` (default)
+
+```typescript
+import { createLogger, resolveLogLevel } from "@outfitter/logging";
+
+const logger = createLogger({
+  name: "my-app",
+  level: resolveLogLevel(),
+  sinks: [createConsoleSink()],
+});
+
+// With OUTFITTER_ENV=development → "debug"
+// With OUTFITTER_LOG_LEVEL=error → "error" (overrides everything)
+// With nothing set → "info"
+
+// Forward a CLI string without casting
+const level = flags.logLevel; // string from commander
+const logger2 = createLogger({
+  name: "cli",
+  level: resolveLogLevel(level),
+  sinks: [createConsoleSink()],
+});
+```
+
+MCP-style level names are mapped automatically: `warning` to `warn`, `emergency`/`critical`/`alert` to `fatal`, `notice` to `info`.
+
+### Edge Runtime Compatibility
+
+`resolveLogLevel` and `createConsoleSink` are safe to use in environments where `process` is unavailable (V8 isolates, Cloudflare Workers, edge runtimes). Environment variable reads are guarded and environment profile resolution falls back gracefully to defaults.
+
+## Logger Factory + BYO Backends
+
+Use the Outfitter logger factory when wiring runtimes (CLI, MCP, daemons). It applies Outfitter defaults for log level resolution and redaction.
+
+```typescript
+import { createOutfitterLoggerFactory } from "@outfitter/logging";
+
+const factory = createOutfitterLoggerFactory();
+const logger = factory.createLogger({
+  name: "mcp",
+  context: { surface: "mcp" },
+});
+
+logger.info("Tool invoked", { tool: "search" });
+await factory.flush();
+```
+
+If you need a different backend, you can use the shared contracts factory with your own adapter and still satisfy the same `Logger` interface expected by Outfitter packages.
+
+```typescript
+import {
+  createLoggerFactory,
+  type Logger,
+  type LoggerAdapter,
+} from "@outfitter/contracts";
+
+type BackendOptions = { write: (line: string) => void };
+
+const adapter: LoggerAdapter<BackendOptions> = {
+  createLogger(config) {
+    const write = config.backend?.write ?? (() => {});
+    const createMethod = (level: string): Logger["info"] =>
+      ((message: string) => {
+        write(`[${level}] ${message}`);
+      }) as Logger["info"];
+
+    return {
+      trace: createMethod("trace"),
+      debug: createMethod("debug"),
+      info: createMethod("info"),
+      warn: createMethod("warn"),
+      error: createMethod("error"),
+      fatal: createMethod("fatal"),
+      child: () => adapter.createLogger(config),
+    };
+  },
+};
+
+const customFactory = createLoggerFactory(adapter);
+const customLogger = customFactory.createLogger({
+  name: "custom-runtime",
+  backend: { write: (line) => console.log(line) },
+});
+
+customLogger.info("Hello from custom backend");
+```
+
+## Runtime Compatibility
+
+| Export | Node.js | Bun | Edge/V8 Isolates | Notes |
+|---|---|---|---|---|
+| `createLogger` | Yes | Yes | Yes | Universal |
+| `createConsoleSink` | Yes | Yes | Yes | Falls back to `console.*` when `process` unavailable |
+| `createFileSink` | No | Yes | No | Requires `Bun.file` / `Bun.write` |
+| `createJsonFormatter` | Yes | Yes | Yes | Universal |
+| `createPrettyFormatter` | Yes | Yes | Yes | Universal |
+| `resolveLogLevel` | Yes | Yes | Yes | Guards `process.env` access |
+| `resolveOutfitterLogLevel` | Yes | Yes | Yes | Guards `process.env` access |
+| `configureRedaction` | Yes | Yes | Yes | Universal |
+| `flush` | Yes | Yes | Yes | Universal |
+
+Edge-runtime notes:
+- `resolveLogLevel()` safely returns defaults when `process` is undefined
+- `createConsoleSink()` auto-detects TTY via `process.stdout?.isTTY` with graceful fallback
+
+## API Reference
+
+### Functions
+
+| Function                | Description                                         |
+| ----------------------- | --------------------------------------------------- |
+| `createLogger`          | Create a configured logger instance                 |
+| `createChildLogger`     | Create a child logger with merged context           |
+| `resolveLogLevel`       | Resolve log level from env vars and profile         |
+| `configureRedaction`    | Configure global redaction patterns and keys        |
+| `flush`                 | Flush all pending log writes across all sinks       |
+| `createJsonFormatter`   | Create a JSON formatter for structured output       |
+| `createPrettyFormatter` | Create a human-readable formatter with colors       |
+| `createConsoleSink`     | Create a console sink (stdout/stderr routing)       |
+| `createFileSink`        | Create a file sink with buffered writes             |
+
+### Types
+
+| Type                     | Description                                     |
+| ------------------------ | ----------------------------------------------- |
+| `LogLevel`               | Union of log level strings                      |
+| `LogRecord`              | Structured log record with timestamp/metadata   |
+| `LoggerConfig`           | Configuration options for `createLogger`        |
+| `LoggerInstance`         | Logger interface with level methods             |
+| `RedactionConfig`        | Per-logger redaction configuration              |
+| `GlobalRedactionConfig`  | Global redaction patterns and keys              |
+| `Formatter`              | Interface for log record formatting             |
+| `Sink`                   | Interface for log output destinations           |
+| `PrettyFormatterOptions` | Options for human-readable formatter            |
+| `FileSinkOptions`        | Options for file sink configuration             |
+
+## Upgrading
+
+Run `outfitter update --guide` for version-specific migration instructions, or check the [migration docs](https://github.com/outfitter-dev/outfitter/tree/main/plugins/outfitter/shared/migrations) for detailed upgrade steps.
+
+## License
+
+MIT
+
+---
+path: docs/packages/mcp/README.md
+package: mcp
+title: @outfitter/mcp
+---
+
+# @outfitter/mcp
+
+MCP (Model Context Protocol) server framework with typed tools and Result-based error handling.
+
+## Installation
+
+```bash
+bun add @outfitter/mcp
+```
+
+## Quick Start
+
+```typescript
+import { createMcpServer, defineTool } from "@outfitter/mcp";
+import { Result } from "@outfitter/contracts";
+import { z } from "zod";
+
+const server = createMcpServer({
+  name: "calculator",
+  version: "1.0.0",
+});
+
+server.registerTool(
+  defineTool({
+    name: "add",
+    description: "Add two numbers together",
+    inputSchema: z.object({
+      a: z.number(),
+      b: z.number(),
+    }),
+    handler: async (input, ctx) => {
+      ctx.logger.debug("Adding numbers", { a: input.a, b: input.b });
+      return Result.ok({ sum: input.a + input.b });
+    },
+  })
+);
+
+await server.start();
+```
+
+## Features
+
+- **Typed Tools** — Define tools with Zod schemas for automatic input validation
+- **Result-Based Errors** — All operations return `Result<T, E>` for explicit error handling
+- **Handler Contract** — Tools use the same `Handler` pattern as other Outfitter packages
+- **Core Tools** — Built-in docs, config, and query tools for common patterns
+- **Deferred Loading** — Support for MCP tool search with `deferLoading` flag
+
+## API Reference
+
+### createMcpServer(options)
+
+Creates an MCP server instance.
+
+```typescript
+interface McpServerOptions {
+  name: string;           // Server name for MCP handshake
+  version: string;        // Server version (semver)
+  logger?: Logger;        // Optional structured logger (BYO)
+  defaultLogLevel?: McpLogLevel | null; // Default log forwarding level
+}
+
+const server = createMcpServer({
+  name: "my-server",
+  version: "1.0.0",
+});
+
+// If `logger` is omitted, Outfitter logger factory defaults are used.
+```
+
+### Bring Your Own Logger (BYO)
+
+`createMcpServer` accepts any logger implementing the shared `Logger` contract.
+This lets you use the default Outfitter backend or a custom backend adapter.
+
+#### Outfitter factory backend
+
+```typescript
+import { createOutfitterLoggerFactory } from "@outfitter/logging";
+
+const loggerFactory = createOutfitterLoggerFactory();
+const server = createMcpServer({
+  name: "my-server",
+  version: "1.0.0",
+  logger: loggerFactory.createLogger({
+    name: "mcp",
+    context: { surface: "mcp" },
+  }),
+});
+```
+
+#### Custom adapter backend
+
+```typescript
+import {
+  createLoggerFactory,
+  type Logger,
+  type LoggerAdapter,
+} from "@outfitter/contracts";
+
+type BackendOptions = { write: (line: string) => void };
+
+const adapter: LoggerAdapter<BackendOptions> = {
+  createLogger(config) {
+    const write = config.backend?.write ?? (() => {});
+    const createMethod = (level: string): Logger["info"] =>
+      ((message: string) => {
+        write(`[${level}] ${config.name}: ${message}`);
+      }) as Logger["info"];
+
+    return {
+      trace: createMethod("trace"),
+      debug: createMethod("debug"),
+      info: createMethod("info"),
+      warn: createMethod("warn"),
+      error: createMethod("error"),
+      fatal: createMethod("fatal"),
+      child: (childContext) =>
+        adapter.createLogger({
+          ...config,
+          context: { ...(config.context ?? {}), ...childContext },
+        }),
+    };
+  },
+};
+
+const loggerFactory = createLoggerFactory(adapter);
+const server = createMcpServer({
+  name: "my-server",
+  version: "1.0.0",
+  logger: loggerFactory.createLogger({
+    name: "mcp",
+    backend: { write: (line) => console.log(line) },
+  }),
+});
+```
+
+### Log Forwarding
+
+MCP servers can forward log messages to the connected client. The default log level is resolved from environment configuration:
+
+**Precedence** (highest wins):
+1. `OUTFITTER_LOG_LEVEL` environment variable
+2. `options.defaultLogLevel`
+3. `OUTFITTER_ENV` profile defaults (`"debug"` in development, `null` otherwise)
+4. `null` (no forwarding)
+
+```typescript
+const server = createMcpServer({
+  name: "my-server",
+  version: "1.0.0",
+  // Forwarding level auto-resolved from OUTFITTER_ENV
+});
+
+// With OUTFITTER_ENV=development → forwards at "debug"
+// With OUTFITTER_ENV=production → no forwarding (null)
+// With OUTFITTER_LOG_LEVEL=error → forwards at "error"
+```
+
+Set `defaultLogLevel: null` to explicitly disable forwarding regardless of environment. The MCP client can always override via `logging/setLevel`.
+
+#### `sendLogMessage(level, data, loggerName?)`
+
+Send a log message to the connected MCP client.
+
+```typescript
+server.sendLogMessage("info", "Indexing complete", "my-server");
+server.sendLogMessage("warning", { message: "Rate limited", retryAfter: 30 });
+```
+
+Only sends if the message level meets or exceeds the current client log level threshold.
+
+### defineTool(definition)
+
+Helper for defining typed tools with better type inference.
+
+```typescript
+interface ToolDefinition<TInput, TOutput, TError> {
+  name: string;                    // Unique tool name (kebab-case)
+  description: string;             // Human-readable description
+  inputSchema: z.ZodType<TInput>;  // Zod schema for validation
+  handler: Handler<TInput, TOutput, TError>;
+  deferLoading?: boolean;          // Default: true
+}
+
+const getUserTool = defineTool({
+  name: "get-user",
+  description: "Retrieve a user by their unique ID",
+  inputSchema: z.object({ userId: z.string().uuid() }),
+  handler: async (input, ctx) => {
+    const user = await db.users.find(input.userId);
+    if (!user) {
+      return Result.err(NotFoundError.create("user", input.userId));
+    }
+    return Result.ok(user);
+  },
+});
+```
+
+### defineResource(definition)
+
+Helper for defining MCP resources.
+
+```typescript
+interface ResourceDefinition {
+  uri: string;           // Unique resource URI
+  name: string;          // Human-readable name
+  description?: string;  // Optional description
+  mimeType?: string;     // Content MIME type
+  handler?: ResourceReadHandler; // Optional resources/read handler
+}
+
+const configResource = defineResource({
+  uri: "file:///etc/app/config.json",
+  name: "Application Config",
+  description: "Main configuration file",
+  mimeType: "application/json",
+  handler: async (uri, ctx) => {
+    ctx.logger.debug("Reading config resource", { uri });
+    return Result.ok([
+      {
+        uri,
+        mimeType: "application/json",
+        text: JSON.stringify({ debug: true }),
+      },
+    ]);
+  },
+});
+```
+
+Registered resources with handlers are exposed through MCP `resources/read`.
+
+```typescript
+server.registerResource(configResource);
+
+const contentResult = await server.readResource("file:///etc/app/config.json");
+```
+
+### Server Methods
+
+```typescript
+interface McpServer {
+  readonly name: string;
+  readonly version: string;
+
+  // Registration
+  registerTool<TInput, TOutput, TError>(tool: ToolDefinition): void;
+  registerResource(resource: ResourceDefinition): void;
+  registerResourceTemplate(template: ResourceTemplateDefinition): void;
+
+  // Introspection
+  getTools(): SerializedTool[];
+  getResources(): ResourceDefinition[];
+  getResourceTemplates(): ResourceTemplateDefinition[];
+
+  // Invocation
+  readResource(uri: string): Promise<Result<ResourceContent[], McpError>>;
+  invokeTool<T>(name: string, input: unknown, options?: InvokeToolOptions): Promise<Result<T, McpError>>;
+
+  // Lifecycle
+  start(): Promise<void>;
+  stop(): Promise<void>;
+}
+```
+
+### McpHandlerContext
+
+Extended handler context for MCP tools with additional metadata:
+
+```typescript
+interface McpHandlerContext extends HandlerContext {
+  toolName?: string;  // Name of the tool being invoked
+}
+```
+
+## Core Tools
+
+Pre-built tools for common MCP patterns. These are marked with `deferLoading: false` for immediate availability.
+
+### Docs Tool
+
+Provides documentation, usage patterns, and examples.
+
+```typescript
+import { defineDocsTool, createCoreTools } from "@outfitter/mcp";
+
+const docsTool = defineDocsTool({
+  docs: {
+    overview: "Calculator server for arithmetic operations",
+    tools: [{ name: "add", summary: "Add two numbers" }],
+    examples: [{ input: { a: 2, b: 3 }, description: "Basic addition" }],
+  },
+});
+
+// Or use getDocs for dynamic content
+const dynamicDocsTool = defineDocsTool({
+  getDocs: async (section) => {
+    return loadDocsFromFile(section);
+  },
+});
+```
+
+### Config Tool
+
+Read and modify server configuration.
+
+```typescript
+import { defineConfigTool } from "@outfitter/mcp";
+
+const configTool = defineConfigTool({
+  initial: { debug: false, maxRetries: 3 },
+});
+
+// With custom store
+const persistedConfigTool = defineConfigTool({
+  store: {
+    get: async (key) => db.config.get(key),
+    set: async (key, value) => db.config.set(key, value),
+    list: async () => db.config.all(),
+  },
+});
+```
+
+### Query Tool
+
+Search and discovery with pagination.
+
+```typescript
+import { defineQueryTool } from "@outfitter/mcp";
+
+const queryTool = defineQueryTool({
+  handler: async (input, ctx) => {
+    const results = await searchIndex(input.q, {
+      limit: input.limit,
+      cursor: input.cursor,
+      filters: input.filters,
+    });
+    return Result.ok({
+      results: results.items,
+      nextCursor: results.nextCursor,
+    });
+  },
+});
+```
+
+### Bundle All Core Tools
+
+```typescript
+import { createCoreTools } from "@outfitter/mcp";
+
+const coreTools = createCoreTools({
+  docs: { docs: myDocs },
+  config: { initial: myConfig },
+  query: { handler: myQueryHandler },
+});
+
+for (const tool of coreTools) {
+  server.registerTool(tool);
+}
+```
+
+## Tool Annotations
+
+Use `TOOL_ANNOTATIONS` presets to declare tool behavior hints without manually specifying all four booleans:
+
+```typescript
+import { defineTool, TOOL_ANNOTATIONS } from "@outfitter/mcp";
+
+// Use a preset directly
+const listTool = defineTool({
+  name: "list-items",
+  description: "List all items",
+  inputSchema: z.object({}),
+  annotations: TOOL_ANNOTATIONS.readOnly,
+  handler: async (input, ctx) => { /* ... */ },
+});
+
+// Spread and override for edge cases
+const searchTool = defineTool({
+  name: "search",
+  description: "Search external APIs",
+  inputSchema: z.object({ q: z.string() }),
+  annotations: { ...TOOL_ANNOTATIONS.readOnly, openWorldHint: true },
+  handler: async (input, ctx) => { /* ... */ },
+});
+```
+
+| Preset | readOnly | destructive | idempotent | openWorld |
+|--------|----------|-------------|------------|-----------|
+| `readOnly` | true | false | true | false |
+| `write` | false | false | false | false |
+| `writeIdempotent` | false | false | true | false |
+| `destructive` | false | true | true | false |
+| `openWorld` | false | false | false | true |
+
+For multi-action tools, use the most conservative union of hints. Per-action annotations are an MCP spec limitation.
+
+### adaptHandler
+
+When your handler returns domain errors that extend `Error` but not `OutfitterError`, use `adaptHandler` instead of an unsafe cast:
+
+```typescript
+import { adaptHandler, defineTool } from "@outfitter/mcp";
+
+const tool = defineTool({
+  name: "my-tool",
+  inputSchema: z.object({ id: z.string() }),
+  handler: adaptHandler(myDomainHandler),
+});
+```
+
+## Transport Helpers
+
+### wrapToolResult / wrapToolError
+
+Format handler output as MCP tool responses. Useful when building custom transport layers or testing:
+
+```typescript
+import { wrapToolResult, wrapToolError } from "@outfitter/mcp";
+
+// Wrap a plain value as MCP tool content
+const response = wrapToolResult({ count: 42 });
+// { content: [{ type: "text", text: '{"count":42}' }] }
+
+// Wrap an error with isError flag
+const errorResponse = wrapToolError(new Error("not found"));
+// { content: [{ type: "text", text: "not found" }], isError: true }
+```
+
+### connectStdio
+
+Connect server to stdio transport for Claude Desktop integration.
+
+```typescript
+import { createMcpServer, connectStdio } from "@outfitter/mcp";
+
+const server = createMcpServer({ name: "my-server", version: "1.0.0" });
+// ... register tools ...
+
+await connectStdio(server);
+```
+
+### createSdkServer
+
+Create the underlying `@modelcontextprotocol/sdk` server.
+
+```typescript
+import { createSdkServer } from "@outfitter/mcp";
+
+const { server: sdkServer, toolsList, callTool } = createSdkServer(mcpServer);
+```
+
+## Error Handling
+
+Tools return Results with typed errors. The framework automatically translates `OutfitterError` categories to JSON-RPC error codes:
+
+| Category | JSON-RPC Code | Description |
+|----------|--------------|-------------|
+| `validation` | -32602 | Invalid params |
+| `not_found` | -32601 | Method not found |
+| `permission` | -32600 | Invalid request |
+| `internal` | -32603 | Internal error |
+
+```typescript
+const result = await server.invokeTool("get-user", { userId: "123" });
+
+if (result.isErr()) {
+  // result.error is McpError with code and context
+  console.error(result.error.message, result.error.code);
+}
+```
+
+## Schema Utilities
+
+### zodToJsonSchema
+
+Convert Zod schemas to JSON Schema for MCP protocol.
+
+```typescript
+import { zodToJsonSchema } from "@outfitter/mcp";
+
+const schema = z.object({
+  name: z.string(),
+  age: z.number().optional(),
+});
+
+const jsonSchema = zodToJsonSchema(schema);
+// { type: "object", properties: { name: { type: "string" }, ... } }
+```
+
+## Action Adapter
+
+### buildMcpTools
+
+Build MCP tools from an action registry (for structured action-based servers).
+
+```typescript
+import { buildMcpTools } from "@outfitter/mcp";
+
+const tools = buildMcpTools({
+  actions: myActionRegistry,
+  prefix: "myapp",
+});
+
+for (const tool of tools) {
+  server.registerTool(tool);
+}
+```
+
+## Claude Desktop Configuration
+
+Add your MCP server to Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "bun",
+      "args": ["run", "/path/to/server.ts"]
+    }
+  }
+}
+```
+
+Config location:
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- Linux: `~/.config/claude/claude_desktop_config.json`
+
+## Upgrading
+
+Run `outfitter update --guide` for version-specific migration instructions, or check the [migration docs](https://github.com/outfitter-dev/outfitter/tree/main/plugins/outfitter/shared/migrations) for detailed upgrade steps.
+
+## Related Packages
+
+- [@outfitter/contracts](../contracts/README.md) — Result types and error taxonomy
+- [@outfitter/logging](../logging/README.md) — Structured logging
+- [@outfitter/config](../config/README.md) — Configuration loading
+
+---
+path: docs/packages/state/README.md
+package: state
+title: @outfitter/state
+---
+
+# @outfitter/state
+
+Pagination cursor persistence and ephemeral state management for CLI and MCP workflows.
+
+## Installation
+
+```bash
+bun add @outfitter/state
+```
+
+## Quick Start
+
+```typescript
+import {
+  createCursor,
+  createCursorStore,
+  createScopedStore,
+  advanceCursor,
+} from "@outfitter/state";
+
+// Create in-memory cursor store
+const store = createCursorStore();
+
+// Create a cursor for pagination
+const cursorResult = createCursor({
+  position: 0,
+  metadata: { query: "status:open" },
+  ttl: 60 * 60 * 1000, // 1 hour expiry
+});
+
+if (cursorResult.isOk()) {
+  const cursor = cursorResult.value;
+  store.set(cursor);
+
+  // Later: advance cursor position
+  const advanced = advanceCursor(cursor, 10);
+  store.set(advanced);
+}
+```
+
+## Cursor Design
+
+Cursors are intentionally **opaque** to consumers. They are immutable, frozen objects that encapsulate pagination state.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | Unique identifier for storage lookup |
+| `position` | `number` | Current offset in the result set |
+| `metadata` | `Record<string, unknown>` | Optional user-defined context |
+| `ttl` | `number` | Time-to-live in milliseconds (optional) |
+| `expiresAt` | `number` | Computed Unix timestamp for expiry (if TTL set) |
+| `createdAt` | `number` | Unix timestamp when cursor was created |
+
+### Why Opaque?
+
+Cursors are frozen (`Object.freeze()`) to prevent direct mutation. This design:
+
+1. **Enforces immutability** - Use `advanceCursor()` to create new positions
+2. **Enables future changes** - Internal representation can evolve without breaking API
+3. **Prevents corruption** - No accidental modification of cursor state
+
+```typescript
+const result = createCursor({ position: 0 });
+if (result.isOk()) {
+  const cursor = result.value;
+
+  // This throws in strict mode (cursor is frozen)
+  cursor.position = 10; // TypeError!
+
+  // Do this instead
+  const advanced = advanceCursor(cursor, 10);
+}
+```
+
+## Pagination Flow
+
+```
++-----------------------------------------------------+
+|  First Request                                      |
+|  1. Handler receives no cursor                      |
+|  2. Creates cursor at position 0                    |
+|  3. Returns items[0..limit] + cursor.id             |
++-----------------------------------------------------+
+                         |
+                         v
++-----------------------------------------------------+
+|  Subsequent Requests                                |
+|  1. Handler receives cursor.id                      |
+|  2. Loads cursor from store                         |
+|  3. Returns items[cursor.position..position+limit]  |
+|  4. Advances cursor, saves back to store            |
++-----------------------------------------------------+
+```
+
+### Example: Paginated Handler
+
+```typescript
+import { createCursor, createCursorStore, advanceCursor } from "@outfitter/state";
+import { Result } from "@outfitter/contracts";
+
+const store = createCursorStore();
+const PAGE_SIZE = 20;
+
+async function listItems(cursorId?: string) {
+  let cursor;
+
+  if (cursorId) {
+    // Load existing cursor
+    const cursorResult = store.get(cursorId);
+    if (cursorResult.isErr()) {
+      return Result.err(cursorResult.error);
+    }
+    cursor = cursorResult.value;
+  } else {
+    // Create new cursor at position 0
+    const cursorResult = createCursor({
+      position: 0,
+      ttl: 30 * 60 * 1000, // 30 minutes
+    });
+    if (cursorResult.isErr()) {
+      return Result.err(cursorResult.error);
+    }
+    cursor = cursorResult.value;
+    store.set(cursor);
+  }
+
+  // Fetch items at cursor position
+  const items = await fetchItems(cursor.position, PAGE_SIZE);
+
+  // Advance cursor for next page
+  const advanced = advanceCursor(cursor, cursor.position + PAGE_SIZE);
+  store.set(advanced);
+
+  return Result.ok({
+    items,
+    nextCursor: items.length === PAGE_SIZE ? cursor.id : undefined,
+  });
+}
+```
+
+## State Scoping
+
+Isolate cursors by namespace to prevent ID collisions between different contexts:
+
+```typescript
+const store = createCursorStore();
+
+// Scoped stores for different contexts
+const issuesStore = createScopedStore(store, "linear:issues");
+const prsStore = createScopedStore(store, "github:prs");
+
+// Cursors are isolated - same ID won't conflict
+issuesStore.set(issueCursor);  // Stored as "linear:issues:cursor-id"
+prsStore.set(prCursor);        // Stored as "github:prs:cursor-id"
+
+// Each scope manages its own cursors
+issuesStore.clear();  // Only clears issue cursors
+```
+
+### Nested Scopes
+
+Scopes can be nested for hierarchical organization:
+
+```typescript
+const store = createCursorStore();
+const githubStore = createScopedStore(store, "github");
+const issuesStore = createScopedStore(githubStore, "issues");
+const prsStore = createScopedStore(githubStore, "prs");
+
+issuesStore.getScope();  // "github:issues"
+prsStore.getScope();     // "github:prs"
+```
+
+### Scoped Store Behavior
+
+When you retrieve a cursor from a scoped store, the ID is presented without the prefix:
+
+```typescript
+const scoped = createScopedStore(store, "my-scope");
+
+const cursor = createCursor({ id: "abc123", position: 0 });
+if (cursor.isOk()) {
+  scoped.set(cursor.value);
+
+  // Underlying store has prefixed ID
+  store.list();  // ["my-scope:abc123"]
+
+  // Scoped store returns clean ID
+  scoped.list();  // ["abc123"]
+
+  // Get returns cursor with clean ID
+  const result = scoped.get("abc123");
+  if (result.isOk()) {
+    result.value.id;  // "abc123" (not "my-scope:abc123")
+  }
+}
+```
+
+## Persistent Storage
+
+For cursors that need to survive process restarts:
+
+```typescript
+import { createPersistentStore } from "@outfitter/state";
+
+// Create store that persists to disk
+const store = await createPersistentStore({
+  path: "/path/to/cursors.json",
+});
+
+// Use like any cursor store
+store.set(cursor);
+
+// Flush to disk before exit
+await store.flush();
+
+// Cleanup resources
+store.dispose();
+```
+
+### Persistence Details
+
+- **Format**: JSON file with `{ cursors: Record<string, Cursor> }` structure
+- **Atomic writes**: Uses temp file + rename to prevent corruption
+- **Auto-creates directories**: Parent directories created if they don't exist
+- **Graceful degradation**: Corrupted files result in empty store (no crash)
+
+### Example: Persistent Scoped Store
+
+```typescript
+import { createPersistentStore, createScopedStore } from "@outfitter/state";
+
+const persistent = await createPersistentStore({
+  path: "~/.config/myapp/cursors.json",
+});
+
+const issuesCursors = createScopedStore(persistent, "issues");
+const prsCursors = createScopedStore(persistent, "prs");
+
+// Use scoped stores normally
+issuesCursors.set(cursor);
+
+// Flush persists all scopes
+await persistent.flush();
+```
+
+## TTL and Expiration
+
+Cursors can have a time-to-live (TTL) for automatic expiration:
+
+```typescript
+// Cursor expires in 1 hour
+const result = createCursor({
+  position: 0,
+  ttl: 60 * 60 * 1000,
+});
+
+if (result.isOk()) {
+  const cursor = result.value;
+  cursor.ttl;       // 3600000
+  cursor.expiresAt; // Unix timestamp (e.g., 1706000000000)
+}
+```
+
+### Expiration Behavior
+
+- **`store.get()`**: Returns `NotFoundError` for expired cursors
+- **`store.has()`**: Returns `false` for expired cursors
+- **`isExpired()`**: Check expiration without store lookup
+- **`store.prune()`**: Remove all expired cursors, returns count
+
+```typescript
+import { isExpired } from "@outfitter/state";
+
+// Manual expiration check
+if (isExpired(cursor)) {
+  console.log("Cursor has expired");
+}
+
+// Prune expired cursors periodically
+const prunedCount = store.prune();
+console.log(`Removed ${prunedCount} expired cursors`);
+```
+
+### Cursors Without TTL
+
+Cursors created without a TTL never expire:
+
+```typescript
+const result = createCursor({ position: 0 });
+if (result.isOk()) {
+  result.value.ttl;       // undefined
+  result.value.expiresAt; // undefined
+  isExpired(result.value); // always false
+}
+```
+
+## API Reference
+
+### Functions
+
+| Function | Description |
+|----------|-------------|
+| `createCursor(options)` | Create a new immutable pagination cursor |
+| `advanceCursor(cursor, position)` | Create a new cursor with updated position |
+| `isExpired(cursor)` | Check if a cursor has expired |
+| `createCursorStore()` | Create an in-memory cursor store |
+| `createPersistentStore(options)` | Create a disk-backed cursor store |
+| `createScopedStore(store, scope)` | Create a namespace-isolated cursor store |
+
+### Interfaces
+
+| Interface | Description |
+|-----------|-------------|
+| `Cursor` | Immutable pagination cursor |
+| `CreateCursorOptions` | Options for `createCursor()` |
+| `CursorStore` | Base interface for cursor stores |
+| `ScopedStore` | Cursor store with namespace isolation |
+| `PersistentStore` | Cursor store with disk persistence |
+| `PersistentStoreOptions` | Options for `createPersistentStore()` |
+
+## Error Handling
+
+All functions that can fail return `Result<T, E>` from `@outfitter/contracts`:
+
+```typescript
+import { Result } from "@outfitter/contracts";
+
+const result = createCursor({ position: -1 });
+
+if (result.isErr()) {
+  // ValidationError: Position must be non-negative
+  console.error(result.error.message);
+}
+
+const getResult = store.get("nonexistent");
+
+if (getResult.isErr()) {
+  // NotFoundError: Cursor not found: nonexistent
+  console.error(getResult.error.message);
+  console.log(getResult.error.resourceType); // "cursor"
+  console.log(getResult.error.resourceId);   // "nonexistent"
+}
+```
+
+## License
+
+MIT
+
+---
+path: docs/packages/testing/README.md
+package: testing
+title: @outfitter/testing
+---
+
+# @outfitter/testing
+
+Test harnesses, fixtures, and utilities for Outfitter packages.
+
+## Installation
+
+```bash
+bun add -d @outfitter/testing
+```
+
+## Quick Start
+
+```typescript
+import {
+  createFixture,
+  createCliHarness,
+  createMcpHarness,
+  withTempDir,
+  withEnv,
+} from "@outfitter/testing";
+
+// Create reusable test fixtures
+const createUser = createFixture({
+  id: 1,
+  name: "Test User",
+  email: "test@example.com",
+});
+
+// Test CLI commands
+const cli = createCliHarness("./bin/my-cli");
+const result = await cli.run(["--help"]);
+expect(result.exitCode).toBe(0);
+
+// Test MCP tools
+const harness = createMcpHarness(myMcpServer);
+const tools = await harness.listTools();
+const output = await harness.invoke("my-tool", { input: "value" });
+```
+
+## Fixtures
+
+Factory functions for creating test data with sensible defaults.
+
+### createFixture
+
+Creates a fixture factory that returns new objects with optional overrides.
+
+```typescript
+import { createFixture } from "@outfitter/testing";
+
+// Define defaults
+const createUser = createFixture({
+  id: 1,
+  name: "John Doe",
+  email: "john@example.com",
+  settings: { theme: "dark", notifications: true },
+});
+
+// Use defaults
+const user1 = createUser();
+
+// Override specific fields (supports deep merge)
+const user2 = createUser({
+  name: "Jane Doe",
+  settings: { theme: "light" },
+});
+// Result: { id: 1, name: "Jane Doe", email: "john@example.com", settings: { theme: "light", notifications: true } }
+```
+
+Each call returns a fresh copy, preventing test pollution from shared mutable state.
+
+#### Deep Merge Behavior
+
+Overrides are deep-merged for nested objects:
+
+```typescript
+const createConfig = createFixture({
+  env: {
+    region: "us-east-1",
+    flags: { beta: false, audit: true },
+  },
+  retries: 3,
+});
+
+const config = createConfig({
+  env: { flags: { beta: true } },
+});
+// Result:
+// {
+//   env: { region: "us-east-1", flags: { beta: true, audit: true } },
+//   retries: 3
+// }
+```
+
+Notes:
+- Arrays are replaced, not merged.
+- `undefined` override values are ignored (defaults remain).
+
+### withTempDir
+
+Runs a function with an isolated temporary directory that is automatically cleaned up.
+
+```typescript
+import { withTempDir } from "@outfitter/testing";
+import { join } from "node:path";
+
+const result = await withTempDir(async (dir) => {
+  // Write test files
+  await Bun.write(join(dir, "config.json"), JSON.stringify({ key: "value" }));
+
+  // Run code that operates on the directory
+  return await processDirectory(dir);
+});
+// Directory is automatically removed after the callback
+```
+
+Cleanup occurs even if the callback throws an error.
+
+### withEnv
+
+Runs a function with temporary environment variables, restoring originals after.
+
+```typescript
+import { withEnv } from "@outfitter/testing";
+
+await withEnv({ API_KEY: "test-key", DEBUG: "true" }, async () => {
+  // process.env.API_KEY is "test-key"
+  // process.env.DEBUG is "true"
+  await runTests();
+});
+// Original environment is restored
+```
+
+## CLI Test Harness
+
+Execute CLI commands and capture their output for assertions.
+
+### createCliHarness
+
+Creates a harness for testing command-line tools.
+
+```typescript
+import { createCliHarness } from "@outfitter/testing";
+
+const harness = createCliHarness("./bin/my-cli");
+
+// Test help output
+const helpResult = await harness.run(["--help"]);
+expect(helpResult.stdout).toContain("Usage:");
+expect(helpResult.exitCode).toBe(0);
+
+// Test error handling
+const errorResult = await harness.run(["--invalid-flag"]);
+expect(errorResult.stderr).toContain("Unknown option");
+expect(errorResult.exitCode).toBe(1);
+
+// Test with arguments
+const result = await harness.run(["process", "--input", "data.json"]);
+expect(result.stdout).toContain("Processed successfully");
+```
+
+### CliResult Interface
+
+```typescript
+interface CliResult {
+  /** Standard output from the command */
+  stdout: string;
+  /** Standard error output from the command */
+  stderr: string;
+  /** Exit code (0 typically indicates success) */
+  exitCode: number;
+}
+```
+
+## MCP Test Harness
+
+Test MCP (Model Context Protocol) server tool invocations.
+
+### createMcpHarness
+
+Creates a test harness from an MCP server for invoking and inspecting tools.
+
+```typescript
+import { createMcpHarness, type McpServer } from "@outfitter/testing";
+
+// Create or mock an MCP server
+const server: McpServer = {
+  tools: [
+    {
+      name: "add",
+      description: "Add two numbers",
+      handler: ({ a, b }) => a + b,
+    },
+    {
+      name: "greet",
+      description: "Generate a greeting",
+      handler: ({ name }) => `Hello, ${name}!`,
+    },
+  ],
+  async invoke(toolName, input) {
+    const tool = this.tools.find(t => t.name === toolName);
+    if (!tool) throw new Error(`Tool not found: ${toolName}`);
+    return tool.handler(input);
+  },
+};
+
+// Create harness
+const harness = createMcpHarness(server);
+
+// List available tools
+const tools = await harness.listTools();
+expect(tools).toEqual(["add", "greet"]);
+
+// Invoke tools with type inference
+const sum = await harness.invoke<number>("add", { a: 2, b: 3 });
+expect(sum).toBe(5);
+
+const greeting = await harness.invoke<string>("greet", { name: "World" });
+expect(greeting).toBe("Hello, World!");
+```
+
+### McpHarness Interface
+
+```typescript
+interface McpHarness {
+  /** Invoke a tool by name with input parameters */
+  invoke<T>(toolName: string, input: unknown): Promise<T>;
+  /** List all available tool names */
+  listTools(): Promise<string[]>;
+}
+```
+
+### McpServer Interface
+
+Minimal interface for MCP servers (can be real or mocked).
+
+```typescript
+interface McpServer {
+  /** Array of tools registered on the server */
+  tools: McpTool[];
+  /** Invoke a tool by name with input */
+  invoke(toolName: string, input: unknown): Promise<unknown>;
+}
+
+interface McpTool {
+  /** Unique name of the tool */
+  name: string;
+  /** Human-readable description */
+  description: string;
+  /** Handler function for the tool */
+  handler: McpToolHandler;
+}
+
+type McpToolHandler = (input: unknown) => unknown | Promise<unknown>;
+```
+
+## Subpath Exports
+
+Import specific modules directly for smaller bundles:
+
+```typescript
+// Just fixtures
+import { createFixture, withTempDir, withEnv } from "@outfitter/testing/fixtures";
+
+// Just CLI harness
+import { createCliHarness } from "@outfitter/testing/cli-harness";
+
+// Just MCP harness
+import { createMcpHarness } from "@outfitter/testing/mcp-harness";
+```
+
+## API Reference
+
+### Fixtures
+
+| Export | Description |
+|--------|-------------|
+| `createFixture<T>(defaults)` | Create a fixture factory with deep merge support |
+| `withTempDir<T>(fn)` | Run callback with auto-cleaned temp directory |
+| `withEnv<T>(vars, fn)` | Run callback with temporary environment variables |
+
+### CLI Harness
+
+| Export | Description |
+|--------|-------------|
+| `createCliHarness(command)` | Create a CLI test harness |
+| `CliHarness` | Interface for CLI harness |
+| `CliResult` | Interface for command execution result |
+
+### MCP Harness
+
+| Export | Description |
+|--------|-------------|
+| `createMcpHarness(server)` | Create an MCP test harness |
+| `McpHarness` | Interface for MCP harness |
+| `McpServer` | Interface for MCP server |
+| `McpTool` | Interface for tool definition |
+| `McpToolHandler` | Type for tool handler functions |
+
+## Related Packages
+
+- `@outfitter/cli` - CLI framework for building command-line tools
+- `@outfitter/mcp` - MCP server framework with typed tools
+- `@outfitter/contracts` - Result types and error patterns
+
+## License
+
+MIT
+
+---
+path: docs/packages/tooling/README.md
+package: tooling
+title: @outfitter/tooling
+---
+
+# @outfitter/tooling
+
+Dev tooling configuration presets and CLI for Outfitter projects.
+
+## Features
+
+- **Configuration Presets**: Biome, TypeScript, Lefthook, and markdownlint configs
+- **CLI Commands**: Initialize configs, upgrade Bun, TDD-aware pre-push hooks
+- **Registry System**: Composable config blocks for scaffolding
+
+## Installation
+
+```bash
+bun add -D @outfitter/tooling
+```
+
+Peer dependencies (optional):
+- `ultracite` — Biome wrapper for formatting/linting
+- `lefthook` — Git hooks
+- `markdownlint-cli2` — Markdown linting
+
+## CLI Commands
+
+### `tooling init`
+
+Initialize tooling configuration in the current project. Copies preset configs for Biome, TypeScript, Lefthook, and markdownlint.
+
+```bash
+bunx @outfitter/tooling init
+```
+
+### `tooling check [paths...]`
+
+Run linting checks (wraps ultracite).
+
+```bash
+bunx @outfitter/tooling check
+bunx @outfitter/tooling check src/
+```
+
+### `tooling fix [paths...]`
+
+Fix linting issues (wraps ultracite).
+
+```bash
+bunx @outfitter/tooling fix
+bunx @outfitter/tooling fix src/
+```
+
+### `tooling upgrade-bun [version]`
+
+Upgrade Bun version across the project. Updates:
+- `.bun-version`
+- `engines.bun` in all package.json files
+- `@types/bun` dependency versions (leaves "latest" alone)
+- `bun.lock`
+
+```bash
+# Upgrade to latest
+bunx @outfitter/tooling upgrade-bun
+
+# Upgrade to specific version
+bunx @outfitter/tooling upgrade-bun 1.4.0
+
+# Skip installing Bun and updating lockfile
+bunx @outfitter/tooling upgrade-bun 1.4.0 --no-install
+```
+
+### `tooling pre-push`
+
+TDD-aware pre-push strict verification hook. Detects RED phase branches and skips verification by design.
+
+RED phase branches follow these patterns:
+- `*-tests` (e.g., `feature/auth-tests`)
+- `*/tests` (e.g., `feature/auth/tests`)
+- `*_tests` (e.g., `feature/auth_tests`)
+
+Verification order:
+1. Run `verify:ci` if present.
+2. Otherwise run strict fallback: `typecheck`, `check|lint`, `build`, `test`.
+
+```bash
+# Normal usage (in lefthook.yml)
+bunx @outfitter/tooling pre-push
+
+# Force skip verification
+bunx @outfitter/tooling pre-push --force
+```
+
+## Configuration Presets
+
+### Biome
+
+Extends our Biome config in your `biome.json`:
+
+```json
+{
+  "extends": ["@outfitter/tooling/biome.json"]
+}
+```
+
+### TypeScript
+
+Extends our TypeScript config in your `tsconfig.json`:
+
+```json
+{
+  "extends": "@outfitter/tooling/tsconfig.preset.json"
+}
+```
+
+Or for Bun-specific projects:
+
+```json
+{
+  "extends": "@outfitter/tooling/tsconfig.preset.bun.json"
+}
+```
+
+### Lefthook
+
+Extends our git hooks in your `.lefthook.yml`:
+
+```yaml
+extends:
+  - node_modules/@outfitter/tooling/lefthook.yml
+```
+
+Default hooks:
+- **pre-commit**: Runs ultracite on staged files, typechecks
+- **pre-push**: Runs TDD-aware strict verification via `tooling pre-push`
+
+### markdownlint
+
+Copy or reference the config:
+
+```bash
+# Copy to project
+cp node_modules/@outfitter/tooling/.markdownlint-cli2.jsonc .
+```
+
+## Registry System
+
+The tooling package includes a registry of composable config blocks for the `outfitter` CLI scaffolding system.
+
+Available blocks:
+- `claude` — Claude Code settings and hooks
+- `biome` — Biome/Ultracite configuration
+- `lefthook` — Git hooks configuration
+- `markdownlint` — Markdown linting configuration
+- `bootstrap` — Project bootstrap script
+- `scaffolding` — Full starter kit (combines all above)
+
+## Exports
+
+| Export | Description |
+|--------|-------------|
+| `./biome.json` | Biome configuration preset |
+| `./tsconfig.preset.json` | TypeScript preset (general) |
+| `./tsconfig.preset.bun.json` | TypeScript preset (Bun) |
+| `./lefthook.yml` | Lefthook hooks configuration |
+| `./.markdownlint-cli2.jsonc` | markdownlint configuration |
+
+## Related
+
+- [@outfitter/contracts](../contracts/README.md) — Result types and error patterns
+- [@outfitter/cli](../cli/README.md) — CLI framework
+- [@outfitter/kit](../kit/README.md) — Version coordination
+
+## License
+
+MIT
+
+---
+path: docs/packages/types/README.md
+package: types
+title: @outfitter/types
+---
+
+# @outfitter/types
+
+Branded types, type guards, and type utilities for Outfitter.
+
+## Installation
+
+```bash
+bun add @outfitter/types
+```
+
+## Status
+
+This package is in early development. API may change.

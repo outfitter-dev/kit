@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { syncPackageDocs } from "./index.js";
+import { syncLlmsDocs, syncPackageDocs } from "./index.js";
 
 interface CliOptions {
   cwd?: string;
@@ -58,6 +58,22 @@ async function main(): Promise<void> {
     `docs sync complete: ${result.value.packageNames.length} package(s), ` +
       `${result.value.writtenFiles.length} file(s) written, ` +
       `${result.value.removedFiles.length} stale file(s) removed\n`
+  );
+
+  const llmsResult = await syncLlmsDocs({
+    ...(options.cwd ? { workspaceRoot: options.cwd } : {}),
+    ...(options.packagesDir ? { packagesDir: options.packagesDir } : {}),
+    ...(options.outputDir ? { outputDir: options.outputDir } : {}),
+  });
+
+  if (llmsResult.isErr()) {
+    process.stderr.write(`docs sync failed: ${llmsResult.error.message}\n`);
+    process.exit(1);
+  }
+
+  process.stdout.write(
+    `llms sync complete: ${llmsResult.value.packageNames.length} package(s), ` +
+      `${llmsResult.value.writtenFiles.length} file(s) written\n`
   );
 }
 

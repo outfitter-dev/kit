@@ -6,6 +6,7 @@ CLI and host command adapter for Outfitter docs workflows.
 
 - `docs sync` — assemble package docs output
 - `docs check` — verify package docs output freshness
+- `docs export --target <packages|llms|llms-full|all>` — export docs artifacts
 
 ## Host CLI Adapter
 
@@ -20,6 +21,7 @@ program.addCommand(createDocsCommand());
 ```bash
 bunx @outfitter/docs docs sync
 bunx @outfitter/docs docs check
+bunx @outfitter/docs docs export --target llms
 ```
 
 ## License

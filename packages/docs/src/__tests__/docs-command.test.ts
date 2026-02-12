@@ -5,6 +5,7 @@ import { join } from "node:path";
 import type { Command } from "commander";
 import { createDocsCommand } from "../command/create-docs-command.js";
 import { executeCheckCommand } from "../commands/check.js";
+import { executeExportCommand } from "../commands/export.js";
 import { executeSyncCommand } from "../commands/sync.js";
 
 async function createWorkspaceFixture(): Promise<string> {
@@ -94,10 +95,36 @@ describe("docs command execution", () => {
     expect(err[0]).toBe("Package docs are stale:");
     expect(err.some((line) => line.includes("[changed]"))).toBe(true);
   });
+
+  it("executeExportCommand exports llms.txt for the llms target", async () => {
+    const workspaceRoot = await createWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const out: string[] = [];
+    const err: string[] = [];
+
+    const code = await executeExportCommand(
+      { cwd: workspaceRoot, target: "llms" },
+      {
+        out: (line) => out.push(line),
+        err: (line) => err.push(line),
+      }
+    );
+
+    expect(code).toBe(0);
+    expect(err).toEqual([]);
+    expect(out[0]).toContain("Exported llms docs");
+
+    const llmsIndex = await readFile(
+      join(workspaceRoot, "docs", "llms.txt"),
+      "utf8"
+    );
+    expect(llmsIndex).toContain("docs/packages/alpha/README.md");
+  });
 });
 
 describe("createDocsCommand", () => {
-  it("creates a host-mountable docs command with sync and check subcommands", () => {
+  it("creates a host-mountable docs command with sync, check, and export subcommands", () => {
     const command = createDocsCommand();
 
     expect(command.name()).toBe("docs");
@@ -106,6 +133,6 @@ describe("createDocsCommand", () => {
       subcommand.name()
     );
 
-    expect(subcommandNames).toEqual(["sync", "check"]);
+    expect(subcommandNames).toEqual(["sync", "check", "export"]);
   });
 });

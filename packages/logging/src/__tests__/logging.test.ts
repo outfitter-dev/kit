@@ -15,6 +15,7 @@
  * Total: 40 tests
  */
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import type { Logger } from "@outfitter/contracts";
 import {
   configureRedaction,
   createChildLogger,
@@ -110,6 +111,13 @@ describe("Logger Creation", () => {
 
     expect(records.length).toBe(1);
     expect(records[0].message).toBe("hello");
+  });
+
+  it("LoggerInstance satisfies contracts Logger interface", () => {
+    // Compile-time test: LoggerInstance extends Logger from contracts
+    const logger: Logger = createLogger({ name: "test" });
+    expect(typeof logger.info).toBe("function");
+    expect(typeof logger.child).toBe("function");
   });
 });
 

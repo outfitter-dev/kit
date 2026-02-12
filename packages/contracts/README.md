@@ -45,6 +45,45 @@ const ctx = createContext({ logger, config });
 const result = await getNote({ id: "abc123" }, ctx);
 ```
 
+## Error Factory Reference
+
+All error classes provide a static `create()` factory method that generates a consistent message from structured parameters. Use `create()` for structured errors and the constructor for custom messages.
+
+| Error Class | `create()` Signature | Generated Message |
+|---|---|---|
+| `ValidationError` | `create(field, reason, context?)` | `"email: format invalid"` |
+| `ValidationError` | `fromMessage(message, context?)` | *(your message as-is)* |
+| `AmbiguousError` | `create(what, candidates, context?)` | `"Ambiguous heading: 2 matches found"` |
+| `NotFoundError` | `create(resourceType, resourceId, context?)` | `"note not found: abc123"` |
+| `AlreadyExistsError` | `create(resourceType, resourceId, context?)` | `"file already exists: notes/meeting.md"` |
+| `ConflictError` | `create(message, context?)` | *(your message as-is)* |
+| `PermissionError` | `create(message, context?)` | *(your message as-is)* |
+| `TimeoutError` | `create(operation, timeoutMs)` | `"database query timed out after 5000ms"` |
+| `RateLimitError` | `create(message, retryAfterSeconds?)` | *(your message as-is)* |
+| `NetworkError` | `create(message, context?)` | *(your message as-is)* |
+| `InternalError` | `create(message, context?)` | *(your message as-is)* |
+| `AuthError` | `create(message, reason?)` | *(your message as-is)* |
+| `CancelledError` | `create(message)` | *(your message as-is)* |
+
+### Message Casing
+
+`create()` factories that auto-generate messages use **lowercase** `resourceType`:
+
+```typescript
+NotFoundError.create("piece", "abc123");
+// → "piece not found: abc123" (not "Piece not found: abc123")
+```
+
+If you need a capitalized message, use the constructor directly:
+
+```typescript
+new NotFoundError({
+  message: "Piece not found: abc123",
+  resourceType: "piece",
+  resourceId: "abc123",
+});
+```
+
 ## License
 
 MIT

@@ -389,6 +389,24 @@ const customLogger = customFactory.createLogger({
 customLogger.info("Hello from custom backend");
 ```
 
+## Runtime Compatibility
+
+| Export | Node.js | Bun | Edge/V8 Isolates | Notes |
+|---|---|---|---|---|
+| `createLogger` | Yes | Yes | Yes | Universal |
+| `createConsoleSink` | Yes | Yes | Yes | Falls back to `console.*` when `process` unavailable |
+| `createFileSink` | No | Yes | No | Requires `Bun.file` / `Bun.write` |
+| `createJsonFormatter` | Yes | Yes | Yes | Universal |
+| `createPrettyFormatter` | Yes | Yes | Yes | Universal |
+| `resolveLogLevel` | Yes | Yes | Yes | Guards `process.env` access |
+| `resolveOutfitterLogLevel` | Yes | Yes | Yes | Guards `process.env` access |
+| `configureRedaction` | Yes | Yes | Yes | Universal |
+| `flush` | Yes | Yes | Yes | Universal |
+
+Edge-runtime notes:
+- `resolveLogLevel()` safely returns defaults when `process` is undefined
+- `createConsoleSink()` auto-detects TTY via `process.stdout?.isTTY` with graceful fallback
+
 ## API Reference
 
 ### Functions

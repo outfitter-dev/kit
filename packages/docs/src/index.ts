@@ -13,6 +13,11 @@ export {
   executeCheckCommand,
 } from "./commands/check.js";
 export {
+  type DocsExportTarget,
+  type ExecuteExportCommandOptions,
+  executeExportCommand,
+} from "./commands/export.js";
+export {
   type ExecuteSyncCommandOptions,
   executeSyncCommand,
 } from "./commands/sync.js";

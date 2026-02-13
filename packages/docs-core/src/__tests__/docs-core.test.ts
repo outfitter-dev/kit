@@ -3,7 +3,12 @@ import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { checkPackageDocs, syncPackageDocs } from "../index.js";
+import {
+  checkLlmsDocs,
+  checkPackageDocs,
+  syncLlmsDocs,
+  syncPackageDocs,
+} from "../index.js";
 
 async function createWorkspaceFixture(): Promise<string> {
   const workspaceRoot = await mkdtemp(
@@ -289,6 +294,125 @@ describe("checkPackageDocs", () => {
       { kind: "changed", path: "docs/packages/alpha/README.md" },
       { kind: "missing", path: "docs/packages/alpha/HARVEST_MAP.md" },
       { kind: "unexpected", path: "docs/packages/alpha/EXTRA.md" },
+    ]);
+  });
+});
+
+describe("syncLlmsDocs", () => {
+  const workspaceRoots = new Set<string>();
+
+  afterEach(async () => {
+    for (const workspaceRoot of workspaceRoots) {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+    workspaceRoots.clear();
+  });
+
+  it("writes llms.txt and llms-full.txt with deterministic sections", async () => {
+    const workspaceRoot = await createWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const result = await syncLlmsDocs({ workspaceRoot });
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      throw new Error(`expected success: ${result.error.message}`);
+    }
+
+    expect(result.value.writtenFiles).toEqual([
+      "docs/llms-full.txt",
+      "docs/llms.txt",
+    ]);
+
+    const llmsIndex = await readFile(
+      join(workspaceRoot, "docs", "llms.txt"),
+      "utf8"
+    );
+    expect(llmsIndex).toContain("# llms.txt");
+    expect(llmsIndex).toContain("## alpha");
+    expect(llmsIndex).toContain("- docs/packages/alpha/README.md");
+
+    const llmsFull = await readFile(
+      join(workspaceRoot, "docs", "llms-full.txt"),
+      "utf8"
+    );
+    expect(llmsFull).toContain("# llms-full.txt");
+    expect(llmsFull).toContain("path: docs/packages/alpha/README.md");
+    expect(llmsFull).toContain("package: alpha");
+  });
+
+  it("supports exporting a single LLM target", async () => {
+    const workspaceRoot = await createWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const result = await syncLlmsDocs({
+      workspaceRoot,
+      targets: ["llms"],
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      throw new Error(`expected success: ${result.error.message}`);
+    }
+
+    expect(result.value.writtenFiles).toEqual(["docs/llms.txt"]);
+    expect(existsSync(join(workspaceRoot, "docs", "llms.txt"))).toBe(true);
+    expect(existsSync(join(workspaceRoot, "docs", "llms-full.txt"))).toBe(
+      false
+    );
+  });
+
+  it("rejects colliding llms output paths", async () => {
+    const workspaceRoot = await createWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const result = await syncLlmsDocs({
+      workspaceRoot,
+      llmsFile: "docs/same-target.txt",
+      llmsFullFile: "docs/same-target.txt",
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain(
+        "llmsFile and llmsFullFile must resolve to distinct paths"
+      );
+    }
+  });
+});
+
+describe("checkLlmsDocs", () => {
+  const workspaceRoots = new Set<string>();
+
+  afterEach(async () => {
+    for (const workspaceRoot of workspaceRoots) {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+    workspaceRoots.clear();
+  });
+
+  it("reports changed and missing llms outputs", async () => {
+    const workspaceRoot = await createWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const initialSync = await syncLlmsDocs({ workspaceRoot });
+    expect(initialSync.isOk()).toBe(true);
+
+    const llmsPath = join(workspaceRoot, "docs", "llms.txt");
+    const llmsFullPath = join(workspaceRoot, "docs", "llms-full.txt");
+
+    await writeFile(llmsPath, "# changed\n");
+    await rm(llmsFullPath);
+
+    const check = await checkLlmsDocs({ workspaceRoot });
+    expect(check.isOk()).toBe(true);
+    if (check.isErr()) {
+      throw new Error(`expected success: ${check.error.message}`);
+    }
+
+    expect(check.value.isUpToDate).toBe(false);
+    expect(check.value.drift).toEqual([
+      { kind: "changed", path: "docs/llms.txt" },
+      { kind: "missing", path: "docs/llms-full.txt" },
     ]);
   });
 });

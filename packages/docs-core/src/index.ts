@@ -25,6 +25,14 @@ export interface PackageDocsOptions {
   readonly excludedFilenames?: readonly string[];
 }
 
+export type LlmsTarget = "llms" | "llms-full";
+
+export interface LlmsDocsOptions extends PackageDocsOptions {
+  readonly llmsFile?: string;
+  readonly llmsFullFile?: string;
+  readonly targets?: readonly LlmsTarget[];
+}
+
 export interface SyncPackageDocsResult {
   readonly packageNames: readonly string[];
   readonly writtenFiles: readonly string[];
@@ -39,6 +47,18 @@ export interface DocsDrift {
 }
 
 export interface CheckPackageDocsResult {
+  readonly packageNames: readonly string[];
+  readonly expectedFiles: readonly string[];
+  readonly drift: readonly DocsDrift[];
+  readonly isUpToDate: boolean;
+}
+
+export interface SyncLlmsDocsResult {
+  readonly packageNames: readonly string[];
+  readonly writtenFiles: readonly string[];
+}
+
+export interface CheckLlmsDocsResult {
   readonly packageNames: readonly string[];
   readonly expectedFiles: readonly string[];
   readonly drift: readonly DocsDrift[];
@@ -101,16 +121,33 @@ interface DiscoveredPackage {
 interface ExpectedOutput {
   readonly packageNames: readonly string[];
   readonly files: ReadonlyMap<string, string>;
+  readonly entries: readonly ExpectedOutputEntry[];
+}
+
+interface ExpectedOutputEntry {
+  readonly packageName: string;
+  readonly destinationAbsolutePath: string;
+  readonly content: string;
 }
 
 interface CollectedMarkdownFile {
+  readonly packageName: string;
   readonly sourceAbsolutePath: string;
   readonly destinationAbsolutePath: string;
+}
+
+interface ResolvedLlmsOptions {
+  readonly llmsPath: string;
+  readonly llmsFullPath: string;
+  readonly targets: readonly LlmsTarget[];
 }
 
 const DEFAULT_PACKAGES_DIR = "packages";
 const DEFAULT_OUTPUT_DIR = "docs/packages";
 const DEFAULT_EXCLUDED_FILES = ["CHANGELOG.md"] as const;
+const DEFAULT_LLMS_FILE = "docs/llms.txt";
+const DEFAULT_LLMS_FULL_FILE = "docs/llms-full.txt";
+const DEFAULT_LLMS_TARGETS = ["llms", "llms-full"] as const;
 
 function toPosixPath(path: string): string {
   return path.split("\\").join("/");
@@ -210,6 +247,70 @@ function resolveOptions(
     packagesRoot,
     outputRoot,
     excludedLowercaseNames,
+  });
+}
+
+function isLlmsTarget(value: string): value is LlmsTarget {
+  return value === "llms" || value === "llms-full";
+}
+
+function resolveLlmsOptions(
+  workspaceRoot: string,
+  options: LlmsDocsOptions | undefined
+): Result<ResolvedLlmsOptions, PackageDocsError> {
+  const llmsPath = resolve(
+    workspaceRoot,
+    options?.llmsFile ?? DEFAULT_LLMS_FILE
+  );
+  const llmsFullPath = resolve(
+    workspaceRoot,
+    options?.llmsFullFile ?? DEFAULT_LLMS_FULL_FILE
+  );
+  const rawTargets = options?.targets ?? DEFAULT_LLMS_TARGETS;
+  const targets = [...new Set(rawTargets)];
+
+  for (const target of targets) {
+    if (!isLlmsTarget(target)) {
+      return Result.err(
+        DocsCoreError.validation("Invalid LLM export target", {
+          target,
+        })
+      );
+    }
+  }
+
+  if (!isPathInsideWorkspace(workspaceRoot, llmsPath)) {
+    return Result.err(
+      DocsCoreError.validation("llmsFile must resolve inside workspace", {
+        llmsPath,
+      })
+    );
+  }
+
+  if (!isPathInsideWorkspace(workspaceRoot, llmsFullPath)) {
+    return Result.err(
+      DocsCoreError.validation("llmsFullFile must resolve inside workspace", {
+        llmsFullPath,
+      })
+    );
+  }
+
+  if (llmsPath === llmsFullPath) {
+    return Result.err(
+      DocsCoreError.validation(
+        "llmsFile and llmsFullFile must resolve to distinct paths",
+        {
+          llmsPath,
+          llmsFullPath,
+        }
+      )
+    );
+  }
+
+  return Result.ok({
+    llmsPath,
+    llmsFullPath,
+    targets,
   });
 }
 
@@ -476,6 +577,7 @@ async function buildExpectedOutput(
         relativeFromPackageRoot
       );
       collectedFiles.push({
+        packageName: discoveredPackage.packageDirName,
         sourceAbsolutePath,
         destinationAbsolutePath,
       });
@@ -494,6 +596,7 @@ async function buildExpectedOutput(
       toPosixPath(b.destinationAbsolutePath)
     )
   );
+  const entries: ExpectedOutputEntry[] = [];
 
   for (const collectedFile of sortedCollectedFiles) {
     const sourceContent = await readFile(
@@ -509,12 +612,169 @@ async function buildExpectedOutput(
     );
 
     files.set(collectedFile.destinationAbsolutePath, rewrittenContent);
+    entries.push({
+      packageName: collectedFile.packageName,
+      destinationAbsolutePath: collectedFile.destinationAbsolutePath,
+      content: rewrittenContent,
+    });
   }
 
   return {
     packageNames: packageNames.sort((a, b) => a.localeCompare(b)),
     files,
+    entries,
   };
+}
+
+function trimTrailingWhitespace(value: string): string {
+  return value.replace(/[ \t]+$/gm, "").trimEnd();
+}
+
+function extractFirstHeading(content: string): string | null {
+  for (const line of content.split(/\r?\n/u)) {
+    const headingMatch = /^\s*#{1,6}\s+(.+)$/u.exec(line);
+    if (!headingMatch) {
+      continue;
+    }
+
+    const heading = headingMatch.at(1);
+    if (heading) {
+      return heading.trim();
+    }
+  }
+
+  return null;
+}
+
+function renderLlmsIndex(
+  expectedOutput: ExpectedOutput,
+  workspaceRoot: string
+): string {
+  const lines: string[] = [
+    "# llms.txt",
+    "",
+    "Outfitter package docs index for LLM retrieval.",
+    "",
+  ];
+
+  for (const packageName of expectedOutput.packageNames) {
+    lines.push(`## ${packageName}`);
+
+    const packageEntries = expectedOutput.entries
+      .filter((entry) => entry.packageName === packageName)
+      .sort((a, b) =>
+        toPosixPath(a.destinationAbsolutePath).localeCompare(
+          toPosixPath(b.destinationAbsolutePath)
+        )
+      );
+
+    for (const entry of packageEntries) {
+      const relativePath = relativeToWorkspace(
+        workspaceRoot,
+        entry.destinationAbsolutePath
+      );
+      const heading = extractFirstHeading(entry.content);
+      lines.push(`- ${relativePath}${heading ? ` — ${heading}` : ""}`);
+    }
+
+    lines.push("");
+  }
+
+  return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function renderLlmsFull(
+  expectedOutput: ExpectedOutput,
+  workspaceRoot: string
+): string {
+  const lines: string[] = [
+    "# llms-full.txt",
+    "",
+    "Outfitter package docs corpus for LLM retrieval.",
+    "",
+  ];
+
+  const entries = [...expectedOutput.entries].sort((a, b) =>
+    toPosixPath(a.destinationAbsolutePath).localeCompare(
+      toPosixPath(b.destinationAbsolutePath)
+    )
+  );
+
+  for (const entry of entries) {
+    const relativePath = relativeToWorkspace(
+      workspaceRoot,
+      entry.destinationAbsolutePath
+    );
+    const heading = extractFirstHeading(entry.content);
+
+    lines.push("---");
+    lines.push(`path: ${relativePath}`);
+    lines.push(`package: ${entry.packageName}`);
+    if (heading) {
+      lines.push(`title: ${heading}`);
+    }
+    lines.push("---");
+    lines.push("");
+    lines.push(trimTrailingWhitespace(entry.content));
+    lines.push("");
+  }
+
+  return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function buildLlmsExpectedFiles(
+  expectedOutput: ExpectedOutput,
+  workspaceRoot: string,
+  llmsOptions: ResolvedLlmsOptions
+): Map<string, string> {
+  const files = new Map<string, string>();
+
+  for (const target of llmsOptions.targets) {
+    if (target === "llms") {
+      files.set(
+        llmsOptions.llmsPath,
+        renderLlmsIndex(expectedOutput, workspaceRoot)
+      );
+      continue;
+    }
+
+    files.set(
+      llmsOptions.llmsFullPath,
+      renderLlmsFull(expectedOutput, workspaceRoot)
+    );
+  }
+
+  return files;
+}
+
+async function computeExplicitFileDrift(
+  workspaceRoot: string,
+  expectedFiles: ReadonlyMap<string, string>
+): Promise<DocsDrift[]> {
+  const drift: DocsDrift[] = [];
+  const expectedEntries = [...expectedFiles.entries()].sort(([a], [b]) =>
+    toPosixPath(a).localeCompare(toPosixPath(b))
+  );
+
+  for (const [expectedPath, expectedContent] of expectedEntries) {
+    if (!existsSync(expectedPath)) {
+      drift.push({
+        kind: "missing",
+        path: relativeToWorkspace(workspaceRoot, expectedPath),
+      });
+      continue;
+    }
+
+    const existingContent = await readFile(expectedPath, "utf8");
+    if (existingContent !== expectedContent) {
+      drift.push({
+        kind: "changed",
+        path: relativeToWorkspace(workspaceRoot, expectedPath),
+      });
+    }
+  }
+
+  return sortDrift(drift);
 }
 
 async function listFilesRecursively(rootPath: string): Promise<string[]> {
@@ -715,6 +975,105 @@ export async function checkPackageDocs(
   } catch (error) {
     return Result.err(
       DocsCoreError.internal("Failed to check package docs", {
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
+      })
+    );
+  }
+}
+
+export async function syncLlmsDocs(
+  options?: LlmsDocsOptions
+): Promise<Result<SyncLlmsDocsResult, PackageDocsError>> {
+  const resolvedOptionsResult = resolveOptions(options);
+  if (resolvedOptionsResult.isErr()) {
+    return resolvedOptionsResult;
+  }
+
+  const resolvedOptions = resolvedOptionsResult.value;
+  const resolvedLlmsOptionsResult = resolveLlmsOptions(
+    resolvedOptions.workspaceRoot,
+    options
+  );
+  if (resolvedLlmsOptionsResult.isErr()) {
+    return resolvedLlmsOptionsResult;
+  }
+
+  const resolvedLlmsOptions = resolvedLlmsOptionsResult.value;
+
+  try {
+    const expectedOutput = await buildExpectedOutput(resolvedOptions);
+    const expectedFiles = buildLlmsExpectedFiles(
+      expectedOutput,
+      resolvedOptions.workspaceRoot,
+      resolvedLlmsOptions
+    );
+
+    for (const [outputPath, content] of expectedFiles.entries()) {
+      await mkdir(dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, content, "utf8");
+    }
+
+    return Result.ok({
+      packageNames: expectedOutput.packageNames,
+      writtenFiles: [...expectedFiles.keys()]
+        .map((filePath) =>
+          relativeToWorkspace(resolvedOptions.workspaceRoot, filePath)
+        )
+        .sort((a, b) => a.localeCompare(b)),
+    });
+  } catch (error) {
+    return Result.err(
+      DocsCoreError.internal("Failed to sync LLM docs outputs", {
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
+      })
+    );
+  }
+}
+
+export async function checkLlmsDocs(
+  options?: LlmsDocsOptions
+): Promise<Result<CheckLlmsDocsResult, PackageDocsError>> {
+  const resolvedOptionsResult = resolveOptions(options);
+  if (resolvedOptionsResult.isErr()) {
+    return resolvedOptionsResult;
+  }
+
+  const resolvedOptions = resolvedOptionsResult.value;
+  const resolvedLlmsOptionsResult = resolveLlmsOptions(
+    resolvedOptions.workspaceRoot,
+    options
+  );
+  if (resolvedLlmsOptionsResult.isErr()) {
+    return resolvedLlmsOptionsResult;
+  }
+
+  const resolvedLlmsOptions = resolvedLlmsOptionsResult.value;
+
+  try {
+    const expectedOutput = await buildExpectedOutput(resolvedOptions);
+    const expectedFiles = buildLlmsExpectedFiles(
+      expectedOutput,
+      resolvedOptions.workspaceRoot,
+      resolvedLlmsOptions
+    );
+    const drift = await computeExplicitFileDrift(
+      resolvedOptions.workspaceRoot,
+      expectedFiles
+    );
+
+    return Result.ok({
+      packageNames: expectedOutput.packageNames,
+      expectedFiles: [...expectedFiles.keys()]
+        .map((filePath) =>
+          relativeToWorkspace(resolvedOptions.workspaceRoot, filePath)
+        )
+        .sort((a, b) => a.localeCompare(b)),
+      drift,
+      isUpToDate: drift.length === 0,
+    });
+  } catch (error) {
+    return Result.err(
+      DocsCoreError.internal("Failed to check LLM docs outputs", {
         errorMessage: error instanceof Error ? error.message : "Unknown error",
       })
     );

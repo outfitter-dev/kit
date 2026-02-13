@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { executeCheckCommand } from "../commands/check.js";
+import { executeExportCommand } from "../commands/export.js";
 import { executeSyncCommand } from "../commands/sync.js";
 
 export interface CreateDocsCommandOptions {
@@ -60,6 +61,38 @@ export function createDocsCommand(options?: CreateDocsCommandOptions): Command {
         outputDir?: string;
       }) => {
         const code = await executeCheckCommand(cmdOptions, io);
+        if (code !== 0) {
+          process.exitCode = code;
+        }
+      }
+    );
+
+  command
+    .command("export")
+    .description("Export docs artifacts for packages and LLM targets")
+    .option("--cwd <path>", "Workspace root to operate in")
+    .option("--packages-dir <path>", "Packages directory relative to workspace")
+    .option("--output-dir <path>", "Output directory relative to workspace")
+    .option("--llms-file <path>", "llms.txt output path relative to workspace")
+    .option(
+      "--llms-full-file <path>",
+      "llms-full.txt output path relative to workspace"
+    )
+    .option(
+      "--target <target>",
+      "Export target: packages, llms, llms-full, all",
+      "all"
+    )
+    .action(
+      async (cmdOptions: {
+        cwd?: string;
+        llmsFile?: string;
+        llmsFullFile?: string;
+        outputDir?: string;
+        packagesDir?: string;
+        target?: string;
+      }) => {
+        const code = await executeExportCommand(cmdOptions, io);
         if (code !== 0) {
           process.exitCode = code;
         }

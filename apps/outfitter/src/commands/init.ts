@@ -23,6 +23,7 @@ import type { OutputMode } from "@outfitter/cli/types";
 import { Result } from "@outfitter/contracts";
 import type { AddBlockResult } from "@outfitter/tooling";
 import type { Command } from "commander";
+import { OperationCollector } from "../engine/collector.js";
 import {
   deriveBinName,
   deriveProjectName,
@@ -33,7 +34,6 @@ import {
   type ScaffoldPlan,
   scaffoldWorkspaceRoot,
 } from "../engine/index.js";
-import { OperationCollector } from "../engine/collector.js";
 import type { PostScaffoldResult } from "../engine/post-scaffold.js";
 import { runPostScaffold } from "../engine/post-scaffold.js";
 import { renderOperationPlan } from "../engine/render-plan.js";
@@ -736,8 +736,12 @@ export function initCommand(program: Command): void {
     return typeof flags.opts === "function" ? flags.opts() : flags;
   };
 
-  const resolveLocal = (flags: InitCommandFlags): boolean =>
-    Boolean(flags.local || flags.workspace);
+  const resolveLocal = (flags: InitCommandFlags): boolean | undefined => {
+    if (flags.local === true || flags.workspace === true) {
+      return true;
+    }
+    return undefined;
+  };
 
   const resolveOutputMode = (
     flags: InitCommandFlags

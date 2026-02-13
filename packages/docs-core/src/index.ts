@@ -18,11 +18,14 @@ import {
 } from "node:path";
 import { Result } from "better-result";
 
+export type MdxMode = "strict" | "lossy";
+
 export interface PackageDocsOptions {
   readonly workspaceRoot?: string;
   readonly packagesDir?: string;
   readonly outputDir?: string;
   readonly excludedFilenames?: readonly string[];
+  readonly mdxMode?: MdxMode;
 }
 
 export type LlmsTarget = "llms" | "llms-full";
@@ -37,6 +40,7 @@ export interface SyncPackageDocsResult {
   readonly packageNames: readonly string[];
   readonly writtenFiles: readonly string[];
   readonly removedFiles: readonly string[];
+  readonly warnings: readonly DocsWarning[];
 }
 
 export type DriftKind = "missing" | "changed" | "unexpected";
@@ -46,16 +50,23 @@ export interface DocsDrift {
   readonly kind: DriftKind;
 }
 
+export interface DocsWarning {
+  readonly path: string;
+  readonly message: string;
+}
+
 export interface CheckPackageDocsResult {
   readonly packageNames: readonly string[];
   readonly expectedFiles: readonly string[];
   readonly drift: readonly DocsDrift[];
   readonly isUpToDate: boolean;
+  readonly warnings: readonly DocsWarning[];
 }
 
 export interface SyncLlmsDocsResult {
   readonly packageNames: readonly string[];
   readonly writtenFiles: readonly string[];
+  readonly warnings: readonly DocsWarning[];
 }
 
 export interface CheckLlmsDocsResult {
@@ -63,6 +74,7 @@ export interface CheckLlmsDocsResult {
   readonly expectedFiles: readonly string[];
   readonly drift: readonly DocsDrift[];
   readonly isUpToDate: boolean;
+  readonly warnings: readonly DocsWarning[];
 }
 
 export class DocsCoreError extends Error {
@@ -111,6 +123,7 @@ interface ResolvedPackageDocsOptions {
   readonly packagesRoot: string;
   readonly outputRoot: string;
   readonly excludedLowercaseNames: ReadonlySet<string>;
+  readonly mdxMode: MdxMode;
 }
 
 interface DiscoveredPackage {
@@ -122,6 +135,7 @@ interface ExpectedOutput {
   readonly packageNames: readonly string[];
   readonly files: ReadonlyMap<string, string>;
   readonly entries: readonly ExpectedOutputEntry[];
+  readonly warnings: readonly DocsWarning[];
 }
 
 interface ExpectedOutputEntry {
@@ -148,6 +162,7 @@ const DEFAULT_EXCLUDED_FILES = ["CHANGELOG.md"] as const;
 const DEFAULT_LLMS_FILE = "docs/llms.txt";
 const DEFAULT_LLMS_FULL_FILE = "docs/llms-full.txt";
 const DEFAULT_LLMS_TARGETS = ["llms", "llms-full"] as const;
+const DEFAULT_MDX_MODE: MdxMode = "lossy";
 
 function toPosixPath(path: string): string {
   return path.split("\\").join("/");
@@ -190,6 +205,10 @@ function normalizeExcludedNames(
   );
 }
 
+function isMdxMode(value: string): value is MdxMode {
+  return value === "strict" || value === "lossy";
+}
+
 function resolveOptions(
   options: PackageDocsOptions | undefined
 ): Result<ResolvedPackageDocsOptions, PackageDocsError> {
@@ -205,6 +224,15 @@ function resolveOptions(
   const excludedLowercaseNames = normalizeExcludedNames(
     options?.excludedFilenames
   );
+  const mdxMode = options?.mdxMode ?? DEFAULT_MDX_MODE;
+
+  if (!isMdxMode(mdxMode)) {
+    return Result.err(
+      DocsCoreError.validation("Invalid MDX mode", {
+        mdxMode,
+      })
+    );
+  }
 
   if (!existsSync(workspaceRoot)) {
     return Result.err(
@@ -247,6 +275,7 @@ function resolveOptions(
     packagesRoot,
     outputRoot,
     excludedLowercaseNames,
+    mdxMode,
   });
 }
 
@@ -342,8 +371,9 @@ async function isPublishablePackage(packageRoot: string): Promise<boolean> {
   }
 }
 
-function isMarkdownFile(path: string): boolean {
-  return extname(path).toLowerCase() === ".md";
+function isDocsSourceFile(path: string): boolean {
+  const extension = extname(path).toLowerCase();
+  return extension === ".md" || extension === ".mdx";
 }
 
 function isExcludedFileName(
@@ -354,7 +384,7 @@ function isExcludedFileName(
   return excludedLowercaseNames.has(fileName.toLowerCase());
 }
 
-async function collectDocsSubtreeMarkdownFiles(
+async function collectDocsSubtreeSourceFiles(
   docsRoot: string,
   excludedLowercaseNames: ReadonlySet<string>
 ): Promise<string[]> {
@@ -383,7 +413,7 @@ async function collectDocsSubtreeMarkdownFiles(
         continue;
       }
 
-      if (!isMarkdownFile(entry.name)) {
+      if (!isDocsSourceFile(entry.name)) {
         continue;
       }
 
@@ -398,27 +428,27 @@ async function collectDocsSubtreeMarkdownFiles(
   return files.sort((a, b) => toPosixPath(a).localeCompare(toPosixPath(b)));
 }
 
-async function collectPackageMarkdownFiles(
+async function collectPackageSourceFiles(
   packageRoot: string,
   excludedLowercaseNames: ReadonlySet<string>
 ): Promise<string[]> {
   const rootEntries = await readdir(packageRoot, { withFileTypes: true });
 
-  const rootMarkdown = rootEntries
+  const rootDocsFiles = rootEntries
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name)
-    .filter((entryName) => isMarkdownFile(entryName))
+    .filter((entryName) => isDocsSourceFile(entryName))
     .filter(
       (entryName) => !isExcludedFileName(entryName, excludedLowercaseNames)
     )
     .map((entryName) => join(packageRoot, entryName));
 
-  const docsSubtreeMarkdown = await collectDocsSubtreeMarkdownFiles(
+  const docsSubtreeDocsFiles = await collectDocsSubtreeSourceFiles(
     join(packageRoot, "docs"),
     excludedLowercaseNames
   );
 
-  return [...rootMarkdown, ...docsSubtreeMarkdown].sort((a, b) =>
+  return [...rootDocsFiles, ...docsSubtreeDocsFiles].sort((a, b) =>
     toPosixPath(a).localeCompare(toPosixPath(b))
   );
 }
@@ -538,6 +568,170 @@ function rewriteMarkdownLinks(
   );
 }
 
+function toOutputRelativePath(relativePath: string): string {
+  const extension = extname(relativePath).toLowerCase();
+  if (extension !== ".mdx") {
+    return relativePath;
+  }
+
+  return `${relativePath.slice(0, -".mdx".length)}.md`;
+}
+
+function getCodeFenceDelimiter(line: string): string | null {
+  const fenceMatch = /^\s*(```+|~~~+)/u.exec(line);
+  return fenceMatch?.at(1) ?? null;
+}
+
+function strictMdxError(input: {
+  workspaceRoot: string;
+  sourceAbsolutePath: string;
+  lineNumber: number;
+  syntax: string;
+}): PackageDocsError {
+  return DocsCoreError.validation(
+    `Unsupported MDX syntax in strict mode: ${input.syntax}`,
+    {
+      line: input.lineNumber,
+      path: relativeToWorkspace(input.workspaceRoot, input.sourceAbsolutePath),
+      syntax: input.syntax,
+    }
+  );
+}
+
+function processDocsSourceContent(input: {
+  content: string;
+  sourceAbsolutePath: string;
+  workspaceRoot: string;
+  mdxMode: MdxMode;
+}): Result<
+  { content: string; warnings: readonly DocsWarning[] },
+  PackageDocsError
+> {
+  if (extname(input.sourceAbsolutePath).toLowerCase() !== ".mdx") {
+    return Result.ok({ content: input.content, warnings: [] });
+  }
+
+  const warningPath = relativeToWorkspace(
+    input.workspaceRoot,
+    input.sourceAbsolutePath
+  );
+  const outputLines: string[] = [];
+  const warnings: DocsWarning[] = [];
+  const sourceLines = input.content.split(/\r?\n/u);
+  let activeFenceDelimiter: string | null = null;
+
+  for (let index = 0; index < sourceLines.length; index += 1) {
+    const line = sourceLines[index] ?? "";
+    const lineNumber = index + 1;
+    const fenceDelimiter = getCodeFenceDelimiter(line);
+
+    if (activeFenceDelimiter) {
+      outputLines.push(line);
+      if (
+        fenceDelimiter &&
+        fenceDelimiter[0] === activeFenceDelimiter[0] &&
+        fenceDelimiter.length >= activeFenceDelimiter.length
+      ) {
+        activeFenceDelimiter = null;
+      }
+      continue;
+    }
+
+    if (fenceDelimiter) {
+      activeFenceDelimiter = fenceDelimiter;
+      outputLines.push(line);
+      continue;
+    }
+
+    if (/^\s*(import|export)\s/u.test(line)) {
+      if (input.mdxMode === "strict") {
+        return Result.err(
+          strictMdxError({
+            workspaceRoot: input.workspaceRoot,
+            sourceAbsolutePath: input.sourceAbsolutePath,
+            lineNumber,
+            syntax: "import/export statement",
+          })
+        );
+      }
+
+      warnings.push({
+        message: `Removed import/export statement on line ${lineNumber}`,
+        path: warningPath,
+      });
+      continue;
+    }
+
+    if (/^\s*<\/?[A-Z][\w.]*\b[^>]*>\s*$/u.test(line)) {
+      if (input.mdxMode === "strict") {
+        return Result.err(
+          strictMdxError({
+            workspaceRoot: input.workspaceRoot,
+            sourceAbsolutePath: input.sourceAbsolutePath,
+            lineNumber,
+            syntax: "JSX component tag",
+          })
+        );
+      }
+
+      warnings.push({
+        message: `Removed JSX component tag on line ${lineNumber}`,
+        path: warningPath,
+      });
+      continue;
+    }
+
+    if (/^\s*\{.*\}\s*$/u.test(line)) {
+      if (input.mdxMode === "strict") {
+        return Result.err(
+          strictMdxError({
+            workspaceRoot: input.workspaceRoot,
+            sourceAbsolutePath: input.sourceAbsolutePath,
+            lineNumber,
+            syntax: "expression block",
+          })
+        );
+      }
+
+      warnings.push({
+        message: `Removed expression block on line ${lineNumber}`,
+        path: warningPath,
+      });
+      continue;
+    }
+
+    if (/\{[^{}]+\}/u.test(line)) {
+      if (input.mdxMode === "strict") {
+        return Result.err(
+          strictMdxError({
+            workspaceRoot: input.workspaceRoot,
+            sourceAbsolutePath: input.sourceAbsolutePath,
+            lineNumber,
+            syntax: "inline expression",
+          })
+        );
+      }
+
+      warnings.push({
+        message: `Removed inline expression on line ${lineNumber}`,
+        path: warningPath,
+      });
+
+      outputLines.push(
+        line.replace(/\{[^{}]+\}/gu, "").replace(/[ \t]+$/u, "")
+      );
+      continue;
+    }
+
+    outputLines.push(line);
+  }
+
+  return Result.ok({
+    content: outputLines.join("\n"),
+    warnings,
+  });
+}
+
 async function buildExpectedOutput(
   options: ResolvedPackageDocsOptions
 ): Promise<ExpectedOutput> {
@@ -547,6 +741,8 @@ async function buildExpectedOutput(
   const packageNames: string[] = [];
   const collectedFiles: CollectedMarkdownFile[] = [];
   const files = new Map<string, string>();
+  const warnings: DocsWarning[] = [];
+  const sourceByDestinationPath = new Map<string, string>();
 
   for (const discoveredPackage of discoveredPackages) {
     const publishable = await isPublishablePackage(
@@ -556,7 +752,7 @@ async function buildExpectedOutput(
       continue;
     }
 
-    const markdownFiles = await collectPackageMarkdownFiles(
+    const markdownFiles = await collectPackageSourceFiles(
       discoveredPackage.packageRoot,
       options.excludedLowercaseNames
     );
@@ -574,8 +770,32 @@ async function buildExpectedOutput(
       const destinationAbsolutePath = join(
         options.outputRoot,
         discoveredPackage.packageDirName,
-        relativeFromPackageRoot
+        toOutputRelativePath(relativeFromPackageRoot)
       );
+      const existingSourceAbsolutePath = sourceByDestinationPath.get(
+        destinationAbsolutePath
+      );
+      if (existingSourceAbsolutePath) {
+        throw DocsCoreError.validation(
+          "Multiple source docs files resolve to the same output path",
+          {
+            outputPath: relativeToWorkspace(
+              options.workspaceRoot,
+              destinationAbsolutePath
+            ),
+            firstSourcePath: relativeToWorkspace(
+              options.workspaceRoot,
+              existingSourceAbsolutePath
+            ),
+            secondSourcePath: relativeToWorkspace(
+              options.workspaceRoot,
+              sourceAbsolutePath
+            ),
+          }
+        );
+      }
+
+      sourceByDestinationPath.set(destinationAbsolutePath, sourceAbsolutePath);
       collectedFiles.push({
         packageName: discoveredPackage.packageDirName,
         sourceAbsolutePath,
@@ -603,13 +823,25 @@ async function buildExpectedOutput(
       collectedFile.sourceAbsolutePath,
       "utf8"
     );
+    const processedContentResult = processDocsSourceContent({
+      content: sourceContent,
+      sourceAbsolutePath: collectedFile.sourceAbsolutePath,
+      workspaceRoot: options.workspaceRoot,
+      mdxMode: options.mdxMode,
+    });
+    if (processedContentResult.isErr()) {
+      throw processedContentResult.error;
+    }
+
     const rewrittenContent = rewriteMarkdownLinks(
-      sourceContent,
+      processedContentResult.value.content,
       collectedFile.sourceAbsolutePath,
       collectedFile.destinationAbsolutePath,
       options.workspaceRoot,
       mirrorTargetBySourcePath
     );
+
+    warnings.push(...processedContentResult.value.warnings);
 
     files.set(collectedFile.destinationAbsolutePath, rewrittenContent);
     entries.push({
@@ -623,6 +855,7 @@ async function buildExpectedOutput(
     packageNames: packageNames.sort((a, b) => a.localeCompare(b)),
     files,
     entries,
+    warnings,
   };
 }
 
@@ -938,8 +1171,13 @@ export async function syncPackageDocs(
           relativeToWorkspace(resolvedOptions.workspaceRoot, filePath)
         )
         .sort((a, b) => a.localeCompare(b)),
+      warnings: expectedOutput.warnings,
     });
   } catch (error) {
+    if (error instanceof DocsCoreError) {
+      return Result.err(error);
+    }
+
     return Result.err(
       DocsCoreError.internal("Failed to sync package docs", {
         errorMessage: error instanceof Error ? error.message : "Unknown error",
@@ -971,8 +1209,13 @@ export async function checkPackageDocs(
         .sort((a, b) => a.localeCompare(b)),
       drift,
       isUpToDate: drift.length === 0,
+      warnings: expectedOutput.warnings,
     });
   } catch (error) {
+    if (error instanceof DocsCoreError) {
+      return Result.err(error);
+    }
+
     return Result.err(
       DocsCoreError.internal("Failed to check package docs", {
         errorMessage: error instanceof Error ? error.message : "Unknown error",
@@ -1020,8 +1263,13 @@ export async function syncLlmsDocs(
           relativeToWorkspace(resolvedOptions.workspaceRoot, filePath)
         )
         .sort((a, b) => a.localeCompare(b)),
+      warnings: expectedOutput.warnings,
     });
   } catch (error) {
+    if (error instanceof DocsCoreError) {
+      return Result.err(error);
+    }
+
     return Result.err(
       DocsCoreError.internal("Failed to sync LLM docs outputs", {
         errorMessage: error instanceof Error ? error.message : "Unknown error",
@@ -1070,8 +1318,13 @@ export async function checkLlmsDocs(
         .sort((a, b) => a.localeCompare(b)),
       drift,
       isUpToDate: drift.length === 0,
+      warnings: expectedOutput.warnings,
     });
   } catch (error) {
+    if (error instanceof DocsCoreError) {
+      return Result.err(error);
+    }
+
     return Result.err(
       DocsCoreError.internal("Failed to check LLM docs outputs", {
         errorMessage: error instanceof Error ? error.message : "Unknown error",

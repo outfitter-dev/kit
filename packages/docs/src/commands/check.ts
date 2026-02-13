@@ -20,6 +20,7 @@ function toCoreOptions(
     ...(options.excludedFilenames
       ? { excludedFilenames: options.excludedFilenames }
       : {}),
+    ...(options.mdxMode ? { mdxMode: options.mdxMode } : {}),
   };
 }
 
@@ -36,12 +37,18 @@ export async function executeCheckCommand(
 
   if (result.value.isUpToDate) {
     io.out("Package docs are up to date.");
+    for (const warning of result.value.warnings) {
+      io.err(`docs warning: ${warning.path}: ${warning.message}`);
+    }
     return 0;
   }
 
   io.err("Package docs are stale:");
   for (const drift of result.value.drift) {
     io.err(`- [${drift.kind}] ${drift.path}`);
+  }
+  for (const warning of result.value.warnings) {
+    io.err(`docs warning: ${warning.path}: ${warning.message}`);
   }
 
   return 1;

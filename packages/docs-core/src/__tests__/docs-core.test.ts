@@ -65,6 +65,99 @@ async function createWorkspaceFixture(): Promise<string> {
   return workspaceRoot;
 }
 
+async function createMdxWorkspaceFixture(): Promise<string> {
+  const workspaceRoot = await mkdtemp(
+    join(tmpdir(), "outfitter-docs-core-mdx-test-")
+  );
+
+  const packageRoot = join(workspaceRoot, "packages", "alpha");
+  await mkdir(join(packageRoot, "docs"), { recursive: true });
+
+  await writeFile(
+    join(packageRoot, "package.json"),
+    JSON.stringify({ name: "@acme/alpha", version: "0.0.1" })
+  );
+  await writeFile(
+    join(packageRoot, "README.mdx"),
+    [
+      'import { Widget } from "./widget";',
+      "",
+      "# Alpha",
+      "",
+      "<Widget />",
+      "",
+      "Inline value {2 + 2}.",
+      "",
+      "Link to [Guide](./docs/guide.mdx).",
+      "",
+    ].join("\n")
+  );
+  await writeFile(
+    join(packageRoot, "docs", "guide.mdx"),
+    [
+      "# Guide",
+      "",
+      'export const metadata = { title: "Guide" };',
+      "",
+      "Body content.",
+      "",
+    ].join("\n")
+  );
+
+  return workspaceRoot;
+}
+
+async function createMdxFencedCodeFixture(): Promise<string> {
+  const workspaceRoot = await mkdtemp(
+    join(tmpdir(), "outfitter-docs-core-mdx-fenced-test-")
+  );
+
+  const packageRoot = join(workspaceRoot, "packages", "alpha");
+  await mkdir(packageRoot, { recursive: true });
+
+  await writeFile(
+    join(packageRoot, "package.json"),
+    JSON.stringify({ name: "@acme/alpha", version: "0.0.1" })
+  );
+
+  await writeFile(
+    join(packageRoot, "README.mdx"),
+    [
+      "# Alpha",
+      "",
+      "```tsx",
+      "export const x = 1;",
+      "<Widget />",
+      "{2 + 2}",
+      "```",
+      "",
+      "Done.",
+      "",
+    ].join("\n")
+  );
+
+  return workspaceRoot;
+}
+
+async function createMdxCollisionFixture(): Promise<string> {
+  const workspaceRoot = await mkdtemp(
+    join(tmpdir(), "outfitter-docs-core-mdx-collision-test-")
+  );
+
+  const packageRoot = join(workspaceRoot, "packages", "alpha");
+  await mkdir(packageRoot, { recursive: true });
+
+  await writeFile(
+    join(packageRoot, "package.json"),
+    JSON.stringify({ name: "@acme/alpha", version: "0.0.1" })
+  );
+
+  await writeFile(join(packageRoot, "README.md"), "# Markdown\n");
+  await writeFile(join(packageRoot, "README.mdx"), "# MDX\n");
+
+  return workspaceRoot;
+}
+
 describe("syncPackageDocs", () => {
   const workspaceRoots = new Set<string>();
 
@@ -414,5 +507,109 @@ describe("checkLlmsDocs", () => {
       { kind: "changed", path: "docs/llms.txt" },
       { kind: "missing", path: "docs/llms-full.txt" },
     ]);
+  });
+});
+
+describe("mdx handling", () => {
+  const workspaceRoots = new Set<string>();
+
+  afterEach(async () => {
+    for (const workspaceRoot of workspaceRoots) {
+      await rm(workspaceRoot, { recursive: true, force: true });
+    }
+    workspaceRoots.clear();
+  });
+
+  it("downlevels mdx to markdown in lossy mode and emits warnings", async () => {
+    const workspaceRoot = await createMdxWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const result = await syncPackageDocs({
+      workspaceRoot,
+      mdxMode: "lossy",
+    });
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      throw new Error(`expected success: ${result.error.message}`);
+    }
+
+    expect(result.value.warnings.length).toBeGreaterThan(0);
+    expect(result.value.writtenFiles).toContain(
+      "docs/packages/alpha/README.md"
+    );
+    expect(result.value.writtenFiles).toContain(
+      "docs/packages/alpha/docs/guide.md"
+    );
+
+    const generatedReadme = await readFile(
+      join(workspaceRoot, "docs", "packages", "alpha", "README.md"),
+      "utf8"
+    );
+
+    expect(generatedReadme).not.toContain("import { Widget }");
+    expect(generatedReadme).not.toContain("<Widget />");
+    expect(generatedReadme).not.toContain("{2 + 2}");
+    expect(generatedReadme).toContain("Inline value .");
+    expect(generatedReadme).toContain("Link to [Guide](./docs/guide.md).");
+  });
+
+  it("fails fast on unsupported mdx in strict mode", async () => {
+    const workspaceRoot = await createMdxWorkspaceFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const result = await syncPackageDocs({
+      workspaceRoot,
+      mdxMode: "strict",
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isOk()) {
+      throw new Error("expected strict mode to fail");
+    }
+
+    expect(result.error.message).toContain("Unsupported MDX syntax");
+    expect(result.error.category).toBe("validation");
+  });
+
+  it("preserves fenced code blocks in strict mode", async () => {
+    const workspaceRoot = await createMdxFencedCodeFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const result = await syncPackageDocs({
+      workspaceRoot,
+      mdxMode: "strict",
+    });
+
+    expect(result.isOk()).toBe(true);
+    if (result.isErr()) {
+      throw new Error(`expected success: ${result.error.message}`);
+    }
+
+    const generatedReadme = await readFile(
+      join(workspaceRoot, "docs", "packages", "alpha", "README.md"),
+      "utf8"
+    );
+
+    expect(generatedReadme).toContain("```tsx");
+    expect(generatedReadme).toContain("export const x = 1;");
+    expect(generatedReadme).toContain("<Widget />");
+    expect(generatedReadme).toContain("{2 + 2}");
+  });
+
+  it("fails when md and mdx inputs collide on output path", async () => {
+    const workspaceRoot = await createMdxCollisionFixture();
+    workspaceRoots.add(workspaceRoot);
+
+    const result = await syncPackageDocs({
+      workspaceRoot,
+      mdxMode: "lossy",
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.message).toContain(
+        "Multiple source docs files resolve to the same output path"
+      );
+    }
   });
 });

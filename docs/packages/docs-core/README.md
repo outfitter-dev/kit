@@ -9,6 +9,7 @@ Core docs assembly and freshness-check primitives for Outfitter-based projects.
 - Rewrite relative links so relocated docs remain valid
 - Check generated docs for drift (missing, changed, unexpected files)
 - Render `llms.txt` and `llms-full.txt` from the same docs graph
+- Process MDX inputs with `strict` or `lossy` downleveling modes
 
 ## API
 
@@ -22,6 +23,7 @@ import {
 
 const syncResult = await syncPackageDocs({
   workspaceRoot: process.cwd(),
+  mdxMode: "strict",
 });
 
 const checkResult = await checkPackageDocs({
@@ -30,6 +32,7 @@ const checkResult = await checkPackageDocs({
 
 const llmsSyncResult = await syncLlmsDocs({
   workspaceRoot: process.cwd(),
+  mdxMode: "lossy",
   targets: ["llms", "llms-full"],
 });
 

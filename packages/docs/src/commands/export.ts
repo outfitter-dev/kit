@@ -42,6 +42,7 @@ function toPackageOptions(
     ...(options.excludedFilenames
       ? { excludedFilenames: options.excludedFilenames }
       : {}),
+    ...(options.mdxMode ? { mdxMode: options.mdxMode } : {}),
   };
 }
 
@@ -58,6 +59,7 @@ function toLlmsOptions(
     ...(options.excludedFilenames
       ? { excludedFilenames: options.excludedFilenames }
       : {}),
+    ...(options.mdxMode ? { mdxMode: options.mdxMode } : {}),
     ...(options.llmsFile ? { llmsFile: options.llmsFile } : {}),
     ...(options.llmsFullFile ? { llmsFullFile: options.llmsFullFile } : {}),
     targets,
@@ -107,6 +109,9 @@ export async function executeExportCommand(
     io.out(
       `Wrote ${packageResult.value.writtenFiles.length} package file(s), removed ${packageResult.value.removedFiles.length} stale file(s).`
     );
+    for (const warning of packageResult.value.warnings) {
+      io.err(`docs warning: ${warning.path}: ${warning.message}`);
+    }
   }
 
   const llmsTargets = targetsFromExportTarget(targetInput);
@@ -121,6 +126,9 @@ export async function executeExportCommand(
       `Exported ${llmsTargets.join("+")} docs for ${llmsResult.value.packageNames.length} package(s).`
     );
     io.out(`Wrote ${llmsResult.value.writtenFiles.length} LLM file(s).`);
+    for (const warning of llmsResult.value.warnings) {
+      io.err(`docs warning: ${warning.path}: ${warning.message}`);
+    }
   }
 
   return 0;

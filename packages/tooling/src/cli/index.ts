@@ -10,6 +10,7 @@
 import { Command } from "commander";
 import { VERSION } from "../version.js";
 import { runCheck } from "./check.js";
+import { runCheckBunupRegistry } from "./check-bunup-registry.js";
 import { runCheckCleanTree } from "./check-clean-tree.js";
 import { runCheckExports } from "./check-exports.js";
 import { runFix } from "./fix.js";
@@ -64,6 +65,15 @@ program
 	.option("-f, --force", "Skip strict verification entirely")
 	.action(async (options: { force?: boolean }) => {
 		await runPrePush(options);
+	});
+
+program
+	.command("check-bunup-registry")
+	.description(
+		"Validate packages with bunup --filter are registered in bunup.config.ts",
+	)
+	.action(async () => {
+		await runCheckBunupRegistry();
 	});
 
 program

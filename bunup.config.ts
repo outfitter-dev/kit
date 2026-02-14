@@ -189,6 +189,7 @@ export default defineWorkspace(
       config: {
         exports: {
           exclude: [
+            "./cli/check-bunup-registry",
             "./cli/check-clean-tree",
             "./cli/check-exports",
             "./cli/check-readme-imports",

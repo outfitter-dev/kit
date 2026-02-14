@@ -36,14 +36,20 @@
     },
     "./commands/demo": {
       "import": {
-        "types": "./dist/commands/demo/index.d.ts",
-        "default": "./dist/commands/demo/index.js"
+        "types": "./dist/commands/demo.d.ts",
+        "default": "./dist/commands/demo.js"
       }
     },
     "./commands/demo/errors": {
       "import": {
         "types": "./dist/commands/demo/errors.d.ts",
         "default": "./dist/commands/demo/errors.js"
+      }
+    },
+    "./commands/demo/registry": {
+      "import": {
+        "types": "./dist/commands/demo/registry.d.ts",
+        "default": "./dist/commands/demo/registry.js"
       }
     },
     "./commands/doctor": {

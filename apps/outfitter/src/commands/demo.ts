@@ -17,7 +17,7 @@ import {
   getSections,
   runAllSections,
   runSection,
-} from "./demo/index.js";
+} from "./demo/registry.js";
 
 // Import app-specific sections to register them
 // Note: Primitive demos (colors, table, etc.) are now provided by @outfitter/cli/demo

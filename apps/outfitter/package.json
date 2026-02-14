@@ -36,8 +36,8 @@
     },
     "./commands/demo": {
       "import": {
-        "types": "./dist/commands/demo.d.ts",
-        "default": "./dist/commands/demo.js"
+        "types": "./dist/commands/demo/index.d.ts",
+        "default": "./dist/commands/demo/index.js"
       }
     },
     "./commands/demo/errors": {
@@ -242,6 +242,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@outfitter/tui": "workspace:*",
     "@types/bun": "^1.3.7",
     "@types/node": "^25.0.10"
   },

@@ -13,7 +13,7 @@ import {
   type PrimitiveId,
   renderAllDemos,
   renderDemo,
-} from "@outfitter/cli/demo";
+} from "@outfitter/tui/demo";
 
 /**
  * A demo section that can be executed.

@@ -7,7 +7,6 @@
  * @packageDocumentation
  */
 
-import { createTheme, renderTable } from "@outfitter/cli/render";
 import {
   AuthError,
   type ErrorCategory,
@@ -16,6 +15,7 @@ import {
   statusCodeMap,
   ValidationError,
 } from "@outfitter/contracts";
+import { createTheme, renderTable } from "@outfitter/tui/render";
 import type { DemoSection } from "./index.js";
 import { registerSection } from "./index.js";
 
